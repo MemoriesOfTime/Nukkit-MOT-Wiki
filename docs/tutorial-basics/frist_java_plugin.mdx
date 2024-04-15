@@ -1,0 +1,60 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# First Java plugin
+
+This is a 0-base tutorial to enable anyone to build their first PNX 2.0 plugin independently.
+
+## Environmental preparation
+
+### Git
+
+<Tabs groupId="operating-systems">
+  <TabItem value="win" label="Windows">
+  [Download Git](https://git-scm.com/download/win)
+
+  You need to download **Git for Windows Setup.** under **Standalone Installer** to install it, otherwise there are no environment variables.
+  </TabItem>
+  <TabItem value="mac" label="macOS">[Download Git](https://git-scm.com/download/mac)</TabItem>
+  <TabItem value="linux" label="Linux">[Download Git](https://git-scm.com/download/linux)</TabItem>
+</Tabs>
+
+### IDEA
+
+<Tabs groupId="operating-systems">
+  <TabItem value="win" label="Windows">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=windows) Community</TabItem>
+  <TabItem value="mac" label="macOS">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=mac) Community</TabItem>
+  <TabItem value="linux" label="Linux">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=linux) Community</TabItem>
+</Tabs>
+
+## Pulling the Example Project
+
+Open IDEA and navigate to **File -> New -> Project from Version Control...**
+
+![from git](/images/tutorial-basics/1.jpg)
+
+Then, in the new window, enter the following URL:
+
+```url
+https://github.com/PowerNukkitX/ExamplePlugin-Maven.git
+```
+
+![input git url](/images/tutorial-basics/2.png)
+
+Click **Clone**.
+
+## Building the Project
+
+After IDEA has finished indexing:
+
+Navigate to **the Maven icon on the right -> Lifecycle -> package** to build the project.
+
+![input git url](/images/tutorial-basics/3.jpg)
+
+The build output is typically located in the **target** folder.
+
+![input git url](/images/tutorial-basics/4.jpg)
