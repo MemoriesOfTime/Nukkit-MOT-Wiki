@@ -98,8 +98,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Tutorial Basics',
+              to: '/docs/category/tutorial-basics',
             },
           ],
         },
@@ -125,8 +125,9 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Memories Of Time`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      additionalLanguages: ['java', 'yaml', 'json', 'log', 'ini'],
+      theme: prismThemes.vsDark,
+      darkTheme: prismThemes.vsDark,
     },
   } satisfies Preset.ThemeConfig,
 };

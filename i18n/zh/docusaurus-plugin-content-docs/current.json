@@ -1,0 +1,26 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Basics": {
+    "message": "基础教程",
+    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Basics.link.generated-index.description": {
+    "message": "从 zero 开始的异世界 NK-MOT 开发之旅！",
+    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Extras": {
+    "message": "拓展教程",
+    "description": "The label for category Tutorial - Extras in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Guides": {
+    "message": "指南",
+    "description": "The label for category Guides in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Guides.link.generated-index.description": {
+    "message": "了解 Nukkit-MOT 的程序接口",
+    "description": "The generated-index page description for category Guides in sidebar tutorialSidebar"
+  }
+}

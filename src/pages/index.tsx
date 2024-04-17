@@ -6,21 +6,39 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
+import Translate from '@docusaurus/Translate';
 
 function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
         <Heading as="h1" className="hero__title">
-          {siteConfig.title}
+          <Translate
+            id="homepage.title"
+            description="The homepage title"
+            values={{}}>
+            {siteConfig.title}
+          </Translate>
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className="hero__subtitle">
+          <Translate
+            id="homepage.subtitle"
+            description="The homepage subtitle"
+            values={{}}>
+            {siteConfig.tagline}
+          </Translate>
+        </p>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Let's Go
+            <Translate
+              id="homepage.visitDocs"
+              description="The homepage message to ask the user to visit docs"
+              values={{}}>
+              {"Let's Go"}
+            </Translate>
           </Link>
         </div>
       </div>
@@ -29,7 +47,7 @@ function HomepageHeader() {
 }
 
 export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title={`Hello from ${siteConfig.title}`}

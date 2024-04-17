@@ -1,0 +1,10 @@
+{
+  "title": {
+    "message": "NK-MOT Wiki",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "Memories Of Time Logo",
+    "description": "The alt text of navbar logo"
+  }
+}
