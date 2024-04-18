@@ -48,7 +48,7 @@ Here’s how to configure the `pom.xml` file in a Maven project to meet our need
 
 included within `<project>`.
 
-```xml
+```xml title="pom.xml"
     <groupId>cn.nukkitmot</groupId>
     // highlight-start
     <artifactId>example-plugin</artifactId>
@@ -77,12 +77,12 @@ included within `<project>`.
 
 The `<build>` tag is included within `<project>`.
 
-```xml
+```xml title="pom.xml"
     <build>
         <defaultGoal>clean package</defaultGoal>
 
-        // highlight-start
         <plugins>
+            // highlight-start
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -114,8 +114,8 @@ The `<build>` tag is included within `<project>`.
                     </execution>
                 </executions>
             </plugin>
+            // highlight-end
         </plugins>
-        // highlight-end
     </build>
 ```
 

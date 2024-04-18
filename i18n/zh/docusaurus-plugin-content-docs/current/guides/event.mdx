@@ -1,0 +1,178 @@
+---
+sidebar_position: 1
+---
+
+# Event 事件指南
+
+## 事件的概念
+
+每当服务器中发生了特定的行为，一个事件对象就会产生。
+
+事件是对某种行为或动作的描述，比如玩家登录、 玩家离开、玩家发送消息等等。
+
+种种的行为或动作都对应一个事件对象作为它们的抽象，事件对象中带有这个行为或者动作中的一些关键信息，比如玩家 **发送消息事件** 对象中就带有发送事件的 **玩家对象、发送的消息字符串** 等等，而玩家对象又包含这个玩家的 **位置、生命值、物品栏** 等等数据。
+
+插件可以向 Nukkit-MOT 注册监听器来在事件发生的时候做出反应。
+
+每个事件对象都包含了对事件的描述，通常事件监听器会在事件发生之前被调用，此时监听器可以通过取消事件来阻止事件真的发生，如果没有任何事件监听器取消了这个事件，那么它就会真正地在游戏内发生。
+
+监听器的执行是单线程的，所有监听器在注册的时候都要给 Nukkit-MOT 提供它的优先级，Nukkit-MOT 会按照优先级将监听器排序，然后依次执行监听器。
+
+:::note
+
+单线程意味着，您不能在事件中执行耗时操作，否则会影响服务器的正常运行。
+
+:::
+
+很可能在您的插件的监听器被执行之间这个事件已经被取消了，但通常这不会影响您的监听器的执行，您的监听器仍然会被执行，您可以通过 `event.isCancelled()` 来判断事件是否被取消了。
+
+:::warning
+
+特别注意的是，优先级越高，执行顺序越往后排。
+也就是说，优先级越低，越优先执行！
+
+:::
+
+### 流程图
+<div style={{textAlign: 'center'}}>
+```mermaid
+graph TD;
+    A([特定行为或动作触发]) -->|创建事件| B[创建事件对象，包含所有相关数据]
+    B --> D[按注册顺序排序监听器]
+    D --> C[/按顺序执行每个监听器/]
+    C -->|事件被取消| F[检查是否还需重新排序监听器]
+    F -->|是| D
+    F -->|否| Z([处理结束])
+    C -->|事件未被取消| E[Nukkit执行事件相关的动作]
+    E --> Z
+    style A fill:#f9f,stroke:#333,stroke-width:2px,color:black
+    style C fill:#cfc,stroke:#333,stroke-width:2px,color:black
+    style Z fill:#ccf,stroke:#333,stroke-width:2px,color:black
+```
+</div>
+
+## 事件监听器
+
+事件监听器在游戏服务器插件开发中是一个关键组件，用于处理游戏中发生的各种事件。这部分将详细介绍如何在Nukkit插件中抽象和实现一个事件监听器，设置其优先级，并进行注册，以便在插件中有效响应服务器和玩家的活动。
+
+### 实现监听器
+
+创建一个事件监听器涉及到实现 `Listener` 接口，并使用 `@EventHandler` 注解来标记那些应当在特定事件发生时被调用的方法。下面是一个具体的实现示例，用于监听服务器命令事件：
+
+```java title="EventListener.java"
+package cn.nukkitmot.exampleplugin;
+
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.server.ServerCommandEvent;
+import cn.nukkit.event.player.PlayerChatEvent;
+
+public class EventListener implements Listener {
+    private final ExamplePlugin plugin;
+
+    public EventListener(ExamplePlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
+    public void onServerCommand(ServerCommandEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        // Log the command to server console
+        this.plugin.getLogger().info("ServerCommandEvent is called with command: " + event.getCommand());
+
+        // Here you can add additional logic to modify the behavior based on the command
+        if (event.getCommand().equalsIgnoreCase("stop")) {
+            this.plugin.getLogger().info("Server stop command issued!");
+            // Perform additional actions before server stops
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerChat(PlayerChatEvent event) {
+        if (event.getMessage().includes("cnm")) { // 检测消息中是否有 cnm
+            event.setCancelled(true);
+        }
+    }
+}
+```
+
+在演示代码中，`onServerCommand` 方法会在服务器命令事件触发时执行。通过此方法，可以进一步处理事件，例如检查命令内容并作出相应响应。
+
+而 `onPlayerChat` 方法会在玩家聊天事件触发时执行。通过此方法，可以拦截玩家发送的消息，并进行相应的处理。
+
+### 优先级
+
+事件的处理优先级是调整插件间互动的重要手段。在 Nukkit 中，事件可以根据其重要性被分配不同的优先级，如下所示：
+
+引用自 [cn.nukkit.event.EventPriority](https://github.com/CloudburstMC/Nukkit/blob/master/src/main/java/cn/nukkit/event/EventPriority.java)
+
+```java title="event/EventPriority.java"
+public enum EventPriority {
+
+    /**
+     * 事件调用非常不重要且应该首先执行，以便其他插件可以进一步定制结果
+     */
+    LOWEST(0),
+    /**
+     * 事件调用的重要性较低
+     */
+    LOW(1),
+    /**
+     * 事件调用重要性一般，这也是默认的优先级。
+     */
+    NORMAL(2),
+    /**
+     * 事件调用的重要性较高
+     */
+    HIGH(3),
+    /**
+     * 事件调用至关重要，必须在事件结果上有最终决定权
+     */
+    HIGHEST(4),
+    /**
+     * 事件仅用于监控事件的结果。
+     * 
+     * 在这个优先级下不应对事件做任何修改
+     * 
+     * 修改指的是通过 `Event#setCanneled()` 取消事件，以及修改事件携带的数据。 
+     */
+    MONITOR(5);
+
+    private final int slot;
+
+    EventPriority(int slot) {
+        this.slot = slot;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+}
+```
+
+### 注册监听器
+
+事件监听器必须在插件启动时注册，以确保它们能够响应事件。这可以通过插件的 `onEnable` 方法完成：
+
+```java title="ExamplePlugin.java"
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onEnable() {
+        // 注册事件监听器
+        // highlight-start
+        this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        // highlight-end
+    }
+}
+```
+
+此方法中，我们创建了 `EventListener` 的实例，并通过插件管理器注册它。这确保了每当相关事件发生时，我们的 `EventListener` 可以接收并处理这些事件。
+
+### 结语
+
+当你使用命令 `/stop` 将会触发事件 `ServerCommandEvent` ，然后 `onServerCommand` 会被调用，你可以添加一些逻辑来处理这个事件。
+
+当玩家发送消息时，`onPlayerChat` 会被调用，若消息中包含 `cnm` 则事件被取消，玩家的消息也不会在游戏中真的发送。

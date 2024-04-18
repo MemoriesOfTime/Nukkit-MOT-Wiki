@@ -32,7 +32,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 
 ## Maven
 #### 仓库：
-```xml
+```xml title="pom.xml"
 <repositories>
     <repository>
         <id>repo-lanink-cn</id>
@@ -42,7 +42,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 ```
 
 #### 依赖：
-```xml
+```xml title="pom.xml"
 <dependencies>
     <dependency>
         <groupId>cn.nukkit</groupId>
