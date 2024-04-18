@@ -34,8 +34,117 @@ Finally, click `OK`.
 
 ![Edit Debug Configuration Window](./img/edit_debug_config_window.png)
 
-## Automatically Updating the Plugin After Successful Build
+## Auto-Update Plugin to Plugins Dir After Build
 
-With the above steps completed, you can now use the `Shift + F9` shortcut to debug your code.
+With the above steps, we can now use the `Shift + F9` shortcut to debug code.
 
-However, for convenience, we want to automatically update the plugin after each successful build.
+It's important to note that debugging with breakpoints is only possible if the JAR plugin matches the current project's build artifacts.
+
+For convenience, we aim to automatically update the plugin to the `plugins` directory each time a build is successful.
+
+Here’s how to configure the `pom.xml` file in a Maven project to meet our needs.
+
+### Adding Relevant Properties
+
+included within `<project>`.
+
+```xml
+    <groupId>cn.nukkitmot</groupId>
+    // highlight-start
+    <artifactId>example-plugin</artifactId>
+    // highlight-end
+    <version>1.0.0</version>
+    <name>ExamplePlugin</name>
+    <description>An Example Nukkit-MOT Plugin</description>
+    <url>https://github.com/MemoriesOfTime/ExamplePlugin-Maven/</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        
+        // highlight-start
+        <nukkitPluginsPath>C:\BedrockServer\MOT\plugins</nukkitPluginsPath>
+        // highlight-end
+    </properties>
+```
+
+`artifactId` is the name of the plugin, which by default is used as the name for the build artifact.
+
+`nukkitPluginsPath` is the path to the plugins directory, which you need to manually add in your debugging environment.
+
+### Adding Maven plugins Tag
+
+The `<build>` tag is included within `<project>`.
+
+```xml
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+
+        // highlight-start
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <outputDirectory>${nukkitPluginsPath}</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${nukkitPluginsPath}</directory>
+                            <includes>
+                                <include>${artifactId}*.jar</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        // highlight-end
+    </build>
+```
+
+### Usage
+
+1. Click the letter **M** icon on the right side of IDEA to open the Maven panel.
+2. Click `clean` to clean, then `package` to build and package.
+
+Note that you need to clean before building and packaging, or the previous JAR artifacts won't be updated.
+
+```js
+ExamplePlugin
+    Lifecycle
+        // highlight-start
+        clean
+        // highlight-end
+        validate
+        compile 
+        test 
+        // highlight-start
+        package
+        // highlight-end
+        verify
+        install
+        site 
+        deploy
+    Plugins
+    Dependencies
+    Repositories
+```
+
+Congratulations, you have now completed all the configurations.

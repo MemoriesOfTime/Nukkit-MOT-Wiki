@@ -63,6 +63,11 @@ const config: Config = {
     ],
   ],
 
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
+
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
@@ -124,10 +129,19 @@ const config: Config = {
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Memories Of Time`,
     },
+    docs: {
+      sidebar: {
+        hideable: true,
+        //autoCollapseCategories: true,
+      },
+    },
     prism: {
       additionalLanguages: ['java', 'yaml', 'json', 'log', 'ini'],
-      theme: prismThemes.vsDark,
+      theme: prismThemes.vsLight,
       darkTheme: prismThemes.vsDark,
+    },
+    mermaid: {
+      theme: { light: 'neutral', dark: 'forest' },
     },
   } satisfies Preset.ThemeConfig,
 };

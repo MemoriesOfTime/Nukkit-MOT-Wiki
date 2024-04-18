@@ -34,10 +34,115 @@ sidebar_position: 3
 
 ![编辑调试配置窗口](./img/edit_debug_config_window.png)
 
-## 在构建成功后自动更新插件
+## 自动更新插件到插件目录
 
 通过上述操作，我们已经可以使用 `Shift + F9` 组合键进行代码调试。
 
-但为了方便，我们希望在每次构建成功后自动更新插件。
+值得注意的是，只有 jar 插件与现在项目中的构建产物相同时，才能使用断点进行分析。
 
-...
+在此，为了方便，我们希望在每次构建成功后自动更新插件到 `plugins` 目录下。
+
+下面介绍如何对 Maven 项目的 `pom.xml` 文件进行配置，以实现我们的需求。
+
+### 添加相关属性
+
+```xml
+    <groupId>cn.nukkitmot</groupId>
+    // highlight-start
+    <artifactId>example-plugin</artifactId>
+    // highlight-end
+    <version>1.0.0</version>
+    <name>ExamplePlugin</name>
+    <description>An Example Nukkit-MOT Plugin</description>
+    <url>https://github.com/MemoriesOfTime/ExamplePlugin-Maven/</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        
+        // highlight-start
+        <nukkitPluginsPath>C:\BedrockServer\MOT\plugins</nukkitPluginsPath>
+        // highlight-end
+    </properties>
+```
+
+artifactId 是插件名称，默认情况下构建产物的名称为包含此值。
+
+nukkitPluginsPath 是插件目录的路径，需要手动添加调试环境中的 `plugins` 目录。
+
+### 添加 Maven plugins 标签
+
+标签 `<build>` 被包含在 `<project>` 中。
+
+```xml
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+
+        // highlight-start
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <outputDirectory>${nukkitPluginsPath}</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${nukkitPluginsPath}</directory>
+                            <includes>
+                                <include>${artifactId}*.jar</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>pre-clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        // highlight-end
+    </build>
+```
+
+### 使用
+
+1. 在 IDEA 右侧点击字母 **M** 图标，打开 Maven 选项卡。
+2. 点击 `clean` 进行清理，点击 `package` 进行构建打包。
+
+请注意需要先进行清理而后再进行构建打包，否则上一次的 jar 产物不会被更新。
+
+```js
+ExamplePlugin
+    生命周期
+        // highlight-start
+        clean
+        // highlight-end
+        validate
+        compile 
+        test 
+        // highlight-start
+        package
+        // highlight-end
+        verify
+        install
+        site 
+        deploy
+    插件
+    依赖项
+    仓库
+```
+
+恭喜你，至此已经完成所有配置。
