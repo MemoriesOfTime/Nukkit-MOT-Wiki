@@ -1,0 +1,224 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Form 表单指南
+
+在 Nukkit-MOT 表单分为四种类型：Modal、Simple、Custom、Dialog。
+
+:::note
+
+其中 Dialog 自 [PR#71](https://github.com/MemoriesOfTime/Nukkit-MOT/pull/71) (版本 1.20.30) 后被加入，Dialog 需要绑定实体使用。
+
+:::
+
+## 模态表单 Modal
+
+[FormWindowModal](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowModal.java) 用于简单的确认或取消操作。
+
+### 使用示例
+
+```java title="form/DemoModalForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowModal;
+
+public class DemoModalForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowModal form = new FormWindowModal("标题", "描述", "true", "false");
+        // 设置确认和取消的操作
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            if (form.getResponse().getClickedButtonId() == 0) {
+                // 用户点击了 true 按钮
+            } else {
+                // 用户点击了 false 按钮
+            }
+        }));
+        // highlight-end
+        // 显示表单给玩家
+        player.showFormWindow(form);
+    }
+}
+```
+
+## 简易表单 Simple
+
+[FormWindowSimple](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowSimple.java) 提供更丰富的按钮选择。
+
+### 使用示例
+
+```java title="form/DemoSimpleForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.element.ElementButton;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowSimple;
+
+public class DemoSimpleForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowSimple form = new FormWindowSimple("标题", "描述");
+        // 添加按钮
+        form.addButton(new ElementButton("按钮1"));
+        form.addButton(new ElementButton("按钮2"));
+        form.addButton(new ElementButton("按钮3"));
+        // 设置按钮点击处理
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            int buttonIndex = form.getResponse().getClickedButtonId(); // 获取点击的按钮索引
+            String buttonText = form.getResponse().getClickedButton().getText(); // 获取点击的按钮文本
+            switch (buttonIndex) {
+                case 0:
+                    // 处理按钮1的操作
+                    break;
+                case 1:
+                    // 处理按钮2的操作
+                    break;
+                case 2:
+                    // 处理按钮3的操作
+                    break;
+                default:
+                    // 默认处理
+                    break;
+            }
+        }));
+        // highlight-end
+        // 显示表单给玩家
+        player.showFormWindow(form);
+    }
+}
+```
+
+### 组件
+
+| 组件名称      | 描述                                           | 引用                                                         |
+| -------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
+| Button         | 按钮，用于简单的点击操作，可附带图片           | [ElementButton](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementButton.java) |
+
+## 自定义表单 Custom
+
+[FormWindowCustom](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowCustom.java) 允许开发者自定义表单的内容和交互方式，包括文本输入框、下拉框等。
+
+### 使用示例
+
+```java title="form/DemoCustomForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.element.ElementDropdown;
+import cn.nukkit.form.element.ElementInput;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowCustom;
+
+import java.util.Arrays;
+
+public class DemoCustomForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowCustom form = new FormWindowCustom("标题");
+        // 添加组件
+        form.addElement(new ElementInput("文本输入框", "默认值"));
+        form.addElement(new ElementDropdown("下拉框", Arrays.asList("选项1", "选项2", "选项3")));
+        // 设置提交操作
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            String inputText = form.getResponse().getInputResponse(0); // 获取文本输入框的值
+            int selectedIndex = form.getResponse().getDropdownResponse(1).getElementID(); // 获取下拉框选择的索引
+            String selectedText = form.getResponse().getDropdownResponse(1).getElementContent(); // 获取下拉框选择的文本
+            // 处理用户提交的数据
+        }));
+        // highlight-end
+        // 显示表单给玩家
+        player.showFormWindow(form);
+    }
+}
+
+```
+
+### 组件
+
+| 组件名称      | 描述                                           | 引用                                                         |
+| -------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
+| Dropdown       | 下滑块，点击弹出一个下滑块列表，供用户选择    | [ElementDropdown](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementDropdown.java) |
+| Input          | 文本输入框，允许用户输入字符串                | [ElementInput](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementInput.java) |
+| Label          | 标签，在表单中添加文本标签                     | [ElementLabel](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementLabel.java) |
+| Slider         | 水平滑块，设置最小值和最大值后，可滑动获取数值 | [ElementSlider](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementSlider.java) |
+| StepSlider     | 步进水平滑块，参数为字符串                     | [ElementStepSlider](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementStepSlider.java) |
+| Toggle         | 开关，接受布尔值                               | [ElementToggle](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementToggle.java) |
+
+## 对话框 Dialog
+
+[FormWindowDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowDialog.java) 是一种特殊的表单，需要绑定到实体上才能使用。且实体不能为玩家。
+
+
+[ScrollingTextDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/ScrollingTextDialog.java) 是加强版的对话框，它提供了滚动文本的特性。
+
+### 使用示例
+
+<Tabs groupId="dialog-type">
+  <TabItem value="normal" label="normal">
+```java title="form/DemoDialogForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.form.window.FormWindowDialog;
+
+public class DemoDialogForm {
+    public static void open(Player player, Entity entity) {
+        // highlight-start
+        FormWindowDialog form = new FormWindowDialog("标题", "描述", entity);
+        // 添加选项
+        form.addButton("选项1");
+        form.addButton("选项2");
+        // 设置提交操作
+        form.addHandler((player_, response) -> {
+            String buttonText = response.getClickedButton().getName(); // 获取点击按钮的文本
+            // 处理用户提交的数据
+        });
+        // highlight-end
+        // 显示对话框给玩家
+        form.send(player);
+    }
+}
+
+```
+  </TabItem>
+  <TabItem value="scroll" label="scrolling text">
+```java title="form/DemoScrollingTextDialog.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.form.window.FormWindowDialog;
+import cn.nukkit.form.window.ScrollingTextDialog;
+
+public class DemoScrollingTextDialog {
+    public static void open(Player player, Entity entity) {
+        // highlight-start
+        FormWindowDialog dialog = new FormWindowDialog("标题", "描述", entity);
+        // 添加选项
+        dialog.addButton("选项1");
+        dialog.addButton("选项2");
+        // 设置提交操作
+        dialog.addHandler((player_, response) -> {
+            String buttonText = response.getClickedButton().getName(); // 获取点击按钮的文本
+            // 处理用户提交的数据
+        });
+        ScrollingTextDialog form = new ScrollingTextDialog(player, dialog, 1);
+        // highlight-end
+        // 显示对话框给玩家
+        form.send(player);
+    }
+}
+```
+  </TabItem>
+</Tabs>
