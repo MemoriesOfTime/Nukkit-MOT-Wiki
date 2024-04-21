@@ -10,31 +10,20 @@ import TabItem from '@theme/TabItem';
 本篇是MOT ADDON API的零基础教程，皆在让所有人都能注册自定义物品 定义相关属性 配置资源包
                       -- XKSHADOW
 
-## 
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">
-  [下载 Git](https://git-scm.com/download/win)
 
-  需下载 **Standalone Installer** 下的 **Git for Windows Setup.** 进行安装，否则没有环境变量。
-  </TabItem>
-  <TabItem value="mac" label="macOS">[下载 Git](https://git-scm.com/download/mac)</TabItem>
-  <TabItem value="linux" label="Linux">[下载 Git](https://git-scm.com/download/linux)</TabItem>
-</Tabs>
+## 新建一个类 继承ItemCustom 便于后续注册物品
+getMaxStackSize() **最大堆叠数目 1-64**
+scaleoffset() **物品材质缩放（用于解决物品手持贴图巨大的问题） 16~ 16的倍数 如32 64 128**
+![input git url](/images/tutorial-basics/2.png)
 
-### IDEA
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=windows) 社区版</TabItem>
-  <TabItem value="mac" label="macOS">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=mac) 社区版</TabItem>
-  <TabItem value="linux" label="Linux">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=linux) 社区版</TabItem>
-</Tabs>
 
-请注意，并非页面中的 `IntelliJ IDEA Ultimate`，下滑页面可以看到 `IntelliJ IDEA Community`。
 
-## 拉取示例项目
 
-打开 IDEA 依次点击 **文件 -> 新建 -> 来自版本控制的项目...**
+
+
+
 
 ![from git](/images/tutorial-basics/1.jpg)
 
@@ -44,7 +33,7 @@ import TabItem from '@theme/TabItem';
 https://github.com/MemoriesOfTime/ExamplePlugin-Maven.git
 ```
 
-![input git url](/images/tutorial-basics/2.png)
+
 
 点击 **克隆**
 
