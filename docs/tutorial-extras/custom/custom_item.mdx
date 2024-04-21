@@ -9,12 +9,14 @@ import TabItem from '@theme/TabItem';
 
 本篇是MOT ADDON API的零基础教程，皆在让所有人都能注册自定义物品 定义相关属性 配置资源包
                       -- XKSHADOW
+# 一个自定义物品包含两部分： 插件里成功注册 资源包内定义物品贴图
+
 
 这里以定义一个有耐久的剑为例
 
 ## 新建一个类 继承ItemCustom 便于后续注册物品
 
-![input git url](/images/tutorial-basics/2.png)
+![input git url](/images/1.png)
 
 最大堆叠数目 1-64
 
@@ -44,6 +46,8 @@ Definition定义
                 .build();
     }
 ```
+
+![input git url](/images/2.png)
 ## 新建一个类 继承您上一个继承
 stringid 填写的是物品字符串id 这个会和资源包里面的贴图定义相对应
 getMaxDurability() 最大耐久值 1~9999
@@ -63,7 +67,32 @@ getMaxDurability() 最大耐久值 1~9999
     }
 ```
 
-## 最后 在 onEnable 时注册物品
+## 最后 在 onEnable 时注册物品 
 ```url
    Item.registerCustomItem(candy_cane_sword.customitem.class);
 ```
+
+
+## 此时您进入到游戏内 打开创造物品栏可以看到多了一个空白的格子
+拿出来是空气 这是因为你还没正确指向资源包贴图 下面的教程会教您如何制作对应的资源包
+这是一个资源包的更目录构成
+这里对我们自定义物品有用的部分只有manifest.json和textures文件夹
+![input git url](/images/3.png)
+进入textures文件夹 在item_texture.json中定义武器贴图路径
+![input git url](/images/4.png)
+```url
+{
+  "resource_pack_name": "vanilla",
+  "texture_name": "atlas.items",
+  "texture_data": {
+
+	
+    "candy_cane_sword": {
+      "textures": "textures/items/candy_cane_sword"
+    },
+	}
+	}
+```
+## 打包好资源包 放入resource_packs文件夹 进入服务器 正常您会看见资源包正常显示
+如果还是空白 请检查：
+item_texture.json 内的 单个图标 占位符和图片路径是否有误
