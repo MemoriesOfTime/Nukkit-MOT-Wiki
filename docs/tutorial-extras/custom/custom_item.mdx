@@ -12,9 +12,9 @@ import TabItem from '@theme/TabItem';
 # 一个自定义物品包含两部分： 插件里成功注册 资源包内定义物品贴图
 
 
-这里以定义一个有耐久的剑为例
+这里以定义一个有耐久的剑（糖果剑）为例
 
-## 新建一个类 继承ItemCustom 便于后续注册物品
+## 新建一个类CustomItemWepeon 继承ItemCustom 便于后续注册物品 
 
 ![input git url](/images/1.png)
 
@@ -48,7 +48,7 @@ Definition定义
 ```
 
 ![input git url](/images/2.png)
-## 新建一个类 继承您上一个继承
+## 新建一个（糖果剑）的类 继承CustomItemWepeon
 stringid 填写的是物品字符串id 这个会和资源包里面的贴图定义相对应
 getMaxDurability() 最大耐久值 1~9999
 ```url
