@@ -16,18 +16,18 @@ The `Item` class, located in the `cn.nukkit.item` package, provides a large numb
 The `Item` class provides several constructors that allow the creation of item instances from different parameters.
 
 #### Example code:
-``java
+```java
 // Import the Item class
-import cn.nukkit.item.
+import cn.nukkit.item.Item;
 
 public class Example {
     public void example() {
         // Create the item by item ID and quantity
         Item diamond = Item.get(Item.DIAMOND, 0, 1); // create 1 diamond
         // Give the player a diamond
-        player.giveItem(diamond)
+        player.giveItem(diamond);
         // Or
-        player.getInventory().addItem(diamond)
+        player.getInventory().addItem(diamond);
     }
 }
 ```
@@ -46,7 +46,7 @@ The following are descriptions and examples of some common methods in the `Item`
 
 #### `getId()`.
 Returns the ID of the item.
-``java
+```java
 int id = diamond.getId(); // Get the ID of the diamond
 ```
 
@@ -65,7 +65,7 @@ String name = diamond.getName(); // Get the name of the diamond
 #### `getEnchantmentLevel(int id)`
 Get the enchantment level of an item.
 You can find the relevant enchantment ID at ``cn/nukkit/item/enchantment/Enchantment.java``.
-`` java
+```java
 int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the diamond's sharpness level. If it's not enchanted, return 0.
 ```
 
@@ -74,7 +74,7 @@ int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the d
 Attributes of items can be managed through various setter and getter methods.
 
 #### Setting the number of items
-``` java
+```java
 diamond.setCount(3); // Set the number of diamonds to 3
 ```
 
