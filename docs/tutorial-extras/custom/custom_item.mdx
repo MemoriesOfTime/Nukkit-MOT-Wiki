@@ -75,8 +75,28 @@ getMaxDurability() 最大耐久值 1~9999
 
 ## 此时您进入到游戏内 打开创造物品栏可以看到多了一个空白的格子
 拿出来是空气 这是因为你还没正确指向资源包贴图 下面的教程会教您如何制作对应的资源包
-这是一个资源包的更目录构成
-这里对我们自定义物品有用的部分只有manifest.json和textures文件夹
+## 这是一个资源包的根目录构成 打包资源包时也是以根目录进行打包 否则客户端无法读取资源包
+这里对我们自定义物品有用的部分只有manifest.json和textures文件夹 
+## 在manifest.json定义资源包的uuid
+```url
+{
+  "format_version": 2,
+  "header": {
+    "description": "BY.XKSHADOW",
+    "name": "§7虚空之遗服务器资源包",
+    "uuid": "00000000-0000-0000-0000-000020160300",
+    "version": [1, 1, 6],
+    "min_engine_version": [1, 14, 0]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "dde211f9-e1a6-435e-9a84-06fa9242f63e",
+      "version": [1, 0, 0]
+    }
+  ]
+}
+```
 ![input git url](/images/3.png)
 进入textures文件夹 在item_texture.json中定义武器贴图路径
 ![input git url](/images/4.png)
