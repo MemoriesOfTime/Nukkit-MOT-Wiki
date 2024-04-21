@@ -16,7 +16,7 @@ import TabItem from '@theme/TabItem';
 
 ## 新建一个类CustomItemWepeon 继承ItemCustom 便于后续注册物品 
 
-![input git url](/images/1.png)
+![input git url1](./images/1.png)
 
 最大堆叠数目 1-64
 
@@ -47,7 +47,7 @@ Definition定义
     }
 ```
 
-![input git url](/images/2.png)
+![input git url2](./images/2.png)
 ## 新建一个（糖果剑）的类 继承CustomItemWepeon
 stringid 填写的是物品字符串id 这个会和资源包里面的贴图定义相对应
 getMaxDurability() 最大耐久值 1~9999
@@ -78,9 +78,8 @@ getMaxDurability() 最大耐久值 1~9999
 拿出来是空气 这是因为你还没正确指向资源包贴图 
 ## 这是一个资源包的根目录构成
 这里对我们自定义物品有用的部分只有manifest.json和textures文件夹 
-打包资源包时也是以根目录进行打包 否则客户端无法读取资源包
 ## 在manifest.json定义资源包的uuid等信息
-![input git url](/images/3.png)
+![input git url3](./images/3.png)
 ```url
 {
   "format_version": 2,
@@ -101,7 +100,7 @@ getMaxDurability() 最大耐久值 1~9999
 }
 ```
 进入textures文件夹 在item_texture.json中定义武器贴图路径
-![input git url](/images/4.png)
+![input git url4](./images/4.png)
 ```url
 {
   "resource_pack_name": "vanilla",
@@ -116,5 +115,7 @@ getMaxDurability() 最大耐久值 1~9999
 	}
 ```
 ## 打包好资源包 放入resource_packs文件夹 进入服务器 正常您会看见资源包正常显示
+## 打包资源包时是以根目录进行打包 否则客户端无法读取资源包
+![input git url5](./images/5.png)
 如果还是空白 请检查：
 item_texture.json 内的 单个图标 占位符和图片路径是否有误
