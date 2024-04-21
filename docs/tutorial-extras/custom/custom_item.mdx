@@ -13,7 +13,7 @@ import TabItem from '@theme/TabItem';
 
 
 ## 新建一个类 继承ItemCustom 便于后续注册物品
-getMaxStackSize() **最大堆叠数目 1-64**
+ **最大堆叠数目 1-64**
 scaleoffset() **物品材质缩放（用于解决物品手持贴图巨大的问题） 16~ 16的倍数 如32 64 128**
 ![input git url](/images/tutorial-basics/2.png)
 
@@ -30,7 +30,10 @@ scaleoffset() **物品材质缩放（用于解决物品手持贴图巨大的问�
 而后在新的窗口中输入
 
 ```url
-https://github.com/MemoriesOfTime/ExamplePlugin-Maven.git
+@Override
+public int getMaxStackSize() {
+            return 1;
+        }
 ```
 
 
