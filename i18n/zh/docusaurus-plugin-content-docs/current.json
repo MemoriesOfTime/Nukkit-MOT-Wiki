@@ -13,7 +13,11 @@
   },
   "sidebar.tutorialSidebar.category.Tutorial Extras": {
     "message": "拓展教程",
-    "description": "The label for category Tutorial - Extras in sidebar tutorialSidebar"
+    "description": "The label for category Tutorial-Extras in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Custom Content APIs": {
+    "message": "内容自定义接口",
+    "description": "The label for category Tutorial-Extras/custom in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Guides": {
     "message": "指南",
