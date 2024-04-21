@@ -105,7 +105,7 @@ public class Example {
         Item diamond = Item.get(Item.DIAMOND, 0, 1);
         diamond.setLore("第一行", "第二行"); // 你可以继续增加行数
         diamond.setCustomName("物品的自定义名称"); // 如果不希望文本倾斜 可在文本最前面添加 "§r" 来重置格式
-        diamond.addEnchantment(new Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), new Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4)) // 为物品添加锋利5和保护4附魔
+        diamond.addEnchantment(new Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), new Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4)); // 为物品添加锋利5和保护4附魔
     }
 }
 ```

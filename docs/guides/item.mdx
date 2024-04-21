@@ -83,7 +83,7 @@ String name = diamond.getName(); // Get the name of the diamond
 Get the enchantment level of the item.
 You can find relevant enchantment IDs in [cn.nukkit.item.enchantment.Enchantment](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/enchantment/Enchantment.java).
 ```java
-int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the Sharpness level of the diamond; returns 0 if not enchanted
+int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the diamond's sharpness level. If it's not enchanted, return 0.
 // Output: 0
 ```
 
