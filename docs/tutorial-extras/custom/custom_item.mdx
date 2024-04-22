@@ -2,5 +2,127 @@
 sidebar_position: 1
 ---
 
-# Custom Item
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
+:::note
+
+Welcome to help us translate to English on github
+https://github.com/MemoriesOfTime/Nukkit-MOT-Wiki
+
+:::
+
+# 注册自定义物品
+
+本篇是Nukkit-MOT的自定义物品教程，皆在让所有人都能注册自定义物品 定义相关属性 配置资源包
+                      -- XKSHADOW
+# 一个自定义物品包含两部分： 插件里成功注册 资源包内定义物品贴图
+
+
+这里以定义一个有耐久的剑（糖果剑）为例
+
+## 新建一个类CustomItemWepeon 继承ItemCustom 便于后续注册物品 
+
+![input git url1](./images/custom_item/1.png)
+
+最大堆叠数目 1-64
+
+```url
+@Override
+public int getMaxStackSize() {
+            return 1;
+        }
+```
+物品材质缩放（用于解决物品手持贴图巨大的问题） 16~ 16的倍数 如32 64 128
+```url
+        public int scaleoffset() {
+        return 32;
+    }
+```
+Definition定义
+需要注意的是 allowOffHand是是否允许副手持有该物品
+其他照抄即可
+```url
+    @Override
+    public CustomItemDefinition getDefinition() {
+        return CustomItemDefinition
+                .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
+                .creativeGroup("itemGroup.name.item")
+                .allowOffHand(false)
+                .renderOffsets(RenderOffsets.scaleOffset(scaleoffset()))
+                .build();
+    }
+```
+
+![input git url2](./images/custom_item/2.png)
+## 新建一个（糖果剑）的类 继承CustomItemWepeon
+stringid 填写的是物品字符串id 这个会和资源包里面的贴图定义相对应
+getMaxDurability() 最大耐久值 1~9999
+```url
+      public static class customitem extends CustomItemWepeon {
+
+        private static String stringid = "candy_cane_sword";
+        public static String name = "糖果剑";
+        public customitem() {
+            super(stringid,name);
+        }
+        @Override
+        public int getMaxDurability() {
+            return 500;
+        }
+
+    }
+```
+
+## 最后 在 onEnable 时注册物品 
+```url
+   Item.registerCustomItem(candy_cane_sword.customitem.class);
+```
+
+
+## 下面的教程会教您如何制作对应的资源包
+此时您进入到游戏内 打开创造物品栏可以看到多了一个空白的格子 
+拿出来是空气 这是因为你还没正确指向资源包贴图 
+## 这是一个资源包的根目录构成
+这里对我们自定义物品有用的部分只有manifest.json和textures文件夹 
+## 在manifest.json定义资源包的uuid等信息
+![input git url3](./images/custom_item/3.png)
+```url
+{
+  "format_version": 2,
+  "header": {
+    "description": "BY.XKSHADOW",
+    "name": "§7虚空之遗服务器资源包",
+    "uuid": "00000000-0000-0000-0000-000020160300",
+    "version": [1, 1, 6],
+    "min_engine_version": [1, 14, 0]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "dde211f9-e1a6-435e-9a84-06fa9242f63e",
+      "version": [1, 0, 0]
+    }
+  ]
+}
+```
+进入textures文件夹 在item_texture.json中定义武器贴图路径
+![input git url4](./images/custom_item/4.png)
+```url
+{
+  "resource_pack_name": "vanilla",
+  "texture_name": "atlas.items",
+  "texture_data": {
+
+	
+    "candy_cane_sword": {
+      "textures": "textures/items/candy_cane_sword"
+    },
+	}
+	}
+```
+## 打包好资源包 放入resource_packs文件夹 进入服务器 正常您会看见资源包正常显示
+## 打包资源包时是以根目录进行打包 否则客户端无法读取资源包
+![input git url5](./images/custom_item/5.png)
+如果还是空白 请检查：
+item_texture.json 内的 单个图标 占位符和图片路径是否有误
