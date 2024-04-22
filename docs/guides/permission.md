@@ -2,7 +2,7 @@
 sidebar_position: 8
 ---
 
-# Permissions Guide
+# Permission Guide
 
 In Nukkit-MOT plugins, permissions are key mechanisms used to control access to specific features and operations.
 
