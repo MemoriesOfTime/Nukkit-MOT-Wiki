@@ -195,7 +195,7 @@ permissions:
 - `pets.call` 权限允许玩家召唤宠物，并且默认情况下任何人都拥有这个权限。
 - `default` 使用的值可以参考 [Permission 类的核心常量](#permission-static)
 
-# 结语
+## 结语
 
 作为一名普通开发者，我们一般直接使用 plugin.yml 来注册权限节点。
 

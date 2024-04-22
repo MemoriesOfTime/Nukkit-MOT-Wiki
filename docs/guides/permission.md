@@ -197,7 +197,7 @@ In this example:
 - The `pets.call` permission allows players to call a pet, and by default, anyone has this permission.
 - The `default` value used can refer to the [Core Constants of the Permission Class](#permission-static)
 
-# Conclusion
+## Conclusion
 
 As ordinary developers, we generally use `plugin.yml` to register permission nodes.
 
