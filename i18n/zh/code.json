@@ -1,6 +1,10 @@
 {
+  "homepage.downloadNukkitMot": {
+    "message": "🌌 下载",
+    "description": "The homepage message to ask the user to download nukkit-mot"
+  },
   "homepage.visitDocs": {
-    "message": "让我们开始吧！",
+    "message": "📖 研读！",
     "description": "The homepage message to ask the user to visit docs"
   },
   "homepage.subtitle": {

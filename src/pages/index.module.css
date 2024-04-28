@@ -4,10 +4,64 @@
  */
 
 .heroBanner {
+  /* 100vh - navbar height. 原本100vh就行但这里需要减去导航栏的高度 */
+  min-height: calc(100vh - var(--ifm-navbar-height));
   padding: 4rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
+  /* Water-like background. 水波颜色 */
+  background-color: var(--ifm-color-primary-lightest);
+  z-index: 0;
+}
+
+[data-theme='dark'] .heroBanner {
+  background-color: var(--ifm-color-primary-lightest);
+}
+
+/* Adding before and after for wave effects */
+.heroBanner::before,
+.heroBanner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  min-width: 360vw;
+  min-height: 360vw;
+  /* Wave circle background. 波浪圆的内部颜色 */
+  background-color: var(--ifm-hero-background-color);
+  animation-name: rotate;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  border-radius: 47%;
+  transform: translate(-50%, -70%) rotate(0);
+  z-index: -1;
+}
+
+.heroBanner::before {
+  bottom: 15vh;
+  /* Slower rotation for a calming effect */
+  animation-duration: 10s;
+}
+
+.heroBanner::after {
+  bottom: 12vh;
+  opacity: 0.5;
+  animation-duration: 16s;
+}
+
+/* Keyframes for the rotating animation */
+@keyframes rotate {
+  0% {
+    transform: translateX(-50%) rotateZ(0deg);
+  }
+
+  50% {
+    transform: translateX(-50%) rotateZ(180deg);
+  }
+
+  100% {
+    transform: translateX(-50%) rotateZ(360deg);
+  }
 }
 
 @media screen and (max-width: 996px) {
@@ -20,4 +74,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* gap controls button spacing. gap 控制按钮间隔*/
+  gap: 1.5rem;
+}
+
+.heroMain {
+  display: flex;
+  min-height: 100vh;
 }

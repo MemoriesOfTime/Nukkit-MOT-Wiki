@@ -32,12 +32,21 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
+            to="https://github.com/MemoriesOfTime/Nukkit-MOT/actions?query=branch%3Amaster+is%3Asuccess">
+            <Translate
+              id="homepage.downloadNukkitMot"
+              description="The homepage message to ask the user to download nukkit-mot">
+              🌌 Download
+            </Translate>
+          </Link>
+
+          <Link
+            className="button button--secondary button--lg"
             to="/docs/intro">
             <Translate
               id="homepage.visitDocs"
-              description="The homepage message to ask the user to visit docs"
-              values={{}}>
-              {"Let's Go"}
+              description="The homepage message to ask the user to visit docs">
+              📖 Let's Go
             </Translate>
           </Link>
         </div>
@@ -53,7 +62,7 @@ export default function Home(): JSX.Element {
       title={`Hello from ${siteConfig.title}`}
       description="Description will go into a meta tag in <head />">
       <HomepageHeader />
-      <main>
+      <main className={clsx(styles.heroMain)}>
         <HomepageFeatures />
       </main>
     </Layout>
