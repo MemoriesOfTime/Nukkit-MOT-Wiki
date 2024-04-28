@@ -25,7 +25,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 3. 编写运行命令：`java -jar file.jar`（将 `file` 更改为你下载的文件的名称）
 
 ## 链接
-- __🌐 下载：[Jenkins](https://motci.cn/job/Nukkit-MOT/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
+- __🌐 下载：[Jenkins](https://motci.cn/job/Nukkit-MOT/job/master/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
 - __💬 [Discord](https://discord.gg/pJjQDQC)__
 - __🔌 [Nukkit 插件](https://cloudburstmc.org/resources/categories/nukkit-plugins.1/)__
 - __🐞 [报告错误](https://github.com/MemoriesOfTime/Nukkit-MOT/issues/new/choose)__

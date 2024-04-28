@@ -32,11 +32,11 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="https://github.com/MemoriesOfTime/Nukkit-MOT/actions?query=branch%3Amaster+is%3Asuccess">
+            to="https://motci.cn/job/Nukkit-MOT/job/master/">
             <Translate
               id="homepage.downloadNukkitMot"
               description="The homepage message to ask the user to download nukkit-mot">
-              🌌 Download
+              🌐 Download
             </Translate>
           </Link>
 
