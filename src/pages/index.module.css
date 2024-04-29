@@ -76,6 +76,7 @@
   justify-content: center;
   /* gap controls button spacing. gap 控制按钮间隔*/
   gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .heroMain {
