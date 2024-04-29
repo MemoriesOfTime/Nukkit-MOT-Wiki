@@ -3,7 +3,7 @@
  * and scoped locally.
  */
 
- .heroBanner {
+.heroBanner {
   /* 100vh - navbar height. 原本100vh就行但这里需要减去导航栏的高度 */
   min-height: calc(100vh - var(--ifm-navbar-height));
   padding: 4rem 0;
