@@ -31,7 +31,7 @@ const config: Config = {
       en: {
         htmlLang: 'en-US'
       },
-      'zh': {
+      zh: {
         label: '汉语',
         htmlLang: 'zh'
       }
@@ -94,7 +94,8 @@ const config: Config = {
         },*/
         {
           type: 'localeDropdown',
-          position: 'right'
+          position: 'right',
+          // queryString: '?lang=en' //TODO: This configuration does not get the locale. 此配置暂时无法获取 locale
         }
       ],
     },

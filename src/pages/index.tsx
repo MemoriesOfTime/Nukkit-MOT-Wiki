@@ -7,6 +7,8 @@ import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 import Translate from '@docusaurus/Translate';
+import { useEffect } from 'react';
+import { redirectToLanguageVersion } from '../redirects';
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
@@ -56,6 +58,10 @@ function HomepageHeader() {
 }
 
 export default function Home(): JSX.Element {
+  useEffect(() => {
+    redirectToLanguageVersion();
+  }, []);
+
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
