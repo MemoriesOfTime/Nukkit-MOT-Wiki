@@ -14,7 +14,7 @@ mentions:
 
 接下来以 **糖果剑** 为例，演示自定义物品的步骤。
 
-## 在插件中注册物品
+## 在插件中注册物品 \{#register-item-in-plugin}
 
 我们按照以下序列图进行操作
 
@@ -34,7 +34,7 @@ sequenceDiagram
     Plugin->>Item: registerCustomItem(新物品类)
 ```
 
-### 创建新物品的类
+### 创建新物品的类 \{#creat-new-item-class}
 
 在插件中，新建 `CandyCaneSword` 类，继承 ItemCustom 并重写相应方法
 
@@ -76,7 +76,7 @@ public static class CandyCaneSword extends ItemCustom {
 }
 ```
 
-### ItemCustom 主要方法
+### ItemCustom 主要方法 \{#key-methods-itemcustom}
 
 引自 [cn.nukkit.item.customitem.ItemCustom](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/ItemCustom.java)
 
@@ -91,11 +91,11 @@ public static class CandyCaneSword extends ItemCustom {
 - `getDefinition()`
 返回一个 CustomItemDefinition 类概括了该物品的基本属性，如 是否允许副手、在创造栏的分类、附魔效果。
 
-### CustomItemDefinition 主要方法
+### CustomItemDefinition 主要方法 \{#key-methods-customitemdefinition}
 
 引自 [cn.nukkit.item.customitem.CustomItemDefinition](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java)
 
-#### 常用构建器
+#### 常用构建器  \{#common-builders}
 
 - `customBuilder` 自定义物品的定义构造器
 
@@ -113,7 +113,7 @@ public static class CandyCaneSword extends ItemCustom {
 CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativeCategory);
 ```
 
-#### 常用方法
+#### 常用方法 \{#common-methods}
 
 由于方法直接返回 `this` 因此我们可以使用扁平化的写法。
 
@@ -127,11 +127,11 @@ CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativ
 
 - `canDestroyInCreative(boolean value)` 控制拿该物品的玩家是否可以在创造模式挖掘方块。
 
-### ItemCreativeGroup 主要方法
+### ItemCreativeGroup 主要方法 \{#itemcreativegroup-key-methods}
 
 引自 [cn.nukkit.item.customitem.data.ItemCreativeGroup](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/ItemCreativeGroup.java)
 
-### 注册物品
+### 注册物品 \{#register-item}
 
 最后，在插件入口类的 onEnable 方法中注册物品
 
@@ -144,7 +144,7 @@ public void onEnable() {
 }
 ```
 
-## 制作资源包
+## 制作资源包 \{#creating-resource-pack}
 
 教程将指导您如何制作资源包，确保正确指向物品贴图，以在游戏内正确显自定义物品。
 
@@ -156,7 +156,7 @@ public void onEnable() {
 2. 在资源包中定义物品贴图路径。
 3. 打包资源包并放入服务器的 resource_packs 文件夹。
 
-### 资源包目录构成
+### 资源包目录构成 \{#resource-pack-directory}
 
 资源包目录应该包含以下文件：
 
@@ -170,7 +170,7 @@ graph TD;
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
 ```
 
-### manifest.json
+### manifest.json \{#manifest-json}
 
 参考 Bedrock Wiki 对 [RP Manifest](https://wiki.bedrock.dev/guide/project-setup.html#rp-manifest) 的讲解。
 
@@ -194,7 +194,7 @@ graph TD;
 }
 ```
 
-### item_texture.json
+### item_texture.json \{#item_texture-json}
 
 ```json title="RP/textures/item_texture.json"
 {
@@ -224,9 +224,9 @@ graph TD;
 
 :::
 
-## 深入了解
+## 深入了解 \{#further-exploration}
 
-### 与 Bedrock Wiki 的对照关系
+### 与 Bedrock Wiki 的对照关系 \{#comparing-with-bedrock-wiki}
 
 如果 CustomItemDefinition 中没有您想要的封装方法，该怎么做呢？
 

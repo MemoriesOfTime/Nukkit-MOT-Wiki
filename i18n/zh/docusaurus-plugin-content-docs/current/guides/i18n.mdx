@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # i18n 国际化指南
 
-## 注册插件的 i18n
+## 注册插件的 i18n \{#registering-i18n-for-plugins}
 
 以 ExamplePlugin-Maven 项目为例。
 
@@ -84,7 +84,7 @@ public class EventListener implements Listener {
 }
 ```
 
-## 添加语言文件至资源
+## 添加语言文件至资源 \{#adding-language-files-to-resources}
 
 而后我们需要在 `src/main/resources` 文件夹下新建 `language` 文件夹来存储 **\<[LangCode](#langcode)\>.lang** 语言文件，您的插件开发目录大致如下
 
@@ -100,7 +100,7 @@ ExamplePlugin-Maven
 └─target
 ```
 
-### 语言文件格式
+### 语言文件格式 \{#language-files-format}
 
 支持参数的多语言文本，例如 `exampleplugin.helloworld=你好 {%0}!`
 
@@ -111,7 +111,7 @@ exampleplugin.helloworld=你好 {%0}!
 exampleplugin.examplecommand.description=这是一个测试命令。
 ```
 
-## LangCode
+## LangCode \{#langcode}
 
 语言代码可见 [cn.nukkit.lang.LangCode](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/lang/LangCode.java)，在此列出表格以便使用:
 

@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+import Image from '@theme/IdealImage';
+
 # 调试您的插件
 
 插件开发过程中，通常会遇到一些代码逻辑错误、插件的兼容性问题、性能瓶颈等挑战。
@@ -10,16 +12,16 @@ sidebar_position: 3
 
 而插件调试需要先在 IDEA 中进行 `运行/调试配置` 的编辑。
 
-## 编辑调试配置
+## 编辑调试配置 \{#edit-debug-config}
 
 使用 IDEA 打开项目。
 
-![编辑调试配置菜单](./img/debug_config_edit_menu.jpg)
+<Image img={require('./images/debug_config_edit_menu.png')} alt="编辑调试配置菜单" />
 
 1. 在顶栏中，打开 `运行/调试配置` 窗口。
 2. 选择 `JAR 应用程序` 模板。
 
-![选择JAR应用程序](./img/add_jarapp_debug_config.jpg)
+<Image img={require('./images/add_jarapp_debug_config.png')} alt="选择JAR应用程序" />
 
 3. 编辑窗口内容
 
@@ -32,9 +34,9 @@ sidebar_position: 3
 
 最后点击 `确定` 即可。
 
-![编辑调试配置窗口](./img/edit_debug_config_window.png)
+<Image img={require('./images/edit_debug_config_window.png')} alt="编辑调试配置窗口" />
 
-## 自动更新插件到插件目录
+## 自动更新插件到插件目录 \{#auto-update-plugin}
 
 通过上述操作，我们已经可以使用 `Shift + F9` 组合键进行代码调试。
 
@@ -44,7 +46,7 @@ sidebar_position: 3
 
 下面介绍如何对 Maven 项目的 `pom.xml` 文件进行配置，以实现我们的需求。
 
-### 添加相关属性
+### 添加相关属性 \{#adding-relevant-properties}
 
 ```xml title="pom.xml"
     <groupId>cn.nukkitmot</groupId>
@@ -71,7 +73,7 @@ artifactId 是插件名称，默认情况下构建产物的名称为包含此值
 
 nukkitPluginsPath 是插件目录的路径，需要手动添加调试环境中的 `plugins` 目录。
 
-### 添加 Maven plugins 标签
+### 添加 Maven plugins 标签 \{#adding-maven-plugins-tag}
 
 标签 `<build>` 被包含在 `<project>` 中。
 
@@ -117,7 +119,7 @@ nukkitPluginsPath 是插件目录的路径，需要手动添加调试环境中�
     </build>
 ```
 
-### 使用
+### 使用 \{#usage}
 
 1. 在 IDEA 右侧点击字母 **M** 图标，打开 Maven 选项卡。
 2. 点击 `clean` 进行清理，点击 `package` 进行构建打包。

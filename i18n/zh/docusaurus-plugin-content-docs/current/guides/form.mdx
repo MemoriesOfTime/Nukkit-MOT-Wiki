@@ -15,11 +15,11 @@ import TabItem from '@theme/TabItem';
 
 :::
 
-## 模态表单 Modal
+## 模态表单 Modal \{#modal-form}
 
 [FormWindowModal](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowModal.java) 用于简单的确认或取消操作。
 
-### 使用示例
+### 使用示例 \{#modal-form-usage-example}
 
 ```java title="form/DemoModalForm.java"
 package cn.nukkitmot.exampleplugin.form;
@@ -48,11 +48,11 @@ public class DemoModalForm {
 }
 ```
 
-## 简易表单 Simple
+## 简易表单 Simple \{#simple-form}
 
 [FormWindowSimple](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowSimple.java) 提供更丰富的按钮选择。
 
-### 使用示例
+### 使用示例 \{#simple-form-usage-example}
 
 ```java title="form/DemoSimpleForm.java"
 package cn.nukkitmot.exampleplugin.form;
@@ -97,17 +97,17 @@ public class DemoSimpleForm {
 }
 ```
 
-### 组件
+### 组件 \{#simple-form-components}
 
 | 组件名称      | 描述                                           | 引用                                                         |
 | -------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
 | Button         | 按钮，用于简单的点击操作，可附带图片           | [ElementButton](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementButton.java) |
 
-## 自定义表单 Custom
+## 自定义表单 Custom \{#custom-form}
 
 [FormWindowCustom](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowCustom.java) 允许开发者自定义表单的内容和交互方式，包括文本输入框、下拉框等。
 
-### 使用示例
+### 使用示例 \{#custom-form-usage-example}
 
 ```java title="form/DemoCustomForm.java"
 package cn.nukkitmot.exampleplugin.form;
@@ -143,7 +143,7 @@ public class DemoCustomForm {
 
 ```
 
-### 组件
+### 组件 \{#custom-form-components}
 
 | 组件名称      | 描述                                           | 引用                                                         |
 | -------------- | ---------------------------------------------- | ---------------------------------------------------------------- |
@@ -154,14 +154,14 @@ public class DemoCustomForm {
 | StepSlider     | 步进水平滑块，参数为字符串                     | [ElementStepSlider](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementStepSlider.java) |
 | Toggle         | 开关，接受布尔值                               | [ElementToggle](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementToggle.java) |
 
-## 对话框 Dialog
+## 对话框 Dialog \{#dialog-form}
 
 [FormWindowDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowDialog.java) 是一种特殊的表单，需要绑定到实体上才能使用。且实体不能为玩家。
 
 
 [ScrollingTextDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/ScrollingTextDialog.java) 是加强版的对话框，它提供了滚动文本的特性。
 
-### 使用示例
+### 使用示例 \{#dialog-form-usage-example}
 
 <Tabs groupId="dialog-type">
   <TabItem value="normal" label="normal">

@@ -6,15 +6,15 @@ sidebar_position: 4
 
 在Nukkit的API中，`Item` 类是一个非常重要的组成部分，它用于处理服务器上的所有物品相关的操作。下面将提供一个详细的文档，用于描述 `Item` 类的主要功能和用法。
 
-## `Item` 类概述
+## `Item` 类概述 \{#item-class-overview}
 
 `Item` 类位于 [cn.nukkit.item](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/Item.java) 包中，它提供了大量的方法来创建和管理游戏中的物品。这些物品可以是方块、工具、食物等。
 
-## 构造函数
+## 构造函数 \{#constructors}
 
 `Item` 类提供了多个构造函数，允许从不同的参数创建物品实例。
 
-### 示例代码：
+### 示例代码： \{#example-code}
 ```java
 // 导入Item类
 import cn.nukkit.item.Item;
@@ -34,7 +34,7 @@ public class Example {
 }
 ```
 
-### 代码解释：
+### 代码解释： \{#code-explanation}
 
 :::warning
 
@@ -46,39 +46,39 @@ public class Example {
 - `0`: 这是物品的变种号，对于大多数物品来说，这个值为0。
 - `1`: 这代表物品的数量。
 
-## 主要方法
+## 主要方法 \{#main-methods}
 
 以下是 `Item` 类中一些常用方法的介绍和示例。
 
-### `getId()`
+### `getId()` \{#get-id}
 返回物品的ID。
 ```java
 int id = diamond.getId(); // 获取钻石的ID
 // 输出：264
 ```
 
-### `getNamespaceId()`
+### `getNamespaceId()` \{#get-namespace-id}
 返回物品的命名空间。
 ```java
 String namespace = diamond.getNamespaceId(); // 获取钻石的命名空间
 // 输出：minecraft:diamond
 ```
 
-### `getCount()`
+### `getCount()` \{#get-count}
 返回物品的数量。
 ```java
 int count = diamond.getCount(); // 获取钻石的数量
 // 输出：1
 ```
 
-### `getName()`
+### `getName()` \{#get-name}
 返回物品的名称。
 ```java
 String name = diamond.getName(); // 获取钻石的名称
 // 输出：Diamond
 ```
 
-### `getEnchantmentLevel(int id)`
+### `getEnchantmentLevel(int id)` \{#get-enchantment-level}
 获取物品的附魔等级。
 你可以在 [cn.nukkit.item.enchantment.Enchantment](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/enchantment/Enchantment.java) 找到相关附魔ID
 ```java
@@ -86,16 +86,16 @@ int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // 获取钻
 // 输出：0
 ```
 
-## 处理物品的属性
+## 处理物品的属性 \{#handling-item-properties}
 
 物品的属性可以通过各种setter和getter方法来管理。
 
-### 设置物品数量
+### 设置物品数量 \{#set-number-of-items}
 ```java
 diamond.setCount(3); // 将钻石的数量设置为3
 ```
 
-### 示例代码
+### 示例代码 \{#example-code-properties}
 
 设置物品基本属性。
 

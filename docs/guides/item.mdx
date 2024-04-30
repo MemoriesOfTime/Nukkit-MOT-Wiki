@@ -4,18 +4,17 @@ sidebar_position: 4
 
 # Item Guide
 
-
 The `Item` class is a very important part of Nukkit's API and is used to handle all item related operations on the server. A detailed documentation for describing the main functions and usage of the `Item` class is provided below.
 
-## `Item` class overview
+## `Item` class overview \{#item-class-overview}
 
 The `Item` class, located in the [cn.nukkit.item](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/Item.java) package, provides a large number of methods for creating and managing in-game items. These items can be cubes, tools, food, and so on.
 
-## Constructors
+## Constructors \{#constructors}
 
 The `Item` class provides several constructors that allow the creation of item instances from different parameters.
 
-### Example code:
+### Example code: \{#example-code}
 ```java
 // Import the Item class
 import cn.nukkit.item;
@@ -35,7 +34,7 @@ public class Example {
 }
 ```
 
-### Code explanation:
+### Code explanation: \{#code-explanation}
 
 :::warning
 
@@ -47,39 +46,39 @@ Always use the `Item.get()` or `Item.fromString()` method to get an item, rather
 - `0`: This is the item's variant number, for most items this will be 0.
 - `1`: This represents the number of the item.
 
-## Main Methods
+## Main Methods \{#main-methods}
 
 Below are some commonly used methods and examples in the `Item` class.
 
-### `getId()`
+### `getId()` \{#get-id}
 Returns the ID of the item.
 ```java
 int id = diamond.getId(); // Get the ID of the diamond
 // Output: 264
 ```
 
-### `getNamespaceId()`
+### `getNamespaceId()` \{#get-namespace-id}
 Returns the namespace of the item.
 ```java
 String namespace = diamond.getNamespaceId(); // Get the namespace of the diamond
 // Output: minecraft:diamond
 ```
 
-### `getCount()`
+### `getCount()` \{#get-count}
 Returns the quantity of the item.
 ```java
 int count = diamond.getCount(); // Get the quantity of the diamond
 // Output: 1
 ```
 
-### `getName()`
+### `getName()` \{#get-name}
 Returns the name of the item.
 ```java
 String name = diamond.getName(); // Get the name of the diamond
 // Output: Diamond
 ```
 
-### `getEnchantmentLevel(int id)`
+### `getEnchantmentLevel(int id)` \{#get-enchantment-level}
 Get the enchantment level of the item.
 You can find relevant enchantment IDs in [cn.nukkit.item.enchantment.Enchantment](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/enchantment/Enchantment.java).
 ```java
@@ -87,16 +86,16 @@ int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the d
 // Output: 0
 ```
 
-## Handling item properties
+## Handling item properties \{#handling-item-properties}
 
 Attributes of items can be managed through various setter and getter methods.
 
-### Setting the number of items
+### Setting the number of items \{#set-number-of-items}
 ```java
 diamond.setCount(3); // Set the number of diamonds to 3
 ```
 
-### Example code
+### Example code \{#example-code-properties}
 
 Setting item basic information.
 
@@ -109,4 +108,4 @@ public class Example {
         diamond.addEnchantment(new Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), new Enchantment.get(Enchantment.ID_PROTECTION_ALL) .setLevel(4)) // Add Sharpness 5 and Protection 4 enchantments to the item
     }
 }
-``
+```
