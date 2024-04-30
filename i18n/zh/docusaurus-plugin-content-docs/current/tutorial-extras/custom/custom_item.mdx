@@ -39,13 +39,21 @@ sequenceDiagram
 在插件中，新建 `CandyCaneSword` 类，继承 ItemCustom 并重写相应方法
 
 ```java title="custom/item/CandyCaneSword.java"
-public static class CandyCaneSword extends ItemCustom {
-    private static String stringId = "candy_cane_sword";
-    public static String name = "糖果剑";
+package cn.nukkitmot.exampleplugin.custom.item;
 
-    @Override
-    public int getMaxStackSize() {
-        return 1;
+import cn.nukkit.item.customitem.CustomItemDefinition;
+import cn.nukkit.item.customitem.ItemCustom;
+import cn.nukkit.item.customitem.data.ItemCreativeCategory;
+import cn.nukkit.item.customitem.data.ItemCreativeGroup;
+import cn.nukkit.item.customitem.data.RenderOffsets;
+// highlight-start
+public class CandyCaneSword extends ItemCustom {
+    private static String spacenameId = "nukkit:candy_cane_sword";
+    private static String textureName = "candy_cane_sword";
+    private static String name = null;
+
+    public CandyCaneSword() {
+        super(spacenameId, name, textureName);
     }
 
     public int scaleOffset() {
@@ -58,22 +66,35 @@ public static class CandyCaneSword extends ItemCustom {
     @Override
     public CustomItemDefinition getDefinition() {
         return CustomItemDefinition
-            .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
-            .creativeGroup("itemGroup.name.item")
-            .allowOffHand(false)
-            .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
-            .build();
-    }
-
-    public CandyCaneSword() {
-        super(stringId, name);
+                .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
+                .creativeGroup(ItemCreativeGroup.SWORD)
+                .allowOffHand(true)
+                .handEquipped(true)
+                .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
+                .build();
     }
 
     @Override
     public int getMaxDurability() {
         return 500;
     }
+
+    @Override
+    public int getMaxStackSize() {
+        return 1;
+    }
+
+    @Override
+    public int getAttackDamage() {
+        return 4;
+    }
+
+    @Override
+    public boolean isSword() {
+        return true;
+    }
 }
+// highlight-end
 ```
 
 ### ItemCustom 主要方法 \{#key-methods-itemcustom}
@@ -137,10 +158,15 @@ CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativ
 
 ```java title="ExamplePlugin.java"
 import cn.nukkit.item.Item;
+import cn.nukkitmot.exampleplugin.custom.item.CandyCaneSword;
 
-@Override
-public void onEnable() {
-    Item.registerCustomItem(CandyCaneSword.class);
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onEnable() {
+        // highlight-start
+        Item.registerCustomItem(CandyCaneSword.class);
+        // highlight-end
+    }
 }
 ```
 
@@ -166,7 +192,7 @@ graph TD;
     RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
     textures --> item_texture["📄 item_texture.json"];
-    RP --> items("📁 items");
+    textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
 ```
 
@@ -210,21 +236,49 @@ graph TD;
 }
 ```
 
-打包好资源包
+打包好资源包放入服务器的 `resource_packs` 文件夹。
 
-放入服务器的 `resource_packs` 文件夹
+进入服务器，正常情况下您会看见资源包正常显示。
 
-进入服务器，正常情况下您会看见资源包正常显示
+:::danger 物品材质未能正常显示？
 
-:::note
+很抱歉听到这个消息，但请保持冷静。并按下列情形进行排查:
 
-打包资源包时是以根目录进行打包，否则客户端无法读取资源包。
+1. 若非插件内置资源包，资源包打包时是以根目录压缩的吗？也就是点开压缩包就能看到 `manifest.json` 文件。
 
-根目录指的是，与 `manifest.json` 文件同级的目录。
+2. 资源包后缀是否从 `.zip` 改为 `.mcpack` 后缀？非 zip 格式的压缩算法客户端不支持。
+
+3. 更新资源包后，是否有清理客户端缓存？在 `设置 → 存储 → 资源包` 存有资源包缓存时，客户端不会向服务器请求更新的资源包。
 
 :::
 
 ## 深入了解 \{#further-exploration}
+
+### 插件内置资源包 \{#resource_packs-in-plugin}
+
+得益于 Nukkit-MOT 的设计，我们可以在插件开发中非常方便的编辑资源包。
+
+只需要在插件的 `resources` 创建 `assets/resource_pack` 文件夹，并在其中放置资源包。
+
+演示插件就是这么做的。
+
+<details>
+    <summary>
+      展示 [ExamplePlugin](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources) 的 resources 目录结构
+    </summary>
+```mermaid
+graph TD;
+    resources("📁 resources") --> assets("📁 assets");
+    resources("📁 resources") -..-> assets("📁 language");
+    assets("📁 assets") --> RP("📁 resource_pack");
+    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
+    RP --> pack_icon["📄 pack_icon.png"];
+    RP --> textures("📁 textures");
+    textures --> item_texture["📄 item_texture.json"];
+    textures --> items("📁 items");
+    items --> candy_cane_sword["📄 candy_cane_sword.png"];
+```
+</details>
 
 ### 与 Bedrock Wiki 的对照关系 \{#comparing-with-bedrock-wiki}
 
@@ -285,3 +339,72 @@ SimpleBuilder#allowOffHand 方法中的 `this.nbt` 在构建器中被创建，�
 可以在 [cn.nukkit.network.protocol.ProtocolInfo](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/network/protocol/ProtocolInfo.java) 中查看协议支持的所有数据包。
 
 :::
+
+### RenderOffsets 渲染偏移 \{#render-offsets}
+
+渲染偏移的知识较为庞大、复杂，当前也没有可视化工具所以需要一定的空间想象能力。
+
+引用：
+
+- [cn.nukkit.item.customitem.data.RenderOffsets](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/RenderOffsets.java)
+- [cn.nukkit.item.customitem.data.Offset](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/Offset.java)
+
+
+通过观察下面的高亮部分代码可知，需要向 `RenderOffsets` 类传入 4 个 `Offset` 对象。
+
+```java title="cn.coolloong.amethyst_equipment.Item.AmethystSpear 节选"
+    @Override
+    public CustomItemDefinition getDefinition() {
+        return CustomItemDefinition
+                .toolBuilder(this, ItemCreativeCategory.EQUIPMENT)
+                .addRepairItems(List.of(Item.fromString("minecraft:amethyst_shard")), 100)
+                .addRepairItems(List.of(Item.fromString("yes:amethyst_spear")), 400)
+                .renderOffsets(new RenderOffsets(
+                    // highlight-start
+                                Offset.builder()
+                                        .position(0.48f, -0.128f, -0.946f)
+                                        .rotation(11.696f, -64.536f, 79.413f)
+                                        .scale(0.038f, 0.037f, 0.038f),
+                                Offset.builder()
+                                        .position(0.258f, 0.979f, -0.541f)
+                                        .rotation(-63.268f, -43.969f, 144.041f)
+                                        .scale(0.094f, 0.094f, 0.094f),
+                                Offset.builder()
+                                        .position(-1.053f, 0.136f, -0.803f)
+                                        .rotation(27.273f, 67.731f, -64.494f)
+                                        .scale(0.063f, 0.063f, 0.063f),
+                                Offset.builder()
+                                        .position(0.258f, 0.979f, -0.541f)
+                                        .rotation(-63.268f, -43.969f, 144.041f)
+                                        .scale(0.094f, 0.094f, 0.094f)
+                        )
+                    // highlight-end
+                )
+                .creativeGroup("itemGroup.name.sword")
+                .allowOffHand(false)
+                .handEquipped(true)
+                .customBuild(nbt -> {
+                    nbt.getCompound("components")
+                            .putCompound("minecraft:cooldown", new CompoundTag()
+                                    .putString("category", "amethyst_spear")
+                                    .putFloat("duration", 3f))
+                            .getCompound("item_properties").putBoolean("animates_in_toolbar", true)
+                            .getCompound("item_properties").putInt("use_duration", 640);
+                });
+    }
+```
+
+在 RenderOffsets 类的定义中
+
+```java
+public RenderOffsets(@Nullable Offset mainHandFirstPerson, @Nullable Offset mainHandThirdPerson, @Nullable Offset offHandFirstPerson, @Nullable Offset offHandThirdPerson) {}
+```
+
+可以知道四个参数分别为：
+
+- mainHandFirstPerson: 主手第一人称
+- mainHandThirdPerson: 主手第三人称
+- offHandFirstPerson: 副手第一人称
+- offHandThirdPerson: 副手第三人称
+
+需要更多的发现...

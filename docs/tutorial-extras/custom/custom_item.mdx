@@ -41,41 +41,62 @@ sequenceDiagram
 Within the plugin, create a new class `CandyCaneSword`, inheriting from ItemCustom and overriding the necessary methods:
 
 ```java title="custom/item/CandyCaneSword.java"
-public static class CandyCaneSword extends ItemCustom {
-    private static String stringId = "candy_cane_sword";
-    public static String name = "Candy Cane Sword";
+package cn.nukkitmot.exampleplugin.custom.item;
 
-    @Override
-    public int getMaxStackSize() {
-        return 1;
+import cn.nukkit.item.customitem.CustomItemDefinition;
+import cn.nukkit.item.customitem.ItemCustom;
+import cn.nukkit.item.customitem.data.ItemCreativeCategory;
+import cn.nukkit.item.customitem.data.ItemCreativeGroup;
+import cn.nukkit.item.customitem.data.RenderOffsets;
+// highlight-start
+public class CandyCaneSword extends ItemCustom {
+    private static String spacenameId = "nukkit:candy_cane_sword";
+    private static String textureName = "candy_cane_sword";
+    private static String name = null;
+
+    public CandyCaneSword() {
+        super(spacenameId, name, textureName);
     }
 
     public int scaleOffset() {
-        return 32; // Must be a multiple of 16, such as 32, 64, 128
+        return 32; // 需要是16的倍数，如 32、64、128
     }
 
     /**
-     * This method sets up the custom item definition.
+     * 该方法设置自定义物品的定义
      */
     @Override
     public CustomItemDefinition getDefinition() {
         return CustomItemDefinition
-            .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
-            .creativeGroup("itemGroup.name.item")
-            .allowOffHand(false)
-            .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
-            .build();
-    }
-
-    public CandyCaneSword() {
-        super(stringId, name);
+                .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
+                .creativeGroup(ItemCreativeGroup.SWORD)
+                .allowOffHand(true)
+                .handEquipped(true)
+                .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
+                .build();
     }
 
     @Override
     public int getMaxDurability() {
         return 500;
     }
+
+    @Override
+    public int getMaxStackSize() {
+        return 1;
+    }
+
+    @Override
+    public int getAttackDamage() {
+        return 4;
+    }
+
+    @Override
+    public boolean isSword() {
+        return true;
+    }
 }
+// highlight-end
 ```
 
 ### Key Methods in ItemCustom \{#key-methods-itemcustom}
@@ -127,16 +148,19 @@ From [cn.nukkit.item.customitem.data.ItemCreativeGroup](https://github.com/Memor
 
 ### Registering the Item \{#register-item}
 
-Finally,
-
- register the item in the plugin's entry class `onEnable` method:
+Finally, register the item in the plugin's entry class `onEnable` method:
 
 ```java title="ExamplePlugin.java"
 import cn.nukkit.item.Item;
+import cn.nukkitmot.exampleplugin.custom.item.CandyCaneSword;
 
-@Override
-public void onEnable() {
-    Item.registerCustomItem(CandyCaneSword.class);
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onEnable() {
+        // highlight-start
+        Item.registerCustomItem(CandyCaneSword.class);
+        // highlight-end
+    }
 }
 ```
 
@@ -161,8 +185,9 @@ graph TD;
     RP("📁 Resource Pack") --> manifest["📄 manifest.json"];
     RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
     textures --> item_texture["📄 item_texture.json"];
-    RP --> items("📁 items");
+    textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
 ```
 
@@ -206,15 +231,50 @@ Refer to Bedrock Wiki's explanation on [RP Manifest](https://wiki.bedrock.dev/gu
 
 Package the resource pack and place it in the server's `resource_packs` folder. Upon entering the server, the resource pack should display normally.
 
-:::note
+:::danger Item Textures Not Displaying Correctly?
 
-When packaging the resource pack, it should be done from the root directory, otherwise, the client will not be able to read the resource pack.
+Sorry to hear that, but keep your cool. Check the following to troubleshoot:
 
-The root directory refers to the level at which the `manifest.json` file is located.
+1. If it’s not a plugin's built-in resource pack, was the pack zipped from the root directory?
+> In other words, when you open the zip file, can you see the `manifest.json` file right away?
+
+2. Did you change the file extension of the resource pack from `.zip` to `.mcpack`?
+> The client doesn't support compression algorithms other than zip.
+
+3. After updating the resource pack, did you clear the client's cache?
+> Go to `Settings → Storage → Resource Packs`. If there's a cached of the resource pack, the client won't ask the server for the updated pack.
 
 :::
 
 ## Further Exploration \{#further-exploration}
+
+### Built-in Resource Packs in Plugin \{#resource_packs-in-plugin}
+
+Thanks to the design of Nukkit-MOT, we can easily manage resource packs during plugin development.
+
+Simply create a `assets/resource_pack` folder within the `resources` directory of the plugin and place the resource pack files there.
+
+This is exactly how the demo plugin does it.
+
+<details>
+    <summary>
+      Show the resources directory structure of [ExamplePlugin](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources)
+    </summary>
+```mermaid
+graph TD;
+    resources("📁 resources") --> assets("📁 assets");
+    resources("📁 resources") --> pluginyml["📄 plugin.yml"];
+    resources("📁 resources") -..-> language("📁 language");
+    assets("📁 assets") --> RP("📁 resource_pack");
+    RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
+    textures --> item_texture["📄 item_texture.json"];
+    textures --> items("📁 items");
+    items --> candy_cane_sword["📄 candy_cane_sword.png"];
+    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
+    RP --> pack_icon["📄 pack_icon.png"];
+```
+</details>
 
 ### Comparing with Bedrock Wiki \{#comparing-with-bedrock-wiki}
 
@@ -277,3 +337,71 @@ Not all methods can achieve their effects simply by adding nbt, such as `minecra
 You can see all the supported protocol packets in [cn.nukkit.network.protocol.ProtocolInfo](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/network/protocol/ProtocolInfo.java).
 
 :::
+
+### RenderOffsets \{#render-offsets}
+
+The knowledge surrounding rendering offsets is extensive and complex. Currently, there are no visualization tools available, so a good spatial imagination is necessary.
+
+References:
+
+- [cn.nukkit.item.customitem.data.RenderOffsets](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/RenderOffsets.java)
+- [cn.nukkit.item.customitem.data.Offset](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/Offset.java)
+
+From the highlighted portion of the code below, it is clear that four `Offset` objects must be passed to the `RenderOffsets` class.
+
+```java title="Excerpt from: cn.coolloong.amethyst_equipment.Item.AmethystSpear"
+    @Override
+    public CustomItemDefinition getDefinition() {
+        return CustomItemDefinition
+                .toolBuilder(this, ItemCreativeCategory.EQUIPMENT)
+                .addRepairItems(List.of(Item.fromString("minecraft:amethyst_shard")), 100)
+                .addRepairItems(List.of(Item.fromString("yes:amethyst_spear")), 400)
+                .renderOffsets(new RenderOffsets(
+                    // highlight-start
+                                Offset.builder()
+                                        .position(0.48f, -0.128f, -0.946f)
+                                        .rotation(11.696f, -64.536f, 79.413f)
+                                        .scale(0.038f, 0.037f, 0.038f),
+                                Offset.builder()
+                                        .position(0.258f, 0.979f, -0.541f)
+                                        .rotation(-63.268f, -43.969f, 144.041f)
+                                        .scale(0.094f, 0.094f, 0.094f),
+                                Offset.builder()
+                                        .position(-1.053f, 0.136f, -0.803f)
+                                        .rotation(27.273f, 67.731f, -64.494f)
+                                        .scale(0.063f, 0.063f, 0.063f),
+                                Offset.builder()
+                                        .position(0.258f, 0.979f, -0.541f)
+                                        .rotation(-63.268f, -43.969f, 144.041f)
+                                        .scale(0.094f, 0.094f, 0.094f)
+                        )
+                    // highlight-end
+                )
+                .creativeGroup("itemGroup.name.sword")
+                .allowOffHand(false)
+                .handEquipped(true)
+                .customBuild(nbt -> {
+                    nbt.getCompound("components")
+                            .putCompound("minecraft:cooldown", new CompoundTag()
+                                    .putString("category", "amethyst_spear")
+                                    .putFloat("duration", 3f))
+                            .getCompound("item_properties").putBoolean("animates_in_toolbar", true)
+                            .getCompound("item_properties").putInt("use_duration", 640);
+                });
+    }
+```
+
+In the definition of the RenderOffsets class:
+
+```java
+public RenderOffsets(@Nullable Offset mainHandFirstPerson, @Nullable Offset mainHandThirdPerson, @Nullable Offset offHandFirstPerson, @Nullable Offset offHandThirdPerson) {}
+```
+
+It can be understood that the four parameters are:
+
+- mainHandFirstPerson: Main hand, first-person view
+- mainHandThirdPerson: Main hand, third-person view
+- offHandFirstPerson: Off hand, first-person view
+- offHandThirdPerson: Off hand, third-person view
+
+More discoveries are needed...
