@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # i18n Guide
 
-## Registering i18n for Plugins
+## Registering i18n for Plugins \{#registering-i18n-for-plugins}
 
 Using the ExamplePlugin-Maven project as an example.
 
@@ -84,7 +84,7 @@ public class EventListener implements Listener {
 }
 ```
 
-## Adding Language Files to Resources
+## Adding Language Files to Resources \{#adding-language-files-to-resources}
 
 Then we need to create a `language` folder under `src/main/resources` to store **\<[LangCode](#langcode)\>.json** language files. Your plugin development directory will look something like this:
 
@@ -100,7 +100,7 @@ ExamplePlugin-Maven
 └─target
 ```
 
-### language files format
+### language files format \{#language-files-format}
 
 Support for multilingual text of parameters,such as `exampleplugin.helloworld=Hello {%0}!`
 
@@ -111,7 +111,7 @@ exampleplugin.helloworld=Hello {%0}!
 exampleplugin.examplecommand.description=this is a test command.
 ```
 
-## LangCode
+## LangCode \{#langcode}
 
 Refer to [cn.nukkit.lang.LangCode](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/lang/LangCode.java). Here's a table listing the codes for easy reference:
 

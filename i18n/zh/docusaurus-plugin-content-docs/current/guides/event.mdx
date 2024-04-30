@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Event 事件指南
 
-## 事件的概念
+## 事件的概念 \{#event-concept}
 
 每当服务器中发生了特定的行为，一个事件对象就会产生。
 
@@ -33,7 +33,7 @@ sidebar_position: 1
 
 :::
 
-### 流程图
+### 流程图 \{#flowchart}
 <div style={{textAlign: 'center'}}>
 ```mermaid
 graph TD;
@@ -51,11 +51,11 @@ graph TD;
 ```
 </div>
 
-## 事件监听器
+## 事件监听器 \{#event-listeners}
 
 事件监听器在游戏服务器插件开发中是一个关键组件，用于处理游戏中发生的各种事件。这部分将详细介绍如何在Nukkit插件中抽象和实现一个事件监听器，设置其优先级，并进行注册，以便在插件中有效响应服务器和玩家的活动。
 
-### 实现监听器
+### 实现监听器 \{#implementing-listener}
 
 创建一个事件监听器涉及到实现 `Listener` 接口，并使用 `@EventHandler` 注解来标记那些应当在特定事件发生时被调用的方法。下面是一个具体的实现示例，用于监听服务器命令事件：
 
@@ -103,7 +103,7 @@ public class EventListener implements Listener {
 
 而 `onPlayerChat` 方法会在玩家聊天事件触发时执行。通过此方法，可以拦截玩家发送的消息，并进行相应的处理。
 
-### 优先级
+### 优先级 \{#priority}
 
 事件的处理优先级是调整插件间互动的重要手段。在 Nukkit 中，事件可以根据其重要性被分配不同的优先级，如下所示：
 
@@ -153,7 +153,7 @@ public enum EventPriority {
 }
 ```
 
-### 注册监听器
+### 注册监听器 \{#registering-listeners}
 
 事件监听器必须在插件启动时注册，以确保它们能够响应事件。这可以通过插件的 `onEnable` 方法完成：
 
@@ -171,7 +171,7 @@ public class ExamplePlugin extends PluginBase {
 
 此方法中，我们创建了 `EventListener` 的实例，并通过插件管理器注册它。这确保了每当相关事件发生时，我们的 `EventListener` 可以接收并处理这些事件。
 
-## 结语
+## 结语 \{#conclusion}
 
 当你使用命令 `/stop` 将会触发事件 `ServerCommandEvent` ，然后 `onServerCommand` 会被调用，你可以添加一些逻辑来处理这个事件。
 

@@ -16,7 +16,7 @@ To create a custom item, you need to include two main components:
 
 Next, using the **Candy Cane Sword** as an example, I'll demonstrate the steps to create a custom item.
 
-## Registering the Item in the Plugin
+## Registering the Item in the Plugin \{#register-item-in-plugin}
 
 Follow this sequence diagram for the registration process:
 
@@ -36,7 +36,7 @@ sequenceDiagram
     Plugin->>Item: registerCustomItem(new item class)
 ```
 
-### Creating the New Item Class
+### Creating the New Item Class \{#creat-new-item-class}
 
 Within the plugin, create a new class `CandyCaneSword`, inheriting from ItemCustom and overriding the necessary methods:
 
@@ -78,7 +78,7 @@ public static class CandyCaneSword extends ItemCustom {
 }
 ```
 
-### Key Methods in ItemCustom
+### Key Methods in ItemCustom \{#key-methods-itemcustom}
 
 From [cn.nukkit.item.customitem.ItemCustom](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/ItemCustom.java):
 
@@ -93,11 +93,11 @@ Used to set the texture size of the custom item, return values must be multiples
 - `getDefinition()`
 Returns a CustomItemDefinition class that summarizes the basic attributes of the item, such as whether it is allowed in the off-hand, its category in creative mode, and enchantment effects.
 
-### Key Methods in CustomItemDefinition
+### Key Methods in CustomItemDefinition \{#key-methods-customitemdefinition}
 
 From [cn.nukkit.item.customitem.CustomItemDefinition](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java):
 
-#### Common Builders
+#### Common Builders  \{#common-builders}
 
 - `customBuilder` - A builder for defining custom items.
 - `simpleBuilder` - A builder for simple items (typically used by default).
@@ -111,7 +111,7 @@ Start with a builder to return a `CustomItemDefinition` class.
 CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativeCategory);
 ```
 
-#### Common Methods
+#### Common Methods \{#common-methods}
 
 Since methods directly return `this`, we can use a flattened writing style:
 
@@ -121,11 +121,11 @@ Since methods directly return `this`, we can use a flattened writing style:
 - `creativeGroup(ItemCreativeGroup creativeGroup)` - Controls the custom item's group in the creative inventory, such as all enchanted books being in the `ItemCreativeGroup.ENCHANTED_BOOK` group.
 - `canDestroyInCreative(boolean value)` - Controls whether a player holding the item can break blocks in creative mode.
 
-### ItemCreativeGroup Key Methods
+### ItemCreativeGroup Key Methods \{#itemcreativegroup-key-methods}
 
 From [cn.nukkit.item.customitem.data.ItemCreativeGroup](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/ItemCreativeGroup.java):
 
-### Registering the Item
+### Registering the Item \{#register-item}
 
 Finally,
 
@@ -140,7 +140,7 @@ public void onEnable() {
 }
 ```
 
-## Creating the Resource Pack
+## Creating the Resource Pack \{#creating-resource-pack}
 
 This tutorial will guide you on how to create a resource pack, ensuring the correct item textures are pointed to, so the custom item displays correctly in-game.
 
@@ -152,7 +152,7 @@ Detailed steps include:
 2. Define the item texture paths in the resource pack.
 3. Package the resource pack and place it in the server's `resource_packs` folder.
 
-### Resource Pack Directory Structure
+### Resource Pack Directory Structure \{#resource-pack-directory}
 
 The resource pack directory should contain the following files:
 
@@ -166,7 +166,7 @@ graph TD;
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
 ```
 
-### manifest.json
+### manifest.json \{#manifest-json}
 
 Refer to Bedrock Wiki's explanation on [RP Manifest](https://wiki.bedrock.dev/guide/project-setup.html#rp-manifest).
 
@@ -190,7 +190,7 @@ Refer to Bedrock Wiki's explanation on [RP Manifest](https://wiki.bedrock.dev/gu
 }
 ```
 
-### item_texture.json
+### item_texture.json \{#item_texture-json}
 
 ```json title="RP/textures/item_texture.json"
 {
@@ -214,9 +214,9 @@ The root directory refers to the level at which the `manifest.json` file is loca
 
 :::
 
-## Further Exploration
+## Further Exploration \{#further-exploration}
 
-### Comparing with Bedrock Wiki
+### Comparing with Bedrock Wiki \{#comparing-with-bedrock-wiki}
 
 What if there is no encapsulation method in CustomItemDefinition that you need? What should you do?
 
@@ -240,6 +240,7 @@ public class CustomItemDefinition {
         }
     }
 }
+```
 
 While Bedrock Wiki introduces [Allow Off Hand](https://wiki.bedrock.dev/items/item-components.html#allow-off-hand) like this:
 

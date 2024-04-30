@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+import Image from '@theme/IdealImage';
+
 # Debug Your Plugin
 
 During the plugin development process, you will often encounter challenges such as logic errors in the code, compatibility issues with other components, performance bottlenecks, and so on.
@@ -10,16 +12,16 @@ Using breakpoints effectively can help us quickly analyze and locate issues.
 
 Plugin debugging requires editing the `Run/Debug Configurations` in IntelliJ IDEA beforehand.
 
-## Editing Debug Configurations
+## Editing Debug Configurations \{#edit-debug-config}
 
 1. Open your project in IntelliJ IDEA.
 
-![Edit Debug Configurations Menu](./img/debug_config_edit_menu.jpg)
+<Image img={require('./images/debug_config_edit_menu.png')} alt="Edit Debug Configurations Menu" />
 
 2. In the top bar, open the `Run/Debug Configurations` window.
 3. Choose the `JAR Application` template.
 
-![Add JAR Application Debug Configuration](./img/add_jarapp_debug_config.jpg)
+<Image img={require('./images/add_jarapp_debug_config.png')} alt="Add JAR Application Debug Configuration" />
 
 4. Edit the configuration settings as follows:
 
@@ -32,9 +34,9 @@ Plugin debugging requires editing the `Run/Debug Configurations` in IntelliJ IDE
 
 Finally, click `OK`.
 
-![Edit Debug Configuration Window](./img/edit_debug_config_window.png)
+<Image img={require('./images/edit_debug_config_window.png')} alt="Edit Debug Configuration Window" />
 
-## Auto-Update Plugin to Plugins Dir After Build
+## Auto-Update Plugin to Plugins Dir After Build \{#auto-update-plugin}
 
 With the above steps, we can now use the `Shift + F9` shortcut to debug code.
 
@@ -44,7 +46,7 @@ For convenience, we aim to automatically update the plugin to the `plugins` dire
 
 Here’s how to configure the `pom.xml` file in a Maven project to meet our needs.
 
-### Adding Relevant Properties
+### Adding Relevant Properties \{#adding-relevant-properties}
 
 included within `<project>`.
 
@@ -73,7 +75,7 @@ included within `<project>`.
 
 `nukkitPluginsPath` is the path to the plugins directory, which you need to manually add in your debugging environment.
 
-### Adding Maven plugins Tag
+### Adding Maven plugins Tag \{#adding-maven-plugins-tag}
 
 The `<build>` tag is included within `<project>`.
 
@@ -119,7 +121,7 @@ The `<build>` tag is included within `<project>`.
     </build>
 ```
 
-### Usage
+### Usage \{#usage}
 
 1. Click the letter **M** icon on the right side of IDEA to open the Maven panel.
 2. Click `clean` to clean, then `package` to build and package.
