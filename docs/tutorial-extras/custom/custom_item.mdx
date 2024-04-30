@@ -48,8 +48,9 @@ import cn.nukkit.item.customitem.ItemCustom;
 import cn.nukkit.item.customitem.data.ItemCreativeCategory;
 import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
-// highlight-start
+
 public class CandyCaneSword extends ItemCustom {
+    // highlight-start
     private static String spacenameId = "nukkit:candy_cane_sword";
     private static String textureName = "candy_cane_sword";
     private static String name = null;
@@ -59,11 +60,11 @@ public class CandyCaneSword extends ItemCustom {
     }
 
     public int scaleOffset() {
-        return 32; // 需要是16的倍数，如 32、64、128
+        return 32; // Must be a multiple of 16, such as 32, 64, 128
     }
 
     /**
-     * 该方法设置自定义物品的定义
+     * This method sets up the custom item definition.
      */
     @Override
     public CustomItemDefinition getDefinition() {
@@ -95,8 +96,8 @@ public class CandyCaneSword extends ItemCustom {
     public boolean isSword() {
         return true;
     }
+    // highlight-end
 }
-// highlight-end
 ```
 
 ### Key Methods in ItemCustom \{#key-methods-itemcustom}

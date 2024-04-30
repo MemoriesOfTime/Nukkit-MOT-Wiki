@@ -46,8 +46,9 @@ import cn.nukkit.item.customitem.ItemCustom;
 import cn.nukkit.item.customitem.data.ItemCreativeCategory;
 import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
-// highlight-start
+
 public class CandyCaneSword extends ItemCustom {
+    // highlight-start
     private static String spacenameId = "nukkit:candy_cane_sword";
     private static String textureName = "candy_cane_sword";
     private static String name = null;
@@ -93,8 +94,8 @@ public class CandyCaneSword extends ItemCustom {
     public boolean isSword() {
         return true;
     }
+    // highlight-end
 }
-// highlight-end
 ```
 
 ### ItemCustom 主要方法 \{#key-methods-itemcustom}
@@ -191,6 +192,7 @@ graph TD;
     RP("📁 Resource Pack") --> manifest["📄 manifest.json"];
     RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
     textures --> item_texture["📄 item_texture.json"];
     textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
@@ -269,14 +271,16 @@ graph TD;
 ```mermaid
 graph TD;
     resources("📁 resources") --> assets("📁 assets");
-    resources("📁 resources") -..-> assets("📁 language");
+    resources("📁 resources") --> pluginyml["📄 plugin.yml"];
+    resources("📁 resources") -..-> language("📁 language");
     assets("📁 assets") --> RP("📁 resource_pack");
-    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
     textures --> item_texture["📄 item_texture.json"];
     textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
+    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
+    RP --> pack_icon["📄 pack_icon.png"];
 ```
 </details>
 
