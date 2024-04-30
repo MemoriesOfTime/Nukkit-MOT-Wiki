@@ -46,8 +46,9 @@ import cn.nukkit.item.customitem.ItemCustom;
 import cn.nukkit.item.customitem.data.ItemCreativeCategory;
 import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
-// highlight-start
+
 public class CandyCaneSword extends ItemCustom {
+    // highlight-start
     private static String spacenameId = "nukkit:candy_cane_sword";
     private static String textureName = "candy_cane_sword";
     private static String name = null;
@@ -93,8 +94,8 @@ public class CandyCaneSword extends ItemCustom {
     public boolean isSword() {
         return true;
     }
+    // highlight-end
 }
-// highlight-end
 ```
 
 ### ItemCustom 主要方法 \{#key-methods-itemcustom}
@@ -191,6 +192,7 @@ graph TD;
     RP("📁 Resource Pack") --> manifest["📄 manifest.json"];
     RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
     textures --> item_texture["📄 item_texture.json"];
     textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
@@ -244,11 +246,14 @@ graph TD;
 
 很抱歉听到这个消息，但请保持冷静。并按下列情形进行排查:
 
-1. 若非插件内置资源包，资源包打包时是以根目录压缩的吗？也就是点开压缩包就能看到 `manifest.json` 文件。
+1. 若非插件内置资源包，资源包打包时是以根目录压缩的吗？
+> 也就是点开压缩包就能看到 `manifest.json` 文件。
 
-2. 资源包后缀是否从 `.zip` 改为 `.mcpack` 后缀？非 zip 格式的压缩算法客户端不支持。
+2. 资源包后缀是否从 `.zip` 改为 `.mcpack` 后缀？
+> 非 zip 格式的压缩算法客户端不支持。
 
-3. 更新资源包后，是否有清理客户端缓存？在 `设置 → 存储 → 资源包` 存有资源包缓存时，客户端不会向服务器请求更新的资源包。
+3. 更新资源包后，是否有清理客户端缓存？
+> 在 `设置 → 存储 → 资源包` 存有资源包缓存时，客户端不会向服务器请求更新的资源包。
 
 :::
 
@@ -269,14 +274,16 @@ graph TD;
 ```mermaid
 graph TD;
     resources("📁 resources") --> assets("📁 assets");
-    resources("📁 resources") -..-> assets("📁 language");
+    resources("📁 resources") --> pluginyml["📄 plugin.yml"];
+    resources("📁 resources") -..-> language("📁 language");
     assets("📁 assets") --> RP("📁 resource_pack");
-    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
     RP --> textures("📁 textures");
+    textures -..-> texture_list["📄 texture_list.json"];
     textures --> item_texture["📄 item_texture.json"];
     textures --> items("📁 items");
     items --> candy_cane_sword["📄 candy_cane_sword.png"];
+    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
+    RP --> pack_icon["📄 pack_icon.png"];
 ```
 </details>
 
