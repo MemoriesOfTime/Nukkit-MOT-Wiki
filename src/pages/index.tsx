@@ -66,7 +66,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title="Nukkit-MOT Wiki"
-      description="Learn Nukkit-MOT and enjoy a support multi-version, plugin-rich.">
+      description="Learn Nukkit-MOT and enjoy multi-version support and a rich plugin ecosystem.">
       <HomepageHeader />
       <main className={clsx(styles.heroMain)}>
         <HomepageFeatures />
