@@ -316,18 +316,19 @@ Determines whether an item can be placed in the off-hand slot of the inventory.
 }
 ```
 
-The SimpleBuilder#allowOffHand method's `this.nbt` is created within the builder, which can be referred to in Nukkit-MOT's [CustomItemDefinition.java#L171](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L171):
+The SimpleBuilder#allowOffHand method's `this.nbt` is created within the builder, which can be referred to in Nukkit-MOT's [CustomItemDefinition.java#L208](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L208):
 
 ```java
     public static class SimpleBuilder {
-        protected final CompoundTag nbt = new CompoundTag()
-
-
-                .putCompound("components", new CompoundTag()
-                        .putCompound("item_properties", new CompoundTag()
-                                .putCompound("minecraft:icon", a CompoundTag())
-                        )
-                );
+        /**
+         * Whether to allow the offHand to have
+         */
+        public SimpleBuilder allowOffHand(boolean allowOffHand) {
+            this.nbt.getCompound("components")
+                    .getCompound("item_properties")
+                    .putBoolean("allow_off_hand", allowOffHand);
+            return this;
+        }
     }
 ```
 

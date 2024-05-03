@@ -326,16 +326,19 @@ Determines whether an item can be placed in the off-hand slot of the inventory.
 }
 ```
 
-SimpleBuilder#allowOffHand 方法中的 `this.nbt` 在构建器中被创建，可参考 Nukkit-MOT 的 [CustomItemDefinition.java#L171](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L171)
+SimpleBuilder#allowOffHand 方法中的 `this.nbt` 在构建器中被创建，可参考 Nukkit-MOT 的 [CustomItemDefinition.java#L208](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L208)
 
 ```java
     public static class SimpleBuilder {
-        protected final CompoundTag nbt = new CompoundTag()
-                .putCompound("components", new CompoundTag()
-                        .putCompound("item_properties", new CompoundTag()
-                                .putCompound("minecraft:icon", new CompoundTag())
-                        )
-                );
+        /**
+         * 是否允许副手持有
+         */
+        public SimpleBuilder allowOffHand(boolean allowOffHand) {
+            this.nbt.getCompound("components")
+                    .getCompound("item_properties")
+                    .putBoolean("allow_off_hand", allowOffHand);
+            return this;
+        }
     }
 ```
 
