@@ -5,6 +5,8 @@ mentions:
   - "Mcayear"
 ---
 
+import FolderView from '@site/src/components/FolderView';
+
 # 自定义物品
 
 想要创建一个自定义物品，需要包含两个部分：
@@ -187,16 +189,16 @@ public class ExamplePlugin extends PluginBase {
 
 资源包目录应该包含以下文件：
 
-```mermaid
-graph TD;
-    RP("📁 Resource Pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
-    RP --> textures("📁 textures");
-    textures -..-> texture_list["📄 texture_list.json"];
-    textures --> item_texture["📄 item_texture.json"];
-    textures --> items("📁 items");
-    items --> candy_cane_sword["📄 candy_cane_sword.png"];
-```
+<FolderView
+    paths={[
+    'Resource Pack/manifest.json',
+    'Resource Pack/pack_icon.png',
+    'Resource Pack/textures/item_texture.json',
+    'Resource Pack/textures/texture_list.json',
+    'Resource Pack/textures/items/candy_cane_sword.png',
+]}
+>
+</FolderView>
 
 ### manifest.json \{#manifest-json}
 
@@ -265,26 +267,24 @@ graph TD;
 
 只需要在插件的 `resources` 创建 `assets/resource_pack` 文件夹，并在其中放置资源包。
 
-演示插件就是这么做的。
+[示例插件](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources)就是这么做的。
 
 <details>
     <summary>
-      展示 [ExamplePlugin](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources) 的 resources 目录结构
+      示例插件的 resources 目录结构
     </summary>
-```mermaid
-graph TD;
-    resources("📁 resources") --> assets("📁 assets");
-    resources("📁 resources") --> pluginyml["📄 plugin.yml"];
-    resources("📁 resources") -..-> language("📁 language");
-    assets("📁 assets") --> RP("📁 resource_pack");
-    RP --> textures("📁 textures");
-    textures -..-> texture_list["📄 texture_list.json"];
-    textures --> item_texture["📄 item_texture.json"];
-    textures --> items("📁 items");
-    items --> candy_cane_sword["📄 candy_cane_sword.png"];
-    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
-```
+<FolderView
+	paths={[
+    'resources/plugin.yml',
+    'resources/language',
+    'resources/assets/resource_pack/manifest.json',
+    'resources/assets/resource_pack/pack_icon.png',
+    'resources/assets/resource_pack/textures/item_texture.json',
+    'resources/assets/resource_pack/textures/texture_list.json',
+    'resources/assets/resource_pack/textures/items/candy_cane_sword.png',
+  ]}
+>
+</FolderView>
 </details>
 
 ### 与 Bedrock Wiki 的对照关系 \{#comparing-with-bedrock-wiki}
@@ -326,16 +326,19 @@ Determines whether an item can be placed in the off-hand slot of the inventory.
 }
 ```
 
-SimpleBuilder#allowOffHand 方法中的 `this.nbt` 在构建器中被创建，可参考 Nukkit-MOT 的 [CustomItemDefinition.java#L171](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L171)
+SimpleBuilder#allowOffHand 方法中的 `this.nbt` 在构建器中被创建，可参考 Nukkit-MOT 的 [CustomItemDefinition.java#L208](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L208)
 
 ```java
     public static class SimpleBuilder {
-        protected final CompoundTag nbt = new CompoundTag()
-                .putCompound("components", new CompoundTag()
-                        .putCompound("item_properties", new CompoundTag()
-                                .putCompound("minecraft:icon", new CompoundTag())
-                        )
-                );
+        /**
+         * 是否允许副手持有
+         */
+        public SimpleBuilder allowOffHand(boolean allowOffHand) {
+            this.nbt.getCompound("components")
+                    .getCompound("item_properties")
+                    .putBoolean("allow_off_hand", allowOffHand);
+            return this;
+        }
     }
 ```
 

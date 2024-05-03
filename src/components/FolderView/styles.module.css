@@ -1,0 +1,33 @@
+/**
+ * On very narrow devices, text may still overflow outside the folderView container.
+ * 
+ * <br />
+ * 
+ * 在极小宽度的设备上，文字任然会溢出 folderView 容器外。
+ */
+.folderView {
+    margin: .5rem;
+    padding: .5rem;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: .375rem;
+    border-color: rgba(229, 231, 235);
+}
+
+[data-theme='dark'] .folderView {
+    border-color: rgba(82, 82, 82);
+}
+
+.folderView > div {
+    width: -moz-fit-content; /* Firefox specific syntax */
+    width: fit-content;      /* Standard syntax */
+}
+
+.collapsed {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.hidden {
+    display: none;
+}

@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+import FolderView from '@site/src/components/FolderView';
+
 # i18n Guide
 
 ## Registering i18n for Plugins \{#registering-i18n-for-plugins}
@@ -88,17 +90,15 @@ public class EventListener implements Listener {
 
 Then we need to create a `language` folder under `src/main/resources` to store **\<[LangCode](#langcode)\>.json** language files. Your plugin development directory will look something like this:
 
-```
-ExamplePlugin-Maven
-├─lib
-├─src
-│  └─main
-│      ├─java
-│      └─resources
-│          └─language
-│             en_US.lang
-└─target
-```
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/language/en_US.lang',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
 
 ### language files format \{#language-files-format}
 

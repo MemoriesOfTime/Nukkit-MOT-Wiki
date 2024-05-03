@@ -7,6 +7,8 @@ mentions:
   - "Mcayear"
 ---
 
+import FolderView from '@site/src/components/FolderView';
+
 # Custom Item
 
 To create a custom item, you need to include two main components:
@@ -181,16 +183,16 @@ Detailed steps include:
 
 The resource pack directory should contain the following files:
 
-```mermaid
-graph TD;
-    RP("📁 Resource Pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
-    RP --> textures("📁 textures");
-    textures -..-> texture_list["📄 texture_list.json"];
-    textures --> item_texture["📄 item_texture.json"];
-    textures --> items("📁 items");
-    items --> candy_cane_sword["📄 candy_cane_sword.png"];
-```
+<FolderView
+    paths={[
+    'Resource Pack/manifest.json',
+    'Resource Pack/pack_icon.png',
+    'Resource Pack/textures/item_texture.json',
+    'Resource Pack/textures/texture_list.json',
+    'Resource Pack/textures/items/candy_cane_sword.png',
+]}
+>
+</FolderView>
 
 ### manifest.json \{#manifest-json}
 
@@ -255,26 +257,24 @@ Thanks to the design of Nukkit-MOT, we can easily manage resource packs during p
 
 Simply create a `assets/resource_pack` folder within the `resources` directory of the plugin and place the resource pack files there.
 
-This is exactly how the demo plugin does it.
+This is exactly how the [ExamplePlugin](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources) does it.
 
 <details>
     <summary>
-      Show the resources directory structure of [ExamplePlugin](https://github.com/MemoriesOfTime/ExamplePlugin-Maven/tree/master/src/main/resources)
+      Show the resources directory structure of ExamplePlugin
     </summary>
-```mermaid
-graph TD;
-    resources("📁 resources") --> assets("📁 assets");
-    resources("📁 resources") --> pluginyml["📄 plugin.yml"];
-    resources("📁 resources") -..-> language("📁 language");
-    assets("📁 assets") --> RP("📁 resource_pack");
-    RP --> textures("📁 textures");
-    textures -..-> texture_list["📄 texture_list.json"];
-    textures --> item_texture["📄 item_texture.json"];
-    textures --> items("📁 items");
-    items --> candy_cane_sword["📄 candy_cane_sword.png"];
-    RP("📁 resource_pack") --> manifest["📄 manifest.json"];
-    RP --> pack_icon["📄 pack_icon.png"];
-```
+<FolderView
+	paths={[
+    'resources/plugin.yml',
+    'resources/language',
+    'resources/assets/resource_pack/manifest.json',
+    'resources/assets/resource_pack/pack_icon.png',
+    'resources/assets/resource_pack/textures/item_texture.json',
+    'resources/assets/resource_pack/textures/texture_list.json',
+    'resources/assets/resource_pack/textures/items/candy_cane_sword.png',
+  ]}
+>
+</FolderView>
 </details>
 
 ### Comparing with Bedrock Wiki \{#comparing-with-bedrock-wiki}
@@ -316,18 +316,19 @@ Determines whether an item can be placed in the off-hand slot of the inventory.
 }
 ```
 
-The SimpleBuilder#allowOffHand method's `this.nbt` is created within the builder, which can be referred to in Nukkit-MOT's [CustomItemDefinition.java#L171](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L171):
+The SimpleBuilder#allowOffHand method's `this.nbt` is created within the builder, which can be referred to in Nukkit-MOT's [CustomItemDefinition.java#L208](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/CustomItemDefinition.java#L208):
 
 ```java
     public static class SimpleBuilder {
-        protected final CompoundTag nbt = new CompoundTag()
-
-
-                .putCompound("components", new CompoundTag()
-                        .putCompound("item_properties", new CompoundTag()
-                                .putCompound("minecraft:icon", a CompoundTag())
-                        )
-                );
+        /**
+         * Whether to allow the offHand to have
+         */
+        public SimpleBuilder allowOffHand(boolean allowOffHand) {
+            this.nbt.getCompound("components")
+                    .getCompound("item_properties")
+                    .putBoolean("allow_off_hand", allowOffHand);
+            return this;
+        }
     }
 ```
 
