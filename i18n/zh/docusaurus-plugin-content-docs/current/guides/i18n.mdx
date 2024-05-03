@@ -2,6 +2,8 @@
 sidebar_position: 3
 ---
 
+import FolderView from '@site/src/components/FolderView';
+
 # i18n 国际化指南
 
 ## 注册插件的 i18n \{#registering-i18n-for-plugins}
@@ -88,17 +90,15 @@ public class EventListener implements Listener {
 
 而后我们需要在 `src/main/resources` 文件夹下新建 `language` 文件夹来存储 **\<[LangCode](#langcode)\>.lang** 语言文件，您的插件开发目录大致如下
 
-```tree
-ExamplePlugin-Maven
-├─lib
-├─src
-│  └─main
-│      ├─java
-│      └─resources
-│          └─language
-│             zh_CN.lang
-└─target
-```
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/language/en_US.lang',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
 
 ### 语言文件格式 \{#language-files-format}
 
