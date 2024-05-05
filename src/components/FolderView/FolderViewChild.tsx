@@ -41,7 +41,7 @@ const FolderViewChild: React.FC<Props> = ({ nodes, depth, name }) => {
             return '📁';
         }
         const type = path.split('.').pop();
-        if (type === 'js' || type === 'ts' || type === 'yml' || type === 'json' || type === 'mcfunction') {
+        if (type === 'js' || type === 'ts' || type === 'yml' || type === 'json' || type === 'mcfunction' || type === 'mcpack' || type === 'key') {
             return '📄';
         } else if (type === 'mcstructure') {
             return '🏛';

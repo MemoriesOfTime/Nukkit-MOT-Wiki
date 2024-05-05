@@ -3,6 +3,14 @@
     "message": "Next",
     "description": "The label for version current"
   },
+  "sidebar.tutorialSidebar.category.Server Config": {
+    "message": "服务器配置",
+    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Server Config.link.generated-index.description": {
+    "message": "关于我转生成服务器这档事！",
+    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+  },
   "sidebar.tutorialSidebar.category.Tutorial Basics": {
     "message": "基础教程",
     "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"

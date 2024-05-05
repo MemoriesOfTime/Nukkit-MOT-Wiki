@@ -1,0 +1,840 @@
+---
+sidebar_position: 1
+---
+
+import Image from '@theme/IdealImage';
+
+# server.properties
+
+Modify the running configuration of the server to customize some basic functionalities.
+
+## `server-ip`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | 0.0.0.0       |
+
+Server IP address
+
+## `enable-query`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to allow querying server information via Query
+
+See: https://wiki.vg/Query
+
+## `server-port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 11013         |
+
+Server port number
+
+## `query.port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 11013         |
+
+Port for Query queries
+
+## `motd`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | RPG FRXX      |
+
+Server main message displayed in the server list
+
+## `sub-motd`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Powered by Nukkit-MOT |
+
+Server sub-message displayed in the server list
+
+## `view-distance`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+Player view distance
+
+## `achievements`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to enable achievements
+
+## `announce-player-achievements`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to announce player achievements
+
+## `spawn-protection`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 10            |
+
+Spawn protection radius in blocks, players can't break blocks within this area.
+
+## `max-players`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 50            |
+
+Maximum number of players allowed on the server
+
+## `drop-spawners`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Drop spawners upon destruction
+
+## `spawn-animals`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Spawn animals
+
+## `spawn-mobs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Spawn mobs
+
+## `gamemode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+Default game mode
+
+## `force-gamemode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to force the default game mode
+
+## `difficulty`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+Default difficulty
+
+## `hardcore`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Whether to enable hardcore mode
+
+## `pvp`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to enable player versus player combat
+
+## `white-list`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Whether to enable the server whitelist
+
+## `whitelist-reason`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Server is white-listed |
+
+Reason for enabling the whitelist, displayed to players when they are denied access
+
+## `generator-settings`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Generator settings
+
+## `level-name`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | rpg           |
+
+Name of the map
+
+## `level-seed`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Seed for the map
+
+## `level-type`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | void          |
+
+Type of the map
+
+## `enable-rcon`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Whether to enable the RCON protocol
+
+See: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
+
+## `rcon.password`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | hZGE1N2JhM    |
+
+Password for RCON connections
+
+## `rcon.port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 25575         |
+
+Port for RCON connections
+
+## `auto-save`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether to automatically save
+
+## `force-resources`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Whether to force resources
+
+## `force-resources-allow-client-packs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Allow client resource packs
+
+## `xbox-auth`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Xbox authentication
+
+## `encryption`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Encryption
+
+## `bed-spawnpoints`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable bed spawn points
+
+## `explosion-break-blocks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether explosions break blocks
+
+## `stop-in-game`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Stop the server in-game, allowing the use of `/stop` to terminate the server
+
+## `op-in-game`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+In-game operator (OP)
+
+## `xp-bottles-on-creative`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+XP bottles in creative mode
+
+## `spawn-eggs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Enable spawn eggs, allowing entity spawning via spawn eggs
+
+## `mob-ai`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable MobPlugin's creature AI
+
+## `entity-auto-spawn-task`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Entity auto-spawn task
+
+## `entity-despawn-task`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Entity despawn task
+
+## `language`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | chs           |
+
+Server language
+
+## `force-language`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Force server language
+
+## `shutdown-message`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Server closed |
+
+Shutdown message
+
+## `save-player-data`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Save player data
+
+## `query-plugins`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Whether Query can query plugin lists
+
+## `debug-level`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1             |
+
+Level of debug information
+
+## `async-workers`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | auto          |
+
+Number of asynchronous worker threads
+
+## `zlib-provider`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+Packet compression provider
+
+## `compression-level`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 4             |
+
+Packet compression level
+
+## `compression-threshold`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 256           |
+
+Packet compression threshold
+
+## `use-snappy-compression`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Use Snappy compression for packets
+
+## `min-mtu`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 576           |
+
+Minimum MTU
+
+## `max-mtu`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1492          |
+
+Maximum MTU
+
+## `timeout-milliseconds`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 25000         |
+
+Timeout in milliseconds
+
+## `auto-tick-rate`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Automatic tick rate
+
+## `auto-tick-rate-limit`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 20            |
+
+Automatic tick rate limit
+
+## `base-tick-rate`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1             |
+
+Base tick rate
+
+## `always-tick-players`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Always tick players
+
+## `light-updates`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Light updates
+
+## `clear-chunk-tick-list`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Clear chunk tick list
+
+## `spawn-threshold`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 56            |
+
+Spawn threshold
+
+## `chunk-sending-per-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 4             |
+
+Chunks sent per tick
+
+## `chunk-ticking-per-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 40            |
+
+Chunks ticked per tick
+
+## `chunk-ticking-radius`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 3             |
+
+Chunk ticking radius
+
+## `chunk-generation-queue-size`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+Generation queue size
+
+## `chunk-generation-population-queue-size`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+Population queue size
+
+## `ticks-per-autosave`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 6000          |
+
+Ticks per autosave
+
+## `ticks-per-entity-spawns`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 200           |
+
+Ticks per entity spawn
+
+## `ticks-per-entity-despawns`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 12000         |
+
+Ticks per entity despawn
+
+## `thread-watchdog`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable thread watchdog
+
+## `thread-watchdog-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 60000         |
+
+Milliseconds the watchdog waits, if the Nukkit-MOT main thread is suspended for more than 60000 milliseconds, a fatal error is thrown and execution is terminated
+
+## `nether`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Nether world
+
+## `end`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+End world
+
+## `vanilla-portals`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Vanilla portals
+
+## `multi-nether-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Multiple Nether worlds
+
+## `anti-xray-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Worlds where anti-Xray is enabled
+
+## `do-not-tick-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Worlds not to tick
+
+## `worlds-entity-spawning-disabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Worlds where entity spawning is disabled
+
+## `load-all-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Load all worlds
+
+## `ansi-title`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Enable to display server occupancy information in Windows CMD title
+
+<Image img={require('./images/windows_cmd_title.png')} alt="Windows CMD Title" />
+
+## `block-listener`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Block listener
+
+## `allow-flight`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Allow flight
+
+## `multiversion-min-protocol`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 0             |
+
+Minimum protocol for multiversion
+
+## `multiversion-max-protocol`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | -1            |
+
+Maximum protocol for multiversion
+
+## `vanilla-bossbars`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Vanilla boss bars
+
+## `strong-ip-bans`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Strong IP bans
+
+## `worlds-level-auto-save-disabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Worlds where level auto-save is disabled
+
+## `temp-ip-ban-failed-xbox-auth`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Temporary ban failed Xbox authentication
+
+## `call-data-pk-send-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Call data packet send event
+
+## `call-batch-pk-send-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Call batch packet send event
+
+## `do-level-gc`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Perform level garbage collection
+
+## `skin-change-cooldown`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 15            |
+
+Skin change cooldown in seconds
+
+## `check-op-movement`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Check OP movement
+
+## `do-not-limit-interactions`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Do not limit interactions
+
+## `do-not-limit-skin-geometry`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Do not limit skin geometry
+
+## `automatic-bug-report`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Automatic bug reporting
+
+## `anvils-enabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Whether anvils are enabled
+
+## `save-player-data-by-uuid`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Save player data by UUID
+
+## `persona-skins`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Persona skins
+
+## `call-entity-motion-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Call entity motion event
+
+## `update-notifications`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Update notifications
+
+## `bstats-metrics`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+bStats metrics, helping developers analyze on which systems, architectures, Java runtimes, and geographical locations the server and plugins run.
+
+## `cache-chunks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Cache chunks
+
+## `async-chunks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Async chunk loading
+
+## `deprecated-verbose`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Verbose API deprecations
+
+## `server-authoritative-movement`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | server-auth   |
+
+Server authoritative movement
+
+## `server-authoritative-block-breaking`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Server authoritative block breaking
+
+## `use-client-spectator`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Use client spectator
+
+## `enable-experiment-mode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable experiment mode
+
+## `use-waterdog`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Attempt to get the real IP of clients provided by WaterdogPE
+
+See: https://waterdog.dev/
+
+## `enable-spark`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Enable Spark
+
+## `hastebin-token`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Hastebin token for generating debug links
+
+See: https://www.toptal.com/developers/hastebin/documentation
+
+## `use-native-leveldb`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Use native LevelDB
+
+## `enable-raw-ores`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable raw ores; when enabled, coarse copper, coarse iron, and raw gold drop from higher-version players
+
+As of [1.17.0](https://minecraft.wiki/w/Bedrock_Edition_1.17.0)
+
+## `leveldb-cache-mb`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 80            |
+
+LevelDB cache size
