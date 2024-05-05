@@ -115,9 +115,13 @@ const config: Config = {
           title: 'Community',
           items: [
             {
+              label: 'Discord',
+              href: 'https://discord.gg/pJjQDQC',
+            },
+            {
               label: 'QQ Group',
               href: 'https://qm.qq.com/q/FKyS4IT9As',
-            },
+            }
           ],
         },
         {

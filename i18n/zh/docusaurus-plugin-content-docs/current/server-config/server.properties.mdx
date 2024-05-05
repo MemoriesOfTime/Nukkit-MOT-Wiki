@@ -1,0 +1,840 @@
+---
+sidebar_position: 1
+---
+
+import Image from '@theme/IdealImage';
+
+# server.properties
+
+修改服务器的运行配置，以此来定制一些基本功能。
+
+## `server-ip`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | 0.0.0.0       |
+
+服务器IP地址
+
+## `enable-query`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否允许通过 Query 查询服务器信息
+
+详见：https://wiki.vg/Query
+
+## `server-port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 11013         |
+
+服务器端口号
+
+## `query.port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 11013         |
+
+Query 查询的端口号
+
+## `motd`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | RPG FRXX      |
+
+服务器主消息，显示在服务器列表中
+
+## `sub-motd`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Powered by Nukkit-MOT |
+
+服务器副消息，显示在服务器列表中
+
+## `view-distance`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+玩家可视距离
+
+## `achievements`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否启用成就
+
+## `announce-player-achievements`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否公告玩家成就
+
+## `spawn-protection`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 10            |
+
+世界重生点保护范围，范围内无法破坏方块。
+
+## `max-players`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 50            |
+
+服务器最大玩家数量
+
+## `drop-spawners`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+掉落刷怪笼
+
+## `spawn-animals`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+生成动物
+
+## `spawn-mobs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+生成怪物
+
+## `gamemode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+默认游戏模式
+
+## `force-gamemode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否强制游戏模式
+
+## `difficulty`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+默认难度
+
+## `hardcore`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+是否开启硬核模式
+
+## `pvp`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否开启玩家间PvP
+
+## `white-list`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+是否启用白名单
+
+## `whitelist-reason`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Server is white-listed |
+
+白名单启用原因，阻拦玩家时展示的内容
+
+## `generator-settings`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+生成器设置
+
+## `level-name`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | rpg           |
+
+地图名称
+
+## `level-seed`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+地图种子
+
+## `level-type`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | void          |
+
+地图类型
+
+## `enable-rcon`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+是否启用 RCON 协议
+
+详见：https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
+
+## `rcon.password`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | hZGE1N2JhM    |
+
+RCON 连接密码
+
+## `rcon.port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 25575         |
+
+RCON 连接端口
+
+## `auto-save`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否自动保存
+
+## `force-resources`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+是否强制资源
+
+## `force-resources-allow-client-packs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+允许客户端资源包
+
+## `xbox-auth`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Xbox 验证
+
+## `encryption`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+加密
+
+## `bed-spawnpoints`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+启用床重生点
+
+## `explosion-break-blocks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+爆炸破坏方块
+
+## `stop-in-game`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+游戏内停止，允许在游戏中使用 `/stop` 终止服务器
+
+## `op-in-game`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+游戏内管理员(OP)
+
+## `xp-bottles-on-creative`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+创造模式经验瓶
+
+## `spawn-eggs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+启用怪物蛋，将可以通过怪物蛋生成实体
+
+## `mob-ai`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+启用 MobPlugin 提供的生物AI
+
+## `entity-auto-spawn-task`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+实体自动生成任务
+
+## `entity-despawn-task`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+实体消失任务
+
+## `language`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | chs           |
+
+服务器语言
+
+## `force-language`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+强制服务器语言
+
+## `shutdown-message`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Server closed |
+
+关闭消息
+
+## `save-player-data`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+保存玩家数据
+
+## `query-plugins`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Query 是否能查询插件列表
+
+## `debug-level`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1             |
+
+调试信息的等级
+
+## `async-workers`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | auto          |
+
+异步工作线程数
+
+## `zlib-provider`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 2             |
+
+数据包压缩，压缩提供者
+
+## `compression-level`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 4             |
+
+数据包压缩，压缩级别
+
+## `compression-threshold`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 256           |
+
+数据包压缩，压缩阈值
+
+## `use-snappy-compression`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+数据包压缩，使用 Snappy 压缩
+
+## `min-mtu`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 576           |
+
+最小 MTU
+
+## `max-mtu`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1492          |
+
+最大 MTU
+
+## `timeout-milliseconds`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 25000         |
+
+超时毫秒数
+
+## `auto-tick-rate`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+自动刻率
+
+## `auto-tick-rate-limit`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 20            |
+
+自动刻率限制
+
+## `base-tick-rate`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 1             |
+
+基础刻率
+
+## `always-tick-players`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+始终刻率玩家
+
+## `light-updates`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+光照更新
+
+## `clear-chunk-tick-list`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+清除区块刻列表
+
+## `spawn-threshold`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 56            |
+
+生成阈值
+
+## `chunk-sending-per-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 4             |
+
+每刻发送的区块数
+
+## `chunk-ticking-per-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 40            |
+
+每刻刻的区块数
+
+## `chunk-ticking-radius`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 3             |
+
+刻区块半径
+
+## `chunk-generation-queue-size`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+生成队列大小
+
+## `chunk-generation-population-queue-size`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 8             |
+
+生成种群队列大小
+
+## `ticks-per-autosave`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 6000          |
+
+每自动保存的游戏刻
+
+## `ticks-per-entity-spawns`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 200           |
+
+每实体生成的游戏刻
+
+## `ticks-per-entity-despawns`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 12000         |
+
+每个实体消失的游戏刻
+
+## `thread-watchdog`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+启用线程看门狗
+
+## `thread-watchdog-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 60000         |
+
+看门狗等待的毫秒数，若 Nukkit-MOT 主线程被挂起超过 60000 毫秒则抛出致命错误并终止运行
+
+## `nether`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+地狱世界
+
+## `end`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+末地世界
+
+## `vanilla-portals`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+原版传送门
+
+## `multi-nether-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+多个地狱世界
+
+## `anti-xray-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+启用反矿透的世界
+
+## `do-not-tick-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+不刻世界
+
+## `worlds-entity-spawning-disabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+实体生成禁用的世界
+
+## `load-all-worlds`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+加载所有世界
+
+## `ansi-title`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+启用则在 Windows CMD 标题显示服务器的占用信息
+
+<Image img={require('./images/windows_cmd_title.png')} alt="Windows CMD 标题" />
+
+## `block-listener`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+方块监听器
+
+## `allow-flight`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+允许飞行
+
+## `multiversion-min-protocol`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 0             |
+
+多版本最小协议
+
+## `multiversion-max-protocol`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | -1            |
+
+多版本最大协议
+
+## `vanilla-bossbars`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+原版BOSS血条
+
+## `strong-ip-bans`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+强制IP封禁
+
+## `worlds-level-auto-save-disabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+世界级别自动保存禁用
+
+## `temp-ip-ban-failed-xbox-auth`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+临时封禁Xbox认证失败
+
+## `call-data-pk-send-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+调用数据包发送事件
+
+## `call-batch-pk-send-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+调用批量数据包发送事件
+
+## `do-level-gc`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+执行地图垃圾回收
+
+## `skin-change-cooldown`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 15            |
+
+皮肤更改冷却时间，单位秒
+
+## `check-op-movement`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+检查管理员(OP)的移动
+
+## `do-not-limit-interactions`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+不限制交互
+
+## `do-not-limit-skin-geometry`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+不限制皮肤几何形状
+
+## `automatic-bug-report`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+自动错误报告
+
+## `anvils-enabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+是否启用铁砧
+
+## `save-player-data-by-uuid`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+通过 UUID 保存玩家数据
+
+## `persona-skins`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+人格皮肤
+
+## `call-entity-motion-event`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+调用实体运动事件
+
+## `update-notifications`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+更新通知
+
+## `bstats-metrics`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+bStats 度量，帮助开发者分析服务端及插件运行在哪些系统、指令集、Java 运行时、地理位置。
+
+## `cache-chunks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+缓存区块
+
+## `async-chunks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+异步加载区块
+
+## `deprecated-verbose`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+不推荐API详细信息
+
+## `server-authoritative-movement`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | server-auth   |
+
+服务器权威移动
+
+## `server-authoritative-block-breaking`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+服务器权威破坏方块
+
+## `use-client-spectator`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+使用客户端旁观者
+
+## `enable-experiment-mode`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+启用实验模式
+
+## `use-waterdog`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+尝试获取 WaterdogPE 提供的客户端真实 IP
+
+详见：https://waterdog.dev/
+
+## `enable-spark`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+启用 Spark
+
+## `hastebin-token`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Hastebin 令牌，方便生成 debug 链接
+
+详见：https://www.toptal.com/developers/hastebin/documentation
+
+## `use-native-leveldb`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+使用原生 LevelDB
+
+## `enable-raw-ores`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+启用粗矿石，若启用则对高版本玩家掉落粗铜、粗铁、粗金
+
+版本自 [1.17.0](https://zh.minecraft.wiki/w/%E5%9F%BA%E5%B2%A9%E7%89%881.17.0) 起
+
+## `leveldb-cache-mb`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 80            |
+
+LevelDB 缓存大小

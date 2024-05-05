@@ -1,0 +1,53 @@
+---
+sidebar_position: 2
+---
+
+import FolderView from '@site/src/components/FolderView';
+
+# 资源包加密
+
+这里的资源包加密仅代表 Nukkit-MOT 支持你使用经你加密的资源包，你只需要按照下面的教程为你的资源包配置 32-key，便可以让玩家客户端正常加载。
+
+请注意：资源包加密并不能完全阻止别有用心之人窃取你的资源包，因为这是 `AES` 对称密钥加密。
+
+只需3步，跟上步伐，即刻开始！
+
+## 加密我的资源包 \{#encrypt-resource-pack}
+
+在一些不受 Nukkit-MOT 管理的站点中 ([encryptmypack](https://encryptmypack.com))，你能够轻松加密你的资源包。
+
+一些注意事项：
+- 资源包以 `.mcpack` 结尾
+- mcpack文件根目录不能嵌套文件夹，必须点进去就能够看到 `manifest.json`
+- **Nukkit-MOT 本身不包含任何加密和解密逻辑，仅仅只是按照你的配置向客户端发送 32-key （这点非常重要）**
+
+
+## 配置你的密钥 \{#configure-key}
+
+与资源包相同的名字命名一个 `.key` 拓展名(后缀)的文件，内容是资源包对应的 32-key。
+
+例子：在 resource_packs 文件夹中有这样两个文件  
+
+<FolderView
+	paths={[
+    'resource_packs/x1.mcpack',
+    'resource_packs/x1.mcpack.key'
+  ]}
+>
+</FolderView>
+
+- x1.mcpack `一个名字为 x1 的资源包`
+- x1.mcpack.key `这是 x1.mcpack 资源包的密钥`
+
+## 重启服务端使其生效 \{#restart-server}
+
+Nukkit-MOT 只有在启动时才会加载 resource_packs 中的文件，因此你需要重启以使它生效。
+
+## FAQ
+
+常见问题解答
+
+| Q                             | A                                              |
+|-------------------------------|------------------------------------------------|
+| 加密后的资源包还能否被解密？    | 可以。但相对于不加密，这已经提高了盗取者的门槛    |
+| 是否会影响性能？               | 不会                                           |
