@@ -6,835 +6,1005 @@ import Image from '@theme/IdealImage';
 
 # server.properties
 
-修改服务器的运行配置，以此来定制一些基本功能。
+Modify the running configuration of the server to customize some basic functionalities.
 
 ## `server-ip`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | 0.0.0.0       |
 
-服务器IP地址
+server's port
 
-## `enable-query`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
+:::note
 
-是否允许通过 Query 查询服务器信息
+there can't be two servers running in the same port
 
-详见：https://wiki.vg/Query
+you will need to port forward in order to have your server publicly accessible
+
+bedrock edition uses UDP
+
+:::
 
 ## `server-port`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 11013         |
 
-服务器端口号
+server's port
+
+:::note
+
+there can't be two servers running in the same port
+
+you will need to port forward in order to have your server publicly accessible
+
+bedrock edition uses UDP
+
+:::
+
+## `enable-query`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+enable extended query
+
+See: https://wiki.vg/Query
 
 ## `query.port`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 11013         |
 
-Query 查询的端口号
+Query listening port
 
 ## `motd`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | RPG FRXX      |
+| String    | Bedrock Server      |
 
-服务器主消息，显示在服务器列表中
+server name / text which shows on the server list
+
+:::note
+
+can't be empty
+
+:::
 
 ## `sub-motd`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | Powered by Nukkit-MOT |
 
-服务器副消息，显示在服务器列表中
+second line for motd
+
+:::note
+
+shows only for players in local network when viewing the server on the friends list in game
+
+can't be empty since 1.16.210
+
+:::
 
 ## `view-distance`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 8             |
 
-玩家可视距离
+maximum view distance in chunks
+
+bigger value = more chunks loaded = more ram & cpu usage
 
 ## `achievements`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否启用成就
+enable player achievements
 
 ## `announce-player-achievements`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否公告玩家成就
+broadcast achievement earned messages to all players
 
 ## `spawn-protection`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 10            |
 
-世界重生点保护范围，范围内无法破坏方块。
+size of the spawn area in blocks where non op players can't build or break blocks
 
 ## `max-players`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 50            |
 
-服务器最大玩家数量
+Maximum number of players allowed on the server
 
 ## `drop-spawners`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-掉落刷怪笼
+Drop spawners upon destruction
 
 ## `spawn-animals`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-生成动物
+enable animal spawning
 
 ## `spawn-mobs`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-生成怪物
+enable monster spawning
 
 ## `gamemode`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 2             |
 
-默认游戏模式
+server's default gamemode
+
+0 = survival, 1 = creative, 2 = adventure, 3 = spectator
 
 ## `force-gamemode`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否强制游戏模式
+set player gamemode to default gamemode on every join
 
 ## `difficulty`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 2             |
 
-默认难度
+server's default difficulty (0-3)
 
 ## `hardcore`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-是否开启硬核模式
+players will be banned when they die
 
 ## `pvp`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否开启玩家间PvP
+Whether to enable player versus player combat
 
 ## `white-list`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-是否启用白名单
+allow only players on the whitelist to join the server
+
+use `/whitelist` command or modify `white-list.txt` to add players to whitelist
 
 ## `whitelist-reason`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | Server is white-listed |
 
-白名单启用原因，阻拦玩家时展示的内容
+Reason for enabling the whitelist, displayed to players when they are denied access
 
 ## `generator-settings`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-生成器设置
+Special world generator settings for the default level
 
 ## `level-name`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | rpg           |
+| String    | world           |
 
-地图名称
+Name of the default world
 
 ## `level-seed`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-地图种子
+Seed for the default level
 
 ## `level-type`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | void          |
 
-地图类型
+generator used to create the default level if it doesn't exist
+
+supported by default: default, normal, flat, nether, the_end or void
 
 ## `enable-rcon`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-是否启用 RCON 协议
+enable remote console access
 
-详见：https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
+:::note
+
+rcon isn't very secure way to remote control the server
+
+rcon uses the same port (but TCP) as the server
+
+:::
+
+See: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
 
 ## `rcon.password`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | hZGE1N2JhM    |
 
-RCON 连接密码
+Password for RCON connections
 
 ## `rcon.port`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 25575         |
 
-RCON 连接端口
+Port for RCON connections
 
 ## `auto-save`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否自动保存
+automatically save the world and player data
+
+:::note
+
+if disabled, changes to worlds are not saved automatically even on unload, use plugin to save manually if needed
+
+:::
+
+you can use `worlds-level-auto-save-disabled` to only disable the auto save task instead
 
 ## `force-resources`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-是否强制资源
+force players to download server's resource pack if they want to join
+
+also see `force-resources-allow-client-packs`
 
 ## `force-resources-allow-client-packs`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-允许客户端资源包
+don't disable client's own packs when force-resources is enabled
 
 ## `xbox-auth`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-Xbox 验证
+require Xbox account to join
+
+:::note
+
+does not bypass client side requirements
+
+if you disable this (not recommended), make sure player names and UUIDs are verified before passing them to permission managers/op
+
+:::
 
 ## `encryption`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-加密
+enable network encryption
+
+it's recommended to enable this if you don't use a proxy software
 
 ## `bed-spawnpoints`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-启用床重生点
+allow players to set spawn point using beds and respawn anchors
 
 ## `explosion-break-blocks`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-爆炸破坏方块
+enable explosion damage to blocks
+
+affects all explosions such as tnt, creepers and end crystals
 
 ## `stop-in-game`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-游戏内停止，允许在游戏中使用 `/stop` 终止服务器
+allow op to use `/stop` command in game
 
 ## `op-in-game`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-游戏内管理员(OP)
+allow op to use `/op` command to op other players in game
 
-## `xp-bottles-on-creative`
+## ~~xp-bottles-on-creative~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-创造模式经验瓶
+~~allow players to throw experience bottles on creative~~
 
 ## `spawn-eggs`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-启用怪物蛋，将可以通过怪物蛋生成实体
+Enable spawn eggs, allowing entity spawning via spawn eggs
 
 ## `mob-ai`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-启用 MobPlugin 提供的生物AI
+Enable MobPlugin's creature AI
 
-## `entity-auto-spawn-task`
+## ~~entity-auto-spawn-task~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-实体自动生成任务
+~~enable task for auto spawning of mobs and animals~~
+
+~~spawning works by the server's difficulty setting~~
+
+~~note: spawn-animals, spawn-mobs or both must be enabled if you want anything to be spawned~~
 
 ## `entity-despawn-task`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-实体消失任务
+enable despawning of mobs and animals without a name tag
+
+:::note
+
+there are special cases such as the ender dragon, withers and villagers that do not despawn
+
+:::
 
 ## `language`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | chs           |
+| String    | eng           |
 
-服务器语言
+default language that Nukkit uses
 
 ## `force-language`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-强制服务器语言
+force server side translations to be used
+
+enable only if you have a plugin to implement those
 
 ## `shutdown-message`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | Server closed |
 
-关闭消息
+message that shows for players when you stop the server
+
+use `§` for colors and `§n` for new line
 
 ## `save-player-data`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-保存玩家数据
+if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
+
+disable this if you use the legacy Waterdog proxy
+
+do not disable if new player data exists
 
 ## `query-plugins`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-Query 是否能查询插件列表
+include list of plugins in query (enable-query=on)
 
 ## `debug-level`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 1             |
 
-调试信息的等级
+set a higher value (1-3) if you want more debug logging
 
 ## `async-workers`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | auto          |
 
-异步工作线程数
+number of async worker threads
 
-## `zlib-provider`
+if set to auto, it will try to automatically detect the number of cores and use that
+
+## ~~zlib-provider~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 2             |
 
-数据包压缩，压缩提供者
+~~select zlib provider~~
+
+~~0 = ZlibOriginal, 1 = ZlibSingleThreadLowMem, 2 = ZlibThreadLocal~~
+
+~~default: 2~~
+
+~~other providers may have negative impact on the server's performance~~
 
 ## `compression-level`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 4             |
 
-数据包压缩，压缩级别
+Zlib compression level for sent packets (0-9)
+
+higher = more cpu usage but less bandwidth usage
 
 ## `compression-threshold`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 256           |
 
-数据包压缩，压缩阈值
+don't compress batch packets smaller than this (Zlib only)
 
 ## `use-snappy-compression`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-数据包压缩，使用 Snappy 压缩
+Use Snappy compression for packets
 
-## `min-mtu`
+## ~~min-mtu~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 576           |
 
-最小 MTU
+~~set minimum MTU size~~
+
+~~default: 576~~
 
 ## `max-mtu`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 1492          |
 
-最大 MTU
+set maximum MTU size (576 - 1492)
+
+higher is more efficient but smaller values could fix issues on some connections
 
 ## `timeout-milliseconds`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 25000         |
 
-超时毫秒数
+how long should the server wait before kicking player if no response from the client
+
+in milliseconds, 1000 milliseconds = 1 second
 
 ## `auto-tick-rate`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-自动刻率
+allow the server to automatically change level tick rate to maintain 20 ticks per second
 
 ## `auto-tick-rate-limit`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 20            |
 
-自动刻率限制
+how much the server can temporary drop tick rate
 
 ## `base-tick-rate`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 1             |
 
-基础刻率
+default tick rate
+
+1 = 20 ticks per second, 2 = 10 ticks per second, etc.
+
+recommended to keep it as default (1)
 
 ## `always-tick-players`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-始终刻率玩家
+Always tick players
 
 ## `light-updates`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-光照更新
+Light updates
 
 ## `clear-chunk-tick-list`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-清除区块刻列表
+Allow the server to clear the list `chunkTickList` that tracks which chunks need logical updates after each game tick is completed.
+
+This can help optimize server performance by preventing unnecessary computations, especially in the case of large servers or when there are many chunks to manage.
 
 ## `spawn-threshold`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 56            |
 
-生成阈值
+how many chunks need to be loaded before player spawns
 
 ## `chunk-sending-per-tick`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 4             |
 
-每刻发送的区块数
+how many chunks can be sent per tick
 
 ## `chunk-ticking-per-tick`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 40            |
 
-每刻刻的区块数
+how many chunks can be ticked per tick
 
 ## `chunk-ticking-radius`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 3             |
 
-刻区块半径
+radius of chunks around players to get ticked
 
 ## `chunk-generation-queue-size`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 8             |
 
-生成队列大小
+how many chunks can be waiting for generation
 
 ## `chunk-generation-population-queue-size`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 8             |
 
-生成种群队列大小
+how many chunks can be waiting for population
 
 ## `ticks-per-autosave`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 6000          |
 
-每自动保存的游戏刻
+how often world autosave task runs
+
+in ticks, 20 ticks = 1 second
 
 ## `ticks-per-entity-spawns`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 200           |
 
-每实体生成的游戏刻
+how often entity auto spawn task runs
+
+in ticks, 20 ticks = 1 second
 
 ## `ticks-per-entity-despawns`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 12000         |
 
-每个实体消失的游戏刻
+how long entities live
+
+in ticks, 20 ticks = 1 second
 
 ## `thread-watchdog`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-启用线程看门狗
+enable a task that checks if the server is frozen and kills it
+
+useful if you have an auto restart script or the server runs on a panel with this feature
 
 ## `thread-watchdog-tick`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 60000         |
 
-看门狗等待的毫秒数，若 Nukkit-MOT 主线程被挂起超过 60000 毫秒则抛出致命错误并终止运行
+Milliseconds the watchdog waits, if the Nukkit-MOT main thread is suspended for more than 60000 milliseconds, a fatal error is thrown and execution is terminated
 
 ## `nether`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-地狱世界
+Nether world
 
 ## `end`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-末地世界
+End world
 
 ## `vanilla-portals`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-原版传送门
+Vanilla portals
 
 ## `multi-nether-worlds`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-多个地狱世界
+if you need multiple nether worlds, list worlds which should have their own nethers here, otherwise using the default nether world
 
 ## `anti-xray-worlds`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-启用反矿透的世界
+list of worlds where the experimental built-in anti xray is enabled
+
+example: `world, survival, factions`
 
 ## `do-not-tick-worlds`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-不刻世界
+list of worlds where random block ticking is disabled
+
+this disables plants growing, leaves decacying, dirt turning into grass, falling blocks etc.
+
+you may want to add your lobby and minigame worlds here
 
 ## `worlds-entity-spawning-disabled`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-实体生成禁用的世界
+list of world where entity auto spawning is not allowed
+
+example: `lobby, pvp, creative`
 
 ## `load-all-worlds`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-加载所有世界
+Load all worlds
 
 ## `ansi-title`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-启用则在 Windows CMD 标题显示服务器的占用信息
+Enable to display server occupancy information in Windows CMD title
 
-<Image img={require('./images/windows_cmd_title.png')} alt="Windows CMD 标题" />
+<Image img={require('./images/windows_cmd_title.png')} alt="Windows CMD Title" />
 
 ## `block-listener`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-方块监听器
+enable checks used for snow and iron golems, monster egg stone etc.
 
 ## `allow-flight`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-允许飞行
+enable / disable fly anticheat
 
 ## `multiversion-min-protocol`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 0             |
 
-多版本最小协议
+Minimum protocol for multiversion
 
 ## `multiversion-max-protocol`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | -1            |
 
-多版本最大协议
+Maximum protocol for multiversion
 
 ## `vanilla-bossbars`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-原版BOSS血条
+show boss bar for wither and ender dragon (experimental)
 
 ## `strong-ip-bans`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-强制IP封禁
+Strong IP bans
 
 ## `worlds-level-auto-save-disabled`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-世界级别自动保存禁用
+Worlds where level auto-save is disabled
 
 ## `temp-ip-ban-failed-xbox-auth`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-临时封禁Xbox认证失败
+Temporary ban failed Xbox authentication
 
 ## `call-data-pk-send-event`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-调用数据包发送事件
+you can disable DataPacketSendEvent for better performance if none of your plugins uses it
 
 ## `call-batch-pk-send-event`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-调用批量数据包发送事件
+you can disable BatchPacketsEvent for better performance if none of your plugins uses it
 
 ## `do-level-gc`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-执行地图垃圾回收
+do level garbage collection between ticks
 
 ## `skin-change-cooldown`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 15            |
 
-皮肤更改冷却时间，单位秒
+Skin change cooldown in seconds
 
-## `check-op-movement`
+## ~~check-op-movement~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-检查管理员(OP)的移动
+~~enable movement checking for operators~~
 
 ## `do-not-limit-interactions`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-不限制交互
+disables a hack which is used to limit right click interaction spamming by client
 
 ## `do-not-limit-skin-geometry`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-不限制皮肤几何形状
+disables maximum skin geometry size checks
 
-## `automatic-bug-report`
+may be required for some persona skins to be usable
+
+## ~~automatic-bug-report~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-自动错误报告
+~~enable automatic bug reports~~
 
-## `anvils-enabled`
+## ~~anvils-enabled~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-是否启用铁砧
+~~enable anvils~~
+
+~~anvils on Nukkit are pretty experimental and issues with item renaming or lost items are quite common~~
 
 ## `save-player-data-by-uuid`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-通过 UUID 保存玩家数据
+if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
+
+disable this if you use the legacy Waterdog proxy
+
+:::note
+
+do not disable if new player data exists
+
+:::
 
 ## `persona-skins`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-人格皮肤
+persona skins allowed
 
-## `call-entity-motion-event`
+:::note
+
+default steve skin will show if disabled
+
+enabling do-not-limit-skin-geometry may be required for some persona skins to be usable
+
+:::
+
+## ~~call-entity-motion-event~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-调用实体运动事件
+~~you can disable EntityMotionEvent for better performance if none of your plugins uses it~~
 
 ## `update-notifications`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-更新通知
+notify operators about new Nukkit MOT releases on join
 
 ## `bstats-metrics`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-bStats 度量，帮助开发者分析服务端及插件运行在哪些系统、指令集、Java 运行时、地理位置。
+enable bStats metrics
+
+https://bstats.org/plugin/server-implementation/Nukkit/
+
+data collected anonymously: server software (Nukkit MOT), player count, players game versions, xbox auth required, Java version, operating system, cpu arch & core count, host country
 
 ## `cache-chunks`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-缓存区块
+save chunks to memory for faster sending
 
-## `async-chunks`
+:::note
+
+no proper multiversion support
+
+:::
+
+## ~~async-chunks~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-异步加载区块
+~~enable asynchronous chunk sending~~
+
+~~this can improve the performance a lot when lots of chunks are being sent to players on different versions~~
+
+~~it's recommended to keep this enabled~~
 
 ## `deprecated-verbose`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-不推荐API详细信息
+Verbose API deprecations
 
 ## `server-authoritative-movement`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    | server-auth   |
 
-服务器权威移动
+Server authoritative movement
 
 ## `server-authoritative-block-breaking`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-服务器权威破坏方块
+Server authoritative block breaking
 
 ## `use-client-spectator`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-使用客户端旁观者
+Use client spectator
 
 ## `enable-experiment-mode`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-启用实验模式
+Enable experiment mode
 
 ## `use-waterdog`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-尝试获取 WaterdogPE 提供的客户端真实 IP
+Attempt to get the real IP of clients provided by WaterdogPE
 
-详见：https://waterdog.dev/
+See: https://waterdog.dev/
 
 ## `enable-spark`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-启用 Spark
+Enabling Spark for Performance Analysis
+
+See: https://spark.lucko.me/docs
 
 ## `hastebin-token`
 | Data Type | Default Value |
 |-----------|---------------|
 | String    |               |
 
-Hastebin 令牌，方便生成 debug 链接
+Hastebin token for generating debug links
 
-详见：https://www.toptal.com/developers/hastebin/documentation
+See: https://www.toptal.com/developers/hastebin/documentation
 
 ## `use-native-leveldb`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-使用原生 LevelDB
+use native leveldb implementation
+
+enable for better performance if it doesn't cause high disk load on your server
 
 ## `enable-raw-ores`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-启用粗矿石，若启用则对高版本玩家掉落粗铜、粗铁、粗金
+Enable raw ores; when enabled, coarse copper, coarse iron, and raw gold drop from higher-version players
 
-版本自 [1.17.0](https://zh.minecraft.wiki/w/%E5%9F%BA%E5%B2%A9%E7%89%881.17.0) 起
+As of [1.17.0](https://minecraft.wiki/w/Bedrock_Edition_1.17.0)
 
 ## `leveldb-cache-mb`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 80            |
 
-LevelDB 缓存大小
+used with 'use-native-leveldb'
+
+set max size of chunk data cache used to reduce disk io
+
+per world, consider increasing if you only have a few large worlds and lots of ram
