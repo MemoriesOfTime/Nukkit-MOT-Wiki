@@ -28,7 +28,7 @@ import Image from '@theme/IdealImage';
 ## `server-port`
 | 数据类型 | 默认值 |
 |-----------|---------------|
-| Integer   | 11013         |
+| Integer   | 19132         |
 
 服务器的端口
 
@@ -51,17 +51,10 @@ import Image from '@theme/IdealImage';
 
 详见：https://wiki.vg/Query
 
-## `query.port`
-| 数据类型 | 默认值 |
-|-----------|---------------|
-| Integer   | 11013         |
-
-Query 查询监听端口
-
 ## `motd`
 | 数据类型 | 默认值 |
 |-----------|---------------|
-| String    | Bedrock Server      |
+| String    | Minecraft Server      |
 
 服务器名称/显示在服务器列表上的文本
 
@@ -245,9 +238,9 @@ RCON 可以使用与服务器相同的端口（TCP 协议）
 详见：https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
 
 ## `rcon.password`
-| 数据类型 | 默认值 |
-|-----------|---------------|
-| String    | hZGE1N2JhM    |
+| 数据类型   | 默认值     |
+|--------|---------|
+| String | 随机10位字符 |
 
 RCON 连接的密码
 
@@ -343,12 +336,12 @@ RCON 连接的端口
 
 允许 OP 在游戏中使用 `/op` 命令对其他玩家进行操作
 
-## ~~xp-bottles-on-creative~~
+## `xp-bottles-on-creative`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~允许创造模式下玩家扔经验瓶~~
+允许创造模式下玩家扔经验瓶
 
 ## `spawn-eggs`
 | 数据类型 | 默认值 |
@@ -364,16 +357,16 @@ RCON 连接的端口
 
 启用 MobPlugin 的生物 AI
 
-## ~~entity-auto-spawn-task~~
+## `entity-auto-spawn-task`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Boolean   | off           |
 
-~~启用自动生成怪物和动物的任务~~
+启用自动生成怪物和动物的任务
 
-~~生成功能依据服务器的游戏难度来工作~~
+生成功能依据服务器的游戏难度来工作
 
-~~注意：如果您希望生成任何生物，必须启用`spawn-animals`、`spawn-mobs`其一，或者两者都启用。~~
+注意：如果您希望生成任何生物，必须启用`spawn-animals`、`spawn-mobs`其一，或者两者都启用。
 
 ## `entity-despawn-task`
 | 数据类型 | 默认值 |
@@ -391,7 +384,7 @@ RCON 连接的端口
 ## `language`
 | 数据类型 | 默认值 |
 |-----------|---------------|
-| String    | chs           |
+| String    | eng           |
 
 Nukkit 使用的默认语言
 
@@ -447,18 +440,18 @@ Nukkit 使用的默认语言
 
 如果设置为 auto，则会尝试自动检测核心数进行调整
 
-## ~~zlib-provider~~
+## `zlib-provider`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Integer   | 2             |
 
-~~选择 zlib 提供程序~~
+选择 zlib 提供程序
 
-~~0 = ZlibOriginal，1 = ZlibSingleThreadLowMem，2 = ZlibThreadLocal~~
+0 = ZlibOriginal，1 = ZlibSingleThreadLowMem，2 = ZlibThreadLocal
 
-~~默认：2~~
+默认：2
 
-~~其他提供程序可能会对服务器的性能产生负面影响~~
+其他提供程序可能会对服务器的性能产生负面影响
 
 ## `compression-level`
 | 数据类型 | 默认值 |
@@ -646,14 +639,14 @@ Nukkit 使用的默认语言
 |-----------|---------------|
 | Boolean   | off           |
 
-地狱世界
+生成地狱世界
 
 ## `end`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Boolean   | off           |
 
-末地世界
+生成末地世界
 
 ## `vanilla-portals`
 | 数据类型 | 默认值 |
@@ -821,12 +814,12 @@ Nukkit 使用的默认语言
 
 可能对某些玩家，皮肤的可用性是必需的
 
-## ~~automatic-bug-report~~
+## `automatic-bug-report`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~启用自动报告错误~~
+启用自动报告错误
 
 ## ~~anvils-enabled~~
 | 数据类型 | 默认值 |
@@ -905,16 +898,16 @@ https://bstats.org/plugin/server-implementation/Nukkit/
 
 :::
 
-## ~~async-chunks~~
+## `async-chunks`
 | 数据类型 | 默认值 |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~启用异步区块发送~~
+启用异步区块发送
 
-~~当向不同版本的玩家发送大量区块时，这可以极大地提高性能~~
+当向不同版本的玩家发送大量区块时，这可以极大地提高性能
 
-~~建议保持此选项开启~~
+建议保持此选项开启
 
 ## `deprecated-verbose`
 | 数据类型 | 默认值 |
@@ -928,7 +921,8 @@ https://bstats.org/plugin/server-implementation/Nukkit/
 |-----------|---------------|
 | String    | server-auth   |
 
-服务器权威移动
+服务器移动验证方式
+可选：`client-auth / server-auth-with-rewind / server-auth`
 
 ## `server-authoritative-block-breaking`
 | 数据类型 | 默认值 |

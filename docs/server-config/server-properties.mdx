@@ -28,7 +28,7 @@ bedrock edition uses UDP
 ## `server-port`
 | Data Type | Default Value |
 |-----------|---------------|
-| Integer   | 11013         |
+| Integer   | 19132         |
 
 server's port
 
@@ -51,17 +51,10 @@ enable extended query
 
 See: https://wiki.vg/Query
 
-## `query.port`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 11013         |
-
-Query listening port
-
 ## `motd`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | Bedrock Server      |
+| Data Type | Default Value    |
+|-----------|------------------|
+| String    | Minecraft Server |
 
 server name / text which shows on the server list
 
@@ -245,9 +238,9 @@ rcon uses the same port (but TCP) as the server
 See: https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
 
 ## `rcon.password`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | hZGE1N2JhM    |
+| Data Type | Default Value        |
+|-----------|----------------------|
+| String    | Random 10 characters |
 
 Password for RCON connections
 
@@ -343,12 +336,12 @@ allow op to use `/stop` command in game
 
 allow op to use `/op` command to op other players in game
 
-## ~~xp-bottles-on-creative~~
+## `xp-bottles-on-creative`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~allow players to throw experience bottles on creative~~
+allow players to throw experience bottles on creative
 
 ## `spawn-eggs`
 | Data Type | Default Value |
@@ -364,16 +357,16 @@ Enable spawn eggs, allowing entity spawning via spawn eggs
 
 Enable MobPlugin's creature AI
 
-## ~~entity-auto-spawn-task~~
+## `entity-auto-spawn-task`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-~~enable task for auto spawning of mobs and animals~~
+enable task for auto spawning of mobs and animals
 
-~~spawning works by the server's difficulty setting~~
+spawning works by the server's difficulty setting
 
-~~note: spawn-animals, spawn-mobs or both must be enabled if you want anything to be spawned~~
+note: spawn-animals, spawn-mobs or both must be enabled if you want anything to be spawned
 
 ## `entity-despawn-task`
 | Data Type | Default Value |
@@ -447,18 +440,18 @@ number of async worker threads
 
 if set to auto, it will try to automatically detect the number of cores and use that
 
-## ~~zlib-provider~~
+## `zlib-provider`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 2             |
 
-~~select zlib provider~~
+select zlib provider
 
-~~0 = ZlibOriginal, 1 = ZlibSingleThreadLowMem, 2 = ZlibThreadLocal~~
+0 = ZlibOriginal, 1 = ZlibSingleThreadLowMem, 2 = ZlibThreadLocal
 
-~~default: 2~~
+default: 2
 
-~~other providers may have negative impact on the server's performance~~
+other providers may have negative impact on the server's performance
 
 ## `compression-level`
 | Data Type | Default Value |
@@ -648,14 +641,14 @@ Milliseconds the watchdog waits, if the Nukkit-MOT main thread is suspended for 
 |-----------|---------------|
 | Boolean   | off           |
 
-Nether world
+Generate Nether world
 
 ## `end`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-End world
+Generate End world
 
 ## `vanilla-portals`
 | Data Type | Default Value |
@@ -823,12 +816,12 @@ disables maximum skin geometry size checks
 
 may be required for some persona skins to be usable
 
-## ~~automatic-bug-report~~
+## `automatic-bug-report`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~enable automatic bug reports~~
+enable automatic bug reports
 
 ## ~~anvils-enabled~~
 | Data Type | Default Value |
@@ -907,16 +900,16 @@ no proper multiversion support
 
 :::
 
-## ~~async-chunks~~
+## `async-chunks`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-~~enable asynchronous chunk sending~~
+enable asynchronous chunk sending
 
-~~this can improve the performance a lot when lots of chunks are being sent to players on different versions~~
+this can improve the performance a lot when lots of chunks are being sent to players on different versions
 
-~~it's recommended to keep this enabled~~
+it's recommended to keep this enabled
 
 ## `deprecated-verbose`
 | Data Type | Default Value |
@@ -931,6 +924,7 @@ Verbose API deprecations
 | String    | server-auth   |
 
 Server authoritative movement
+Optional:`client-auth / server-auth-with-rewind / server-auth`
 
 ## `server-authoritative-block-breaking`
 | Data Type | Default Value |
