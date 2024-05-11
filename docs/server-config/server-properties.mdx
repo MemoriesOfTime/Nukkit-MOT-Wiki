@@ -485,14 +485,23 @@ Use Snappy compression for packets
 
 ~~default: 576~~
 
-## `max-mtu`
+## ~~max-mtu~~
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 1492          |
 
-set maximum MTU size (576 - 1492)
+~~set maximum MTU size (576 - 1492)~~
 
-higher is more efficient but smaller values could fix issues on some connections
+~~higher is more efficient but smaller values could fix issues on some connections~~
+
+## `rak-packet-limit`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 120           |
+
+A number of datagram packets each address can send within one RakNet tick (10ms)
+
+IPs exceeding this limit will be temporarily banned
 
 ## `timeout-milliseconds`
 | Data Type | Default Value |
