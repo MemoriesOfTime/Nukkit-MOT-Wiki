@@ -2,5 +2,270 @@
 sidebar_position: 2
 ---
 
+import FolderView from '@site/src/components/FolderView';
+import Image from '@theme/IdealImage';
+
 # Custom Entity
 
+To create a custom entity, you need to include two main components:
+
+1. Successfully register the entity within the plugin to Nukkit-MOT.
+2. Define the entity textures in the resource pack to send to the client.
+
+Next, take **marker** as an example to demonstrate the steps for creating a custom entity.
+
+## Programming
+
+### Create the Class for the New Entity \{#create-new-item-class}
+
+```java title="entity/MarkerEntity.java"
+package cn.nukkitmot.exampleplugin.custom.entity;
+
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.custom.CustomEntity;
+import cn.nukkit.entity.custom.EntityDefinition;
+import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public class MarkerEntity extends Entity implements CustomEntity {
+    public static final EntityDefinition DEF =
+            EntityDefinition
+                    .builder()
+                    .identifier("example:marker")
+                    //.summonable(true)
+                    .spawnEgg(true)
+                    .implementation(MarkerEntity.class)
+                    .build();
+    private static final String MARKER_INDEX_KEY = "MarkerIndex";
+
+    public MarkerEntity(FullChunk chunk, CompoundTag nbt) {
+        super(chunk, nbt);
+    }
+
+    @Override
+    public int getNetworkId() {
+        return this.getEntityDefinition().getRuntimeId();
+    }
+
+    @Override
+    public EntityDefinition getEntityDefinition() {
+        return DEF;
+    }
+
+    @Override
+    public float getHeight() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getWidth() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getLength() {
+        return 0.5F;
+    }
+
+    //@Override
+    public String getOriginalName() {
+        return "Marker";
+    }
+
+    public int getMarkerIndex() {
+        return namedTag.getInt(MARKER_INDEX_KEY);
+    }
+
+    public void setMarkerIndex(int index) {
+        namedTag.putInt(MARKER_INDEX_KEY, index);
+        setNameTag("§a" + index);
+    }
+}
+```
+
+### Register the Entity in the Plugin \{#register-entity-in-plugin}
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.entity.custom.EntityManager;
+import cn.powernukkitx.replaynk.entity.MarkerEntity;
+
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        //register the custom entity of server
+        registerEntities();
+    }
+
+    private void registerEntities() {
+        // highlight-start
+        EntityManager.get().registerDefinition(MarkerEntity.DEF);
+        // highlight-end
+    }
+}
+```
+
+## Resource Pack \{#rp}
+
+<FolderView
+    paths={[
+    'Resource Pack/entity/marker.entity.json',
+    'Resource Pack/models/entity/marker.geo.json',
+    'Resource Pack/render_controllers/marker.json',
+    'Resource Pack/textures/entity/marker.png',
+]}
+>
+</FolderView>
+
+:::note
+
+:::note
+
+Before proceeding with the content below, it's essential to learn some basics of **computer graphics**.
+
+<details>
+<summary>
+Basic Knowledge
+</summary>
+Texture is an **image** used to simulate the details and texture of an object's surface. It can include color information, detail patterns, and texture details. By mapping a texture onto a model's surface, it can give the model a more realistic appearance and detail.
+
+Material is a collection of properties that describe the appearance and optical characteristics of an object. It includes the object's color, reflective properties (such as diffuse and specular reflection), transparency, refractive index, etc. Material defines how the object interacts with light, determining its appearance when rendered.
+</details>
+
+:::
+
+### Define the Entity
+
+Key Files.
+
+Defines all the attributes of the entity, where the unique id of the entity `"identifier": "example:marker",` corresponds to the `.identifier("example:marker")` in the code.
+
+`materials` The material for the texture `.json` file
+
+`textures` The texture image `.png` file
+
+`geometry` The geometric model `.geo.json` file
+
+`render_controllers` The render controllers `.json` file
+
+For in-depth learning, you can read [Entity Introduction in Resource Pack](https://wiki.bedrock.dev/entities/entity-intro-rp.html).
+
+```json title="RP/entity/marker.entity.json"
+{
+	"format_version": "1.10.0",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "example:marker",
+			"materials": {
+				"default": "entity_alphatest",
+				"invisible": ""
+			},
+			"textures": {
+				"default": "textures/entity/marker"
+			},
+			"geometry": {
+				"default": "geometry.marker"
+			},
+			"render_controllers": [
+				"controller.render.marker"
+			],
+			"spawn_egg": {
+				"base_color": "#000000",
+				"overlay_color": "#FFFFFF"
+			}
+		}
+	}
+}
+```
+
+### Materials \{#rp-material}
+
+Materials describe how textures are rendered.
+
+For example, skeletons have a material that allows the texture to be transparent; endermen have a material that makes their eyes glow.
+
+You can use many premade materials without needing to create your own.
+
+```json title="RP/entity/spider.entity.json#minecraft:client_entity/description"
+"materials": {
+    "default": "spider",
+    "invisible": "spider_invisible"
+},
+```
+
+Here, the materials are `spider` and `spider_invisible`, with the short names being default and invisible, respectively.
+
+Remember, this key just defines what material is attached to the short name. Our entity still doesn't know when to use each material.
+
+For a list of premade materials, you can check [here](https://wiki.bedrock.dev/documentation/materials.html).
+
+For a guide on creating your own material, you can check this [page](https://wiki.bedrock.dev/visuals/materials.html). Be warned that this is quite advanced.
+
+### Textures \{#rp-texture}
+
+A texture is an image mapped onto the geometry.
+
+Each entity has a different texture.
+
+Similarly to materials, this key is also a short name definition, but here, the reference is the path to the texture.
+
+```json title="RP/entity/bee.entity.json#minecraft:client_entity/description"
+"textures": {
+    "default": "textures/entity/bee/bee",
+    "angry": "textures/entity/bee/bee_angry",
+    "nectar": "textures/entity/bee/bee_nectar",
+    "angry_nectar": "textures/entity/bee/bee_angry_nectar"
+}
+```
+
+As mentioned before, we can define multiple textures.
+
+This can be useful if we want different variants of an entity, like the bee above.
+
+Additionally, we can use multiple textures to layer different textures on different bases, like how villagers have different biome bases and different profession layers.
+
+You can check out our page on [render controllers](https://wiki.bedrock.dev/entities/render-controllers.html) for more details on how to layer textures.
+
+### Geometry \{#rp-geometry}
+
+Geometry defines the collection of bones that make up the shape of our entity, simply put, it is modeling.
+
+You can easily create this file using applications like Blockbench.
+
+You can check out [Blockbench: Modeling, Texturing, and Animating](https://wiki.bedrock.dev/guide/blockbench.html) for more details on how to make your own models.
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+"geometry": {
+    "default": "geometry.creeper",
+    "charged": "geometry.creeper.charged"
+}
+```
+
+Here, the short names refer to the identifiers of our geometric models.
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry" : [
+		{
+			"description" : {
+				"identifier" : "geometry.creeper",
+                ...
+            }
+        }
+    ]
+}
+```
+
+Similarly, we can have multiple geometries, such as the creeper with its normal and charged models.
+
+:::note
+
+Usually, if you encounter issues with visuals, it might be due to a typo in the entity's short name. Make sure to double-check.
+
+:::
+
+## The end \{#end}
+
+After loading the plugin and the resource pack, you can generate the entity using the command `/summon example:marker` in the plugin.
+
+<Image img={require('@site/static/images/tutorial-extras/example_marker_entity.png')} alt="Example Marker Entity" />
