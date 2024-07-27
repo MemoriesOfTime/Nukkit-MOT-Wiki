@@ -2,5 +2,269 @@
 sidebar_position: 2
 ---
 
+import FolderView from '@site/src/components/FolderView';
+import Image from '@theme/IdealImage';
+
 # 自定义实体
 
+想要创建一个自定义实体，需要包含两个部分：
+
+1. 插件内将实体成功注册到 Nukkit-MOT
+2. 资源包内定义实体贴图发送给客户端
+
+接下来以 **marker** 为例，演示自定义实体的步骤。
+
+## 编程
+
+### 创建新实体的类 \{#creat-new-item-class}
+
+```java title="entity/MarkerEntity.java"
+package cn.nukkitmot.exampleplugin.custom.entity;
+
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.custom.CustomEntity;
+import cn.nukkit.entity.custom.EntityDefinition;
+import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public class MarkerEntity extends Entity implements CustomEntity {
+    public static final EntityDefinition DEF =
+            EntityDefinition
+                    .builder()
+                    .identifier("example:marker")
+                    //.summonable(true)
+                    .spawnEgg(true)
+                    .implementation(MarkerEntity.class)
+                    .build();
+    private static final String MARKER_INDEX_KEY = "MarkerIndex";
+
+    public MarkerEntity(FullChunk chunk, CompoundTag nbt) {
+        super(chunk, nbt);
+    }
+
+    @Override
+    public int getNetworkId() {
+        return this.getEntityDefinition().getRuntimeId();
+    }
+
+    @Override
+    public EntityDefinition getEntityDefinition() {
+        return DEF;
+    }
+
+    @Override
+    public float getHeight() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getWidth() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getLength() {
+        return 0.5F;
+    }
+
+    //@Override
+    public String getOriginalName() {
+        return "Marker";
+    }
+
+    public int getMarkerIndex() {
+        return namedTag.getInt(MARKER_INDEX_KEY);
+    }
+
+    public void setMarkerIndex(int index) {
+        namedTag.putInt(MARKER_INDEX_KEY, index);
+        setNameTag("§a" + index);
+    }
+}
+```
+
+
+### 在插件入口注册实体 \{#register-entity-in-plugin}
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.entity.custom.EntityManager;
+import cn.powernukkitx.replaynk.entity.MarkerEntity;
+
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        //register the custom entity of server
+        registerEntities();
+    }
+
+    private void registerEntities() {
+        // highlight-start
+        EntityManager.get().registerDefinition(MarkerEntity.DEF);
+        // highlight-end
+    }
+}
+```
+
+## 资源包 \{#rp}
+
+<FolderView
+    paths={[
+    'Resource Pack/entity/marker.entity.json',
+    'Resource Pack/models/entity/marker.geo.json',
+    'Resource Pack/render_controllers/marker.json',
+    'Resource Pack/textures/entity/marker.png',
+]}
+>
+</FolderView>
+
+:::note
+
+在开始下面的内容之前，需要学习一点 **计算机图形学** 的基础。
+
+<details>
+<summary>
+基础知识
+</summary>
+纹理（Texture）是一种 **图像**，用于模拟物体表面的细节和纹理。它可以包含颜色信息、细节图案、纹理细节等。通过将纹理映射到模型表面，可以赋予模型更加真实的外观和细节。
+
+材质（Material）是描述物体外观和光学特性的属性集合。它包括物体的颜色、反射属性（如漫反射、高光反射）、透明度、折射率等。材质定义了物体如何与光线进行交互，决定了物体在渲染时的外观效果。
+</details>
+
+:::
+
+### 定义实体
+
+关键文件。
+
+定义实体的一切属性，其中实体的唯一 id `"identifier": "example:marker",` 与代码中的 `.identifier("example:marker")` 互相呼应。
+
+`materials` 纹理的材质 `.json` 文件
+
+`textures` 材质纹理 `.png` 文件
+
+`geometry` 几何模型 `.geo.json` 文件
+
+`render_controllers` 渲染控制器 `.json` 文件
+
+想深入学习可以阅读 [资源包之实体入门](https://wiki.bedrock.dev/entities/entity-intro-rp.html)。
+
+```json title="RP/entity/marker.entity.json"
+{
+	"format_version": "1.10.0",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "example:marker",
+			"materials": {
+				"default": "entity_alphatest",
+				"invisible": ""
+			},
+			"textures": {
+				"default": "textures/entity/marker"
+			},
+			"geometry": {
+				"default": "geometry.marker"
+			},
+			"render_controllers": [
+				"controller.render.marker"
+			],
+			"spawn_egg": {
+				"base_color": "#000000",
+				"overlay_color": "#FFFFFF"
+			}
+		}
+	}
+}
+```
+
+### 材质 (Materials) \{#rp-material}
+
+材质描述了纹理的渲染方式。
+
+例如，骷髅有一种材质，使纹理能够透明；末影人有一种材质，使它们的眼睛能够发光。
+
+你可以使用许多现成的材质，而不需要自己制作。
+
+```json title="RP/entity/spider.entity.json#minecraft:client_entity/description"
+"materials": {
+    "default": "spider",
+    "invisible": "spider_invisible"
+},
+```
+
+这里的材质分别是 `spider` 和 `spider_invisible`，对应的 _短名_ 是默认（default）和隐身（invisible）。
+
+记住，这个键只是定义了什么材质附加到 _短名_ 上，我们的实体仍然不知道何时使用每种材质。
+
+有关预制材质的列表，你可以查看 [这里](https://wiki.bedrock.dev/documentation/materials.html)。
+
+有关制作你自己的材质的指南，你可以查看这个 [页面](https://wiki.bedrock.dev/visuals/materials.html)。需要注意的是，这 ~~异常困难 ×~~ 相当高级 √
+
+### 纹理 (Textures) \{#rp-texture}
+
+纹理是一种映射到几何模型上的图像。
+
+每个实体都有不同的纹理。
+
+类似于材质，这个键也是一个 __短名__ 定义，不过这里的引用是纹理的路径。
+
+```json title="RP/entity/bee.entity.json#minecraft:client_entity/description"
+"textures": {
+    "default": "textures/entity/bee/bee",
+    "angry": "textures/entity/bee/bee_angry",
+    "nectar": "textures/entity/bee/bee_nectar",
+    "angry_nectar": "textures/entity/bee/bee_angry_nectar"
+}
+```
+
+如前所述，我们可以定义多种纹理。
+
+这在我们需要实体的不同变体时非常有用，比如上面的蜜蜂。
+
+此外，我们可以使用多种纹理在不同的基础上叠加不同的纹理，就像村民在不同的生物群系基础上有不同的职业。
+
+你可以查看关于 [渲染控制器](https://wiki.bedrock.dev/entities/render-controllers.html) 的页面，了解更多关于如何叠加纹理的详细信息。
+
+### 几何 (Geometry) \{#rp-geometry}
+
+几何它定义了构成我们实体形状的 _骨骼_ 集合，通俗来说就是建模。
+
+可以使用 Blockbench 等应用程序轻松创建此文件。
+
+您可以查看 [Blockbench: 建模、纹理和动画](https://wiki.bedrock.dev/guide/blockbench.html)，了解有关如何制作自己的模型的更多详细信息。
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+"geometry": {
+    "default": "geometry.creeper",
+    "charged": "geometry.creeper.charged"
+}
+```
+
+在这里，_短名_ 引用了我们几何模型的标识符。
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+{
+	"format_version" : "1.12.0",
+	"minecraft:geometry" : [
+		{
+			"description" : {
+				"identifier" : "geometry.creeper",
+                ...
+            }
+        }
+    ]
+}
+```
+
+同样，我们可以有多个几何形状，例如苦力怕，它的 正常、被电击 两种模型。
+
+:::note
+
+通常，如果您在视觉效果方面遇到问题，可能是因为实体的 _短名_ 有拼写错误。确保你仔细检查。
+
+:::
+
+## 尾声
+
+加载好插件和资源包后，在插件使用命令 `/summon exapmle:marker` 即可生成实体
+
+<Image img={require('@site/static/images/tutorial-extras/example_marker_entity.png')} alt="Example Marker Entity" />
