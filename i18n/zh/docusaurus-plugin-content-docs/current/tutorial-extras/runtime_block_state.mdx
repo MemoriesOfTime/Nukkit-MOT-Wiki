@@ -1,0 +1,34 @@
+---
+sidebar_position: 1
+---
+
+# 运行时方块状态
+
+在实现新的方块时，我们需要同时更新多个 runtime_block_state 文件，才能确保客户端正常显示。
+
+## 会用到的工具
+
+[IDEA](../tutorial-basics/frist_java_plugin#idea)、[DataConvert](https://github.com/MemoriesOfTime/DataConvert)
+
+## 思路
+
+如果学习了拓展教程中的自定义内容章节，会对本工作产生一些帮助。
+
+于自定义内容的区别有两点：
+
+1. 本工作的原版方块类直接注册在 Nukkit-MOT 而非 Plugin。
+2. 只需要添加原版方块中的数据至 runtime_block_state 文件，而不需要资源包。
+
+代码修改：
+
+```
+src/main/java/cn/nukkit/block
+```
+
+资源更新：
+
+```
+src/main/resources/
+```
+
+未完待续...
