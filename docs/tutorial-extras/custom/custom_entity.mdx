@@ -118,8 +118,6 @@ public class ExamplePlugin extends PluginBase {
 
 :::note
 
-:::note
-
 Before proceeding with the content below, it's essential to learn some basics of **computer graphics**.
 
 <details>
@@ -135,19 +133,7 @@ Material is a collection of properties that describe the appearance and optical 
 
 ### Define the Entity
 
-Key Files.
-
-Defines all the attributes of the entity, where the unique id of the entity `"identifier": "example:marker",` corresponds to the `.identifier("example:marker")` in the code.
-
-`materials` The material for the texture `.json` file
-
-`textures` The texture image `.png` file
-
-`geometry` The geometric model `.geo.json` file
-
-`render_controllers` The render controllers `.json` file
-
-For in-depth learning, you can read [Entity Introduction in Resource Pack](https://wiki.bedrock.dev/entities/entity-intro-rp.html).
+This file is crucial.
 
 ```json title="RP/entity/marker.entity.json"
 {
@@ -176,6 +162,18 @@ For in-depth learning, you can read [Entity Introduction in Resource Pack](https
 	}
 }
 ```
+
+Defines all the attributes of the entity, where the unique id of the entity `"identifier": "example:marker",` corresponds to the `.identifier("example:marker")` in the code.
+
+`materials` The material for the texture `.json` file
+
+`textures` The texture image `.png` file
+
+`geometry` The geometric model `.geo.json` file
+
+`render_controllers` The render controllers `.json` file
+
+For in-depth learning, you can read [Entity Introduction in Resource Pack](https://wiki.bedrock.dev/entities/entity-intro-rp.html).
 
 ### Materials \{#rp-material}
 
