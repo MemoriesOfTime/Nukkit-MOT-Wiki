@@ -8,7 +8,7 @@
     "description": "The homepage message to ask the user to visit docs"
   },
   "homepage.subtitle": {
-    "message": "更全面、更快速、更准确"
+    "message": "多版本、内置实体AI、广泛插件兼容的我的世界服务器"
   },
   "theme.ErrorPageContent.title": {
     "message": "页面已崩溃。",

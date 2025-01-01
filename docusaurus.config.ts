@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Nukkit Memories Of Time',
-  tagline: 'Understand Fully, Quickly, Accurately',// 全面、快速、准确
+  tagline: 'A Minecraft server with multiple versions, built-in AI entities, and extensive plugin compatibility.',
   favicon: 'images/favicon.ico',
 
   // Set the production url of your site here
