@@ -29,6 +29,10 @@ export const languageRedirects = {
     if (process.env.NODE_ENV === 'production') {
       const userLanguage = navigator.language;
       const currentURL = window.location.href;
+      if (sessionStorage.getItem('notFirstOpen') == "true") {
+        return;
+      }
+      sessionStorage.setItem('notFirstOpen', "true");
       Object.entries(languageRedirects).forEach(([lang, redirectUrl]) => {
         if (userLanguage.startsWith(lang) && !currentURL.includes(redirectUrl)) {
           window.location.replace(redirectUrl);
