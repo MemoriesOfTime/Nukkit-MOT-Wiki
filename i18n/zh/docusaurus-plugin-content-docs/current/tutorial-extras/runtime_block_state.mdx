@@ -10,25 +10,49 @@ sidebar_position: 1
 
 [IDEA](../tutorial-basics/frist_java_plugin#idea)、[DataConvert](https://github.com/MemoriesOfTime/DataConvert)
 
-## 思路
+## 指导
 
 如果学习了拓展教程中的自定义内容章节，会对本工作产生一些帮助。
 
 于自定义内容的区别有两点：
 
 1. 本工作的原版方块类直接注册在 Nukkit-MOT 而非 Plugin。
-2. 只需要添加原版方块中的数据至 runtime_block_state 文件，而不需要资源包。
+2. 需要添加原版方块中的数据至 runtime_block_state 文件，而非资源包。
 
-代码修改：
-
-```
-src/main/java/cn/nukkit/block
-```
-
-资源更新：
+### 代码修改
 
 ```
-src/main/resources/
+src/main/java/cn/nukkit/block/BlockID.java
+
+src/main/java/cn/nukkit/block/Block.java
 ```
 
-未完待续...
+通常方块都会伴随一个物品用于实现 `Block#toItem` 方法
+
+```java
+    @Override
+    public Item toItem() {
+        return new ItemBlock(Block.get(this.getId()), 0, 1);
+    }
+```
+
+### 数据更新
+
+```
+src/main/resources/runtime_block_state_[protocol].dat
+
+src/main/resources/legacy_item_ids.json
+```
+
+在 block_ids.csv 文件中找到对应的 id，比如 `minecraft:pink_petals` 的 id 为 `804` 将其减去 255 再取负则可以得到 `-549`
+
+写入 `legacy_item_ids.json` 文件中
+
+```json title="legacy_item_ids.json"
+{
+  "minecraft:suspicious_gravel": -573,
+  "minecraft:decorated_pot": -551,
+  "minecraft:pink_petals": -549,
+  ...
+}
+```
