@@ -3,51 +3,90 @@ sidebar_position: 2
 ---
 
 import FolderView from '@site/src/components/FolderView';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 # 资源包加密
+Nukkit-MOT 支持使用加密资源包保护您的作品。本指南将帮助您通过简单的三步配置实现资源包加密。
 
-这里的资源包加密仅代表 Nukkit-MOT 支持你使用经你加密的资源包，你只需要按照下面的教程为你的资源包配置 32-key，便可以让玩家客户端正常加载。
+:::caution 新手须知
+该加密基于 AES 对称算法，虽然能有效提高资源包安全性，但无法完全杜绝抓包等专业手段破解
+:::
 
-请注意：资源包加密并不能完全阻止别有用心之人窃取你的资源包，因为这是 `AES` 对称密钥加密。
+## 📦 加密资源包 \{#encrypt-resource-pack}
+{/* 推荐使用 [encryptmypack](https://encryptmypack.com) 在线工具进行加密，操作流程：
+1. 准备符合要求的资源包：
+   - 必须使用 `.mcpack` 格式
+   - 解压后直接可见 `manifest.json` 文件（不能嵌套在子文件夹中）
+2. 上传到加密网站生成加密包 */}
+推荐使用开源命令行工具 EncryptMyPack 进行加密，操作流程：
 
-只需3步，跟上步伐，即刻开始！
+1. **下载工具**  
+   从 [GitHub Releases](https://github.com/AllayMC/EncryptMyPack/releases/latest) 下载最新版程序
 
-## 加密我的资源包 \{#encrypt-resource-pack}
+2. **准备资源包**  
+   - 必须为 `.zip` 格式（可直接重命名 .mcpack 文件）
+   - 压缩包根目录必须包含 `manifest.json` 文件
+   - 支持包含子资源包（Sub Packs）
 
-在一些不受 Nukkit-MOT 管理的站点中 ([encryptmypack](https://encryptmypack.com))，你能够轻松加密你的资源包。
+3. **加密**
 
-一些注意事项：
-- 资源包以 `.mcpack` 结尾
-- mcpack文件根目录不能嵌套文件夹，必须点进去就能够看到 `manifest.json`
-- **Nukkit-MOT 本身不包含任何加密和解密逻辑，仅仅只是按照你的配置向客户端发送 32-key （这点非常重要）**
+inputZip 为输入的压缩包文件全名，例如 `example.zip`
 
+outputZip 为输出的压缩包文件全名，例如 `example.zip`
 
-## 配置你的密钥 \{#configure-key}
+key 为自定义的 32 位密钥，若不指定 key 则使用默认密钥 `liulihaocai123456789123456789123`
 
-与资源包相同的名字命名一个 `.key` 拓展名(后缀)的文件，内容是资源包对应的 32-key。
+<Tabs groupId="operating-systems">
+  <TabItem value="win" label="Windows">
+```bash
+EncryptMyPack.exe encrypt <inputZip> <outputZip> [key]
+```
+  </TabItem>
+  <TabItem value="mac" label="macOS">
+```bash
+EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+  <TabItem value="linux" label="Linux">
+添加可执行权限
+```bash
+chmod +x EncryptMyPack
+```
 
-例子：在 resource_packs 文件夹中有这样两个文件  
+方可继续使用
+```bash
+./EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+</Tabs>
+
+:::tip 重要提醒
+Nukkit-MOT 仅负责向客户端传递密钥，不参与实际的加密/解密过程
+:::
+
+## 🔑 配置加密密钥 \{#configure-key}
+1. 在服务端 `resource_packs` 文件夹中
+2. 创建与加密包同名的 `.key` 文件
+3. 在.key文件中粘贴32位加密密钥
 
 <FolderView
-	paths={[
-    'resource_packs/x1.mcpack',
-    'resource_packs/x1.mcpack.key'
+  paths={[
+    'resource_packs/示例资源包.mcpack',
+    'resource_packs/示例资源包.mcpack.key'
   ]}
->
-</FolderView>
+/>
 
-- x1.mcpack `一个名字为 x1 的资源包`
-- x1.mcpack.key `这是 x1.mcpack 资源包的密钥`
+## 🔄 重启服务端 \{#restart-server}
+修改配置后必须重启服务器才能使加密生效（Nukkit-MOT 仅在启动时加载资源包配置）
 
-## 重启服务端使其生效 \{#restart-server}
+## ❓ 常见问题解答 \{#faq}
+| 问题 | 解答 |
+|------|------|
+| 加密后资源包能被破解吗？ | 可能会遭受专业手段破解，但比未加密资源包安全得多 |
+| 加密是否影响游戏性能？ | 完全不会影响客户端和服务端性能 |
+| 支持多个加密包吗？ | 可以同时部署多个加密包，每个都需要对应.key文件 |
 
-Nukkit-MOT 只有在启动时才会加载 resource_packs 中的文件，因此你需要重启以使它生效。
-
-## FAQ
-
-常见问题解答
-
-| Q                             | A                                              |
-|-------------------------------|------------------------------------------------|
-| 加密后的资源包还能否被解密？    | 可以。但相对于不加密，这已经提高了盗取者的门槛    |
-| 是否会影响性能？               | 不会                                           |
+:::success 完成！
+现在您的玩家加载资源包时，客户端会自动使用配置的密钥进行解密加载
+:::

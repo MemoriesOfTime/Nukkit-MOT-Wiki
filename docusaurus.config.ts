@@ -1,6 +1,7 @@
-import { themes as prismThemes } from 'prism-react-renderer';
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import prismLight from './src/utils/prismLight';
+import prismDark from './src/utils/prismDark';
 
 const config: Config = {
   title: 'Nukkit Memories Of Time',
@@ -144,8 +145,19 @@ const config: Config = {
     },
     prism: {
       additionalLanguages: ['java', 'yaml', 'json', 'log', 'ini'],
-      theme: prismThemes.vsLight,
-      darkTheme: prismThemes.vsDark,
+      magicComments: [
+        {
+          className: 'theme-code-block-highlighted-line',
+          line: 'highlight-next-line',
+          block: {start: 'highlight-start', end: 'highlight-end'},
+        },
+        {
+          className: 'code-block-error-line',
+          line: 'This will error',
+        },
+      ],
+      theme: prismLight,
+      darkTheme: prismDark,
     },
     mermaid: {
       theme: { light: 'neutral', dark: 'dark' },

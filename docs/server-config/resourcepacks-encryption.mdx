@@ -3,42 +3,88 @@ sidebar_position: 2
 ---
 
 import FolderView from '@site/src/components/FolderView';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-# RP Encryption
+# Resource Pack Encryption
 
-The resource package encryption here only means that Nukkit-MOT supports you to use the resource package encrypted by you. You only need to configure a 32-key for your resource package according to the following tutorial to enable the player client to load normally.
+Nukkit-MOT supports the use of encrypted resource packs to protect your work. This guide will help you configure resource pack encryption in three simple steps.
 
-Please note that resource package encryption cannot completely prevent people with ulterior motives from stealing your resource package, because it is `AES` symmetric key encryption.
+:::caution Note for Beginners
+This encryption is based on the AES symmetric algorithm. While it can effectively enhance the security of your resource pack, it cannot completely prevent professional methods such as packet sniffing from cracking it.
+:::
 
-Just 3 steps, keep up and get started!
+## 📦 Encrypt the Resource Pack \{#encrypt-resource-pack}
+{/* It is recommended to use the [encryptmypack](https://encryptmypack.com) online tool for encryption. The process is as follows:
+1. Prepare a resource pack that meets the requirements:
+   - Must be in `.mcpack` format
+   - The `manifest.json` file must be directly visible after extraction (not nested in a subfolder)
+2. Upload it to the encryption website to generate an encrypted pack */}
+It is recommended to use the open-source command-line tool EncryptMyPack for encryption. The process is as follows:
 
-## Encrypt my resource pack \{#encrypt-resource-pack}
+1. **Download the Tool**  
+   Download the latest version of the program from [GitHub Releases](https://github.com/AllayMC/EncryptMyPack/releases/latest).
+2. **Prepare the Resource Pack**  
+   - Must be in `.zip` format (you can directly rename a .mcpack file)
+   - The root directory of the zip file must contain the `manifest.json` file
+   - Supports including sub-packs (Sub Packs)
+3. **Encryption**
 
-In some sites not managed by Nukkit-MOT ([encryptmypack](https://encryptmypack.com)), you can easily encrypt your resource package.
+inputZip is the full name of the input zip file, e.g., `example.zip`
 
-Some precautions:
-- Resource package ends with `.mcpack`
-- The root directory of the mcpack file cannot be nested with folders. The `manifest.json` file must be visible in the root directory of the resource package.
-- **Nukkit-MOT itself does not contain any encryption and decryption logic, but only sends 32 keys to the client according to your configuration (this is very important)**
+outputZip is the full name of the output zip file, e.g., `example.zip`
 
+key is a custom 32-bit key. If no key is specified, the default key `liulihaocai123456789123456789123` will be used.
 
-## Configure your key \{#configure-key}
+<Tabs groupId="operating-systems">
+  <TabItem value="win" label="Windows">
+```bash
+EncryptMyPack.exe encrypt <inputZip> <outputZip> [key]
+```
+  </TabItem>
+  <TabItem value="mac" label="macOS">
+```bash
+EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+  <TabItem value="linux" label="Linux">
+Add executable permissions
+```bash
+chmod +x EncryptMyPack
+```
+Then you can proceed with the following command:
+```bash
+./EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+</Tabs>
 
-The file with the same name as the resource package is named with a `.key` file extension name. The content is the 32-key corresponding to the resource package.
+:::tip Important Reminder
+Nukkit-MOT is only responsible for passing the key to the client and does not participate in the actual encryption/decryption process.
+:::
 
-Example: There are two files in the `resource_packs` folder.  
+## 🔑 Configure the Encryption Key \{#configure-key}
+1. In the server's `resource_packs` folder,
+2. Create a `.key` file with the same name as the encrypted pack.
+3. Paste the 32-bit encryption key in the .key file.
 
 <FolderView
-	paths={[
-    'resource_packs/x1.mcpack',
-    'resource_packs/x1.mcpack.key'
+  paths={[
+    'resource_packs/ExampleResourcePack.mcpack',
+    'resource_packs/ExampleResourcePack.mcpack.key'
   ]}
->
-</FolderView>
+/>
 
-- x1.mcpack `A resource package named "x1"`
-- x1.mcpack.key `This is the key of "x1.mcpack" resource package`
+## 🔄 Restart the Server \{#restart-server}
+After modifying the configuration, you must restart the server for the encryption to take effect (Nukkit-MOT only loads resource pack configurations at startup).
 
-## Restart the server to make it effective \{#restart-server}
+## ❓ FAQ \{#faq}
+| Question | Answer |
+|------|------|
+| Can the encrypted resource pack be cracked? | It may be cracked by professional methods, but it is much more secure than an unencrypted resource pack. |
+| Does encryption affect game performance? | It does not affect client or server performance at all. |
+| Are multiple encrypted packs supported? | Yes, you can deploy multiple encrypted packs simultaneously, each requiring a corresponding .key file. |
 
-Nukkit-MOT will only load the files in `resource_packs` when it starts, so you need to restart it to make it take effect.
+:::success Done!
+Now, when your players load the resource pack, the client will automatically use the configured key to decrypt and load it.
+:::
