@@ -19,21 +19,17 @@ The `Item` class provides several constructors that allow the creation of item i
 ### Example code: \{#example-code}
 ```java
 // Import the Item class
-import cn.nukkit.item;
+import cn.nukkit.item.Item;
 
-public class Example {
-    public void example() {
-        // Create the item by item ID and quantity
-        Item diamond = Item.get(Item.DIAMOND, 0, 1); // create 1 diamond
-        // Give the player a diamond
-        player.giveItem(diamond);
-        // Or
-        player.getInventory().addItem(diamond);
+// Create the item by item ID and quantity
+Item diamond = Item.get(Item.DIAMOND, 0, 1); // create 1 diamond
+// Give the player a diamond
+player.giveItem(diamond);
+// Or
+player.getInventory().addItem(diamond);
 
-        // Create items via namespaces (Highly recommended!)
-        Item apple = Item.fromString("minecraft:apple");
-    }
-}
+// Create items via namespaces (recommended!)
+Item apple = Item.fromString("minecraft:apple");
 ```
 
 ### Code explanation: \{#code-explanation}
@@ -97,17 +93,56 @@ Attributes of items can be managed through various setter and getter methods.
 diamond.setCount(3); // Set the number of diamonds to 3
 ```
 
-### Example code \{#example-code-properties}
+### Example Code \{#example-code-properties}
 
-Setting item basic information.
+1. Setting Basic Item Properties
 
-```Java
-public class Example {
-    public void example() {
-        Item diamond = Item.get(Item.DIAMOND, 0, 1);
-        diamond.setLore("first row", "second row"); // you can keep adding rows
-        diamond.setCustomName("custom name for item"); // if you don't want the text to be skewed you can reset the formatting by adding "§r" to the top of the text
-        diamond.addEnchantment(new Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), new Enchantment.get(Enchantment.ID_PROTECTION_ALL) .setLevel(4)) // Add Sharpness 5 and Protection 4 enchantments to the item
-    }
-}
+```java
+Item diamond = Item.get(Item.DIAMOND, 0, 1);
+// You can continue to add more lines
+diamond.setLore("Line 1", "Line 2");
+// If you do not want the text to be italicized, you can add "§r" at the beginning of the text to reset the format
+diamond.setCustomName("Custom Name of the Item");
+// Add Sharpness 5 and Protection 4 enchantments to the item
+diamond.addEnchantment(Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4));
+```
+
+2. Infinite Durability for Items
+
+```java
+// Achieved through nbt
+CompoundTag tag = diamond.hasCompoundTag() ? diamond.getNamedTag() : new CompoundTag();
+tag.putByte("Unbreakable", 1);
+// After modifying nbt, you need to setNamedTag for it to take effect
+diamond.setNamedTag(tag);
+```
+
+3. Item Lock Modes
+
+Nukkit-MOT provides the `Item.ItemLockMode` class, and developers can use `setItemLockMode(ItemLockMode lockMode)` to set the lock mode of an item.
+
+- `Item.ItemLockMode.LOCK_NONE`
+
+Remove item lock
+
+- `Item.ItemLockMode.LOCK_IN_INVENTORY`
+
+![lock in inventory](https://minecraft.wiki/images/Item_lock_yellow.png) the texture used over the item.
+
+Prevents the item from being removed from the player's inventory, dropped, or crafted with.
+
+- `Item.ItemLockMode.LOCK_IN_SLOT`
+
+![lock in slot](https://minecraft.wiki/images/Item_lock_red.png) the texture used over the item.
+
+Prevents the item from being moved or removed from its slot in the player's inventory, dropped, and by extension, crafted with.
+
+:::tip
+
+Supported since 1.16.100 (protocol version 419)
+
+:::
+
+```java
+diamond.setItemLockMode(Item.ItemLockMode.LOCK_IN_INVENTORY);
 ```

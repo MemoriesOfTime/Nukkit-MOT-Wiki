@@ -21,19 +21,15 @@ sidebar_position: 4
 // 导入Item类
 import cn.nukkit.item.Item;
 
-public class Example {
-    public void example() {
-        // 通过物品ID和数量创建物品
-        Item diamond = Item.get(Item.DIAMOND, 0, 1); // 创建1个钻石
-        // 给予玩家一个钻石
-        player.giveItem(diamond);
-        // 或者
-        player.getInventory().addItem(diamond);
+// 通过物品ID和数量创建物品
+Item diamond = Item.get(Item.DIAMOND, 0, 1); // 创建1个钻石
+// 给予玩家一个钻石
+player.giveItem(diamond);
+// 或者
+player.getInventory().addItem(diamond);
 
-        // 通过命名空间创建物品（非常推荐！）
-        Item apple = Item.fromString("minecraft:apple");
-    }
-}
+// 通过命名空间创建物品（推荐！）
+Item apple = Item.fromString("minecraft:apple");
 ```
 
 ### 代码解释： \{#code-explanation}
@@ -99,15 +95,52 @@ diamond.setCount(3); // 将钻石的数量设置为3
 
 ### 示例代码 \{#example-code-properties}
 
-设置物品基本属性。
+一、设置物品基本属性
 
 ```java
-public class Example {
-    public void example() {
-        Item diamond = Item.get(Item.DIAMOND, 0, 1);
-        diamond.setLore("第一行", "第二行"); // 你可以继续增加行数
-        diamond.setCustomName("物品的自定义名称"); // 如果不希望文本倾斜 可在文本最前面添加 "§r" 来重置格式
-        diamond.addEnchantment(new Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), new Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4)); // 为物品添加锋利5和保护4附魔
-    }
-}
+Item diamond = Item.get(Item.DIAMOND, 0, 1);
+diamond.setLore("第一行", "第二行"); // 你可以继续增加行数
+diamond.setCustomName("物品的自定义名称"); // 如果不希望文本倾斜 可在文本最前面添加 "§r" 来重置格式
+diamond.addEnchantment(Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4)); // 为物品添加锋利5和保护4附魔
+```
+
+二、物品无限耐久
+
+```java
+// 通过 nbt 来实现
+CompoundTag tag = diamond.hasCompoundTag() ? diamond.getNamedTag() : new CompoundTag();
+tag.putByte("Unbreakable", 1);
+
+// 修改 nbt 后需 setNamedTag 方可生效
+diamond.setNamedTag(tag);
+```
+
+三、物品锁的模式
+
+Nukkit-MOT 提供了 `Item.ItemLockMode` 类，开发者可以使用 `setItemLockMode(ItemLockMode lockMode)` 来设置物品的锁模式。
+
+- `Item.ItemLockMode.LOCK_NONE`
+
+移除物品锁
+
+- `Item.ItemLockMode.LOCK_IN_INVENTORY`
+
+![lock in inventory](https://minecraft.wiki/images/Item_lock_yellow.png) 物品表面所使用的纹理。
+
+阻止该物品被从玩家的物品栏移除、丢弃或用于合成。
+
+- `Item.ItemLockMode.LOCK_IN_SLOT`
+
+![lock in slot](https://minecraft.wiki/images/Item_lock_red.png) 物品表面所使用的纹理
+
+阻止该物品被从玩家物品栏的该槽位移动、移除、丢弃或用于合成。
+
+:::tip
+
+自 1.16.100 (协议版本 419) 开始支持
+
+:::
+
+```java
+diamond.setItemLockMode(Item.ItemLockMode.LOCK_IN_INVENTORY);
 ```
