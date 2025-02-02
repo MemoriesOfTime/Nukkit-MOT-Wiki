@@ -1,0 +1,152 @@
+---
+sidebar_position: 4
+---
+
+import FolderView from '@site/src/components/FolderView';
+
+# Configuration Guide
+This document will guide you on how to create a standardized configuration management system based on the Nukkit-MOT framework development specifications, covering core functionalities such as basic configuration reading, nested object handling, and dynamic saving.
+
+## Configuration File Structure \{#file-structure}
+It is recommended to organize configuration files using the YAML format. A typical structure is as follows:
+```yml title="config.yml"
+this-is-a-key: Hello! Config!  # String type configuration
+another-key: true             # Boolean type configuration
+object-key:                   # Object type configuration
+  enabled: false
+  subKey1: nukkit
+  subKey2: 2023
+array-key:                    # Array type configuration
+  - first element
+  - second element
+  - third element
+```
+
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/config.yml',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
+
+## Configuration Class Implementation \{#class-imple}
+### Basic Configuration Class \{#base-class-imple}
+```java
+public class ExampleConfig {
+    private final Config config;
+    // Use Lombok to automatically generate Getters
+    @Getter private String aKey;
+    @Getter private boolean anotherKey;
+    @Getter private ArrayList<String> arrayKey;
+    public ExampleConfig() {
+        // Ensure the configuration file exists (automatically creates an empty configuration)
+        ExamplePlugin.getInstance().saveResource("config.yml");
+        // Initialize the configuration object (with default values)
+        config = new Config(
+            new File(ExamplePlugin.getInstance().getDataFolder(), "config.yml"),
+            Config.YAML,
+            new ConfigSection(new LinkedHashMap<>() {{
+                // Default value configuration section
+                put("this-is-a-key", "Hello! Config!");
+                put("another-key", true);
+                // Nested object default values
+                put("object-key", new LinkedHashMap<String, Object>() {{
+                    put("enabled", false);
+                    put("subKey1", "nukkit");
+                    put("subKey2", 2023);
+                }});
+                // Array default values
+                put("array-key", Arrays.asList(
+                    "first element",
+                    "second element",
+                    "third element"
+                ));
+            }})
+        );
+        // Load configuration into memory
+        setAKey(config.getString("this-is-a-key"));
+        setAnotherKey(config.getBoolean("another-key"));
+        setArrayKey((ArrayList<String>) config.getStringList("array-key"));
+    }
+}
+```
+
+### Nested Object Handling \{#nested-object-handle}
+```java
+// Define nested configuration objects in the ExampleConfig class
+public class KeyObject {
+    private final ConfigSection configSection;
+    @Getter private boolean enabled;
+    @Getter private String subKey1;
+    @Getter private Integer subKey2;
+    public KeyObject() {
+        // Get the object configuration section
+        this.configSection = config.getSection("object-key");
+        // Read with default values
+        this.enabled = configSection.getBoolean("enabled", false);
+        this.subKey1 = configSection.getString("subKey1", "nukkit");
+        this.subKey2 = configSection.getInt("subKey2", 2023);
+    }
+    // Support chainable set methods
+    public KeyObject setEnabled(boolean value) {
+        enabled = value;
+        configSection.set("enabled", enabled);
+        return this;// Method Chaining
+    }
+}
+```
+
+### Dynamic Configuration Saving \{#dynamic-save}
+```java
+// Main configuration save method
+public void save() {
+    config.set("this-is-a-key", aKey);
+    config.set("another-key", anotherKey);
+    config.set("array-key", arrayKey);
+    config.save();
+}
+// Nested object save method
+public ExampleConfig save() {
+    configSection.set("enabled", enabled);
+    configSection.set("subKey1", subKey1);
+    configSection.set("subKey2", subKey2);
+    config.save();
+    return parent;
+}
+```
+
+## Best Practices \{#best-practices}
+1. **Default Value Assurance**: Always provide default values in the constructor to prevent configuration file corruption.
+2. **Type Safety**: Use type-specific methods like `getBoolean()`/`getInt()` instead of the generic `get()`.
+3. **Configuration Isolation**: Use separate configuration classes for managing nested objects.
+4. **Memory Caching**: Store configurations in memory fields upon first load to avoid frequent file reads.
+5. **Ordered Storage**: Use `LinkedHashMap` to maintain the order of configuration items.
+6. **Method Chaining**: Have setter methods return 'this' to enable fluent interface.
+
+## Configuration Hot Reload \{#config-hotreload}
+Implement configuration hot updates by listening to server reload commands:
+```java
+// Register the event in the plugin main class
+@EventHandler
+public void onReload(ServerCommandEvent event) {
+    if (event.getCommand().equals("reload example")) {
+        this.config = new ExampleConfig();// Re-instantiate to reload
+        getLogger().info("Configuration reloaded!");
+    }
+}
+```
+
+:::note
+
+Hot reloading may affect running business logic.
+
+:::
+
+## Debugging Tips \{#debug-tips}
+Use `config.getRootSection().toString()` to quickly output the currently loaded full configuration:
+```java
+getLogger().info("Current configuration state:\n" + config.getRootSection().toString());
+```

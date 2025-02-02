@@ -1,0 +1,162 @@
+---
+sidebar_position: 4
+---
+
+import FolderView from '@site/src/components/FolderView';
+
+# Config 配置类指南
+
+本文档将指导您如何基于 Nukkit-MOT 框架开发规范创建规范的配置管理系统，涵盖基础配置读取、嵌套对象处理、动态保存等核心功能。
+
+## 配置文件结构 \{#file-structure}
+建议采用 YAML 格式组织配置文件，典型结构如下：
+
+```yml title="config.yml"
+this-is-a-key: Hello! Config!  # 字符串类型配置
+another-key: true             # 布尔值配置
+object-key:                   # 对象类型配置
+  enabled: false
+  subKey1: nukkit
+  subKey2: 2023
+array-key:                    # 数组类型配置
+  - first element
+  - second element
+  - third element
+```
+
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/config.yml',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
+
+## 配置类实现 \{#class-imple}
+### 基础配置类 \{#base-class-imple}
+```java
+public class ExampleConfig {
+    private final Config config;
+
+    // 使用 Lombok 自动生成 Getter
+    @Getter private String aKey;
+    @Getter private boolean anotherKey;
+    @Getter private ArrayList<String> arrayKey;
+
+    public ExampleConfig() {
+        // 确保配置文件存在（自动创建空配置）
+        ExamplePlugin.getInstance().saveResource("config.yml");
+        
+        // 初始化配置对象（带默认值）
+        config = new Config(
+            new File(ExamplePlugin.getInstance().getDataFolder(), "config.yml"),
+            Config.YAML,
+            new ConfigSection(new LinkedHashMap<>() {{
+                // 默认值配置区
+                put("this-is-a-key", "Hello! Config!");
+                put("another-key", true);
+                // 嵌套对象默认值
+                put("object-key", new LinkedHashMap<String, Object>() {{
+                    put("enabled", false);
+                    put("subKey1", "nukkit");
+                    put("subKey2", 2023);
+                }});
+                // 数组默认值
+                put("array-key", Arrays.asList(
+                    "first element",
+                    "second element",
+                    "third element"
+                ));
+            }})
+        );
+
+        // 加载配置到内存
+        setAKey(config.getString("this-is-a-key"));
+        setAnotherKey(config.getBoolean("another-key"));
+        setArrayKey((ArrayList<String>) config.getStringList("array-key"));
+    }
+}
+```
+
+### 嵌套对象处理 \{#nested-object-handle}
+```java
+// 在 ExampleConfig 类中定义嵌套配置对象
+public class KeyObject {
+    private final ConfigSection configSection;
+    @Getter private boolean enabled;
+    @Getter private String subKey1;
+    @Getter private Integer subKey2;
+
+    public KeyObject() {
+        // 获取对象配置区
+        this.configSection = config.getSection("object-key");
+        
+        // 带默认值的读取方式
+        this.enabled = configSection.getBoolean("enabled", false);
+        this.subKey1 = configSection.getString("subKey1", "nukkit");
+        this.subKey2 = configSection.getInt("subKey2", 2023);
+    }
+
+    // 支持链式调用的设置方法
+    public KeyObject setEnabled(boolean value) {
+        enabled = value;
+        configSection.set("enabled", enabled);
+        return this;
+    }
+}
+```
+
+### 配置动态保存 \{#dynamic-save}
+```java
+// 主配置保存方法
+public void save() {
+    config.set("this-is-a-key", aKey);
+    config.set("another-key", anotherKey);
+    config.set("array-key", arrayKey);
+    config.save();
+}
+
+// 嵌套对象保存方法
+public ExampleConfig save() {
+    configSection.set("enabled", enabled);
+    configSection.set("subKey1", subKey1);
+    configSection.set("subKey2", subKey2);
+    config.save();
+    return parent;
+}
+```
+
+## 最佳实践 \{#best-practices}
+1. **默认值保障**：在构造函数中始终提供默认值配置，防止配置文件损坏
+2. **类型安全**：使用 `getBoolean()`/`getInt()` 等类型化方法替代通用 `get()`
+3. **配置隔离**：对嵌套对象使用独立的配置类进行管理
+4. **内存缓存**：首次加载时将配置存入内存字段，避免频繁读取文件
+5. **有序存储**：使用 `LinkedHashMap` 保持配置项的写入顺序
+6. **链式调用**：set 方法返回 this 简化代码
+
+## 配置热重载 \{#config-hotreload}
+通过监听服务器重载命令实现配置热更新：
+```java
+// 在插件主类注册事件
+@EventHandler
+public void onReload(ServerCommandEvent event) {
+    if (event.getCommand().equals("reload example")) {
+        this.config = new ExampleConfig();// 重新实例化即可
+        getLogger().info("配置重载完成！");
+    }
+}
+```
+
+:::note
+
+热重载可能影响正在运行的业务逻辑
+
+:::
+
+## 调试技巧 \{#debug-tips}
+使用 `config.getRootSection().toString()` 可快速输出当前加载的完整配置：
+```java
+getLogger().info("当前配置状态：\n" + config.getRootSection().toString());
+```
