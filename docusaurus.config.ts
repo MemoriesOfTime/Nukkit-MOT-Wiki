@@ -132,6 +132,10 @@ const config: Config = {
               label: 'GitHub',
               href: 'https://github.com/MemoriesOfTime/Nukkit-MOT',
             },
+            {
+              label: 'Forums',
+              href: 'https://bbs.nukkit-mot.com/',
+            },
           ],
         },
       ],

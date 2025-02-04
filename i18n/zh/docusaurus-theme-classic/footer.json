@@ -26,5 +26,9 @@
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/MemoriesOfTime/Nukkit-MOT"
+  },
+  "link.item.label.Forums": {
+    "message": "Forums",
+    "description": "Nukkit-MOT Forums"
   }
 }
