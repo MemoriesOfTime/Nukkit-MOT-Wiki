@@ -503,6 +503,15 @@ A number of datagram packets each address can send within one RakNet tick (10ms)
 
 IPs exceeding this limit will be temporarily banned
 
+## `enable-rak-send-cookie`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on           |
+
+When enabled, the server will send a Cookie to the client during the connection process to verify the client's legitimacy.
+
+This enhances connection security and helps prevent potential malicious connections or attacks.
+
 ## `timeout-milliseconds`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -1009,3 +1018,10 @@ used with 'use-native-leveldb'
 set max size of chunk data cache used to reduce disk io
 
 per world, consider increasing if you only have a few large worlds and lots of ram
+
+## `forced-safety-enchant`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable forced safety enchantments (up max lvl)
