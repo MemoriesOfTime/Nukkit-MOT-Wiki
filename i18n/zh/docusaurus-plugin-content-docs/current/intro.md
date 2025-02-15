@@ -13,7 +13,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 注意：如果你需要更高版本的功能，请使用 [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)。
 
 ### Nukkit-MOT 有什么新功能？ {#whats-new}
-1. 支持 1.2 – 1.21.50 版本（你可以在配置中设置最小协议）
+1. 支持 1.2 – 1.21.60 版本（你可以在配置中设置最小协议）
 2. 支持大多数具有 AI 的实体
 3. 支持下界和末地
 4. 生成地牢和洞穴
@@ -22,13 +22,13 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 ## 如何安装？ {#how-to-install}
 1. 安装 Java 17 或更高版本
 2. 从下面的链接下载 .jar 文件
-3. 编写运行命令：`java -jar file.jar`（将 `file` 更改为你下载的文件的名称）
+3. 运行命令：`java -jar Nukkit-MOT-SNAPSHOT.jar`（将 `Nukkit-MOT-SNAPSHOT.jar` 替换为你下载的文件名）
 
 ## 链接 {#links}
-- __🌐 下载：[Jenkins](https://motci.cn/job/Nukkit-MOT/job/master/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
-- __💬 [Discord](https://discord.gg/pJjQDQC)__
-- __🔌 [Nukkit 插件](https://cloudburstmc.org/resources/categories/nukkit-plugins.1/)__
-- __🐞 [报告错误](https://github.com/MemoriesOfTime/Nukkit-MOT/issues/new/choose)__
+- __🌐 下载地址: [Jenkins](https://motci.cn/job/Nukkit-MOT/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
+- __💬 交流社区: [Discord](https://discord.gg/pJjQDQC) / [QQ 群](https://jq.qq.com/?_wv=1027&k=5aIuYMH)__
+- __🔌 插件资源: [Nukkit 论坛](https://cloudburstmc.org/resources/categories/nukkit-plugins.1/) / [Nukkit-MOT 论坛](https://bbs.nukkit-mot.com/resources/)__
+- __🐞 [提交问题反馈](https://github.com/MemoriesOfTime/Nukkit-MOT/issues/new/choose)__
 
 ## Maven {#maven}
 #### 仓库： {#maven-repository}
@@ -52,13 +52,18 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
     </dependency>
 </dependencies>
 ```
+## Gradle {#gradle}
+#### Repository: {#gradle-repository}
+```kts
+repositories {
+    mavenCentral()
+    maven("https://repo.lanink.cn/repository/maven-public/")
+} 
+```
 
-## 致谢 {#credits}
-[Nukkit](https://github.com/CloudburstMC/Nukkit)  
-[NukkitPetteriM1Edition](https://github.com/PetteriM1/NukkitPetteriM1Edition)  
-[PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)
-
-这个项目是基于 [Nukkit](https://github.com/CloudburstMC/Nukkit)，因此你应该遵守 [Nukkit](https://github.com/CloudburstMC/Nukkit) 的许可证
-
-感谢 [jetbrains](https://jb.gg/OpenSourceSupport) 免费提供开发工具支持本项目！  
-[<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" width="200"/>](https://jb.gg/OpenSourceSupport)
+#### Dependencies: {#gradle-dependencies}
+```kts
+dependencies {
+    compileOnly("cn.nukkit:Nukkit:MOT-SNAPSHOT")
+}
+```
