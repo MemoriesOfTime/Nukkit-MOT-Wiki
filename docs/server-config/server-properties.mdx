@@ -336,6 +336,19 @@ allow op to use `/stop` command in game
 
 allow op to use `/op` command to op other players in game
 
+## `space-name-mode`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | ignore        |
+
+Handling player names with spaces
+
+"disabled" - Players with names containing spaces are prohibited from entering the server
+
+"ignore" - Ignore names with spaces (default)
+
+"replacing" - Replace spaces in player names with "_"
+
 ## `xp-bottles-on-creative`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -674,6 +687,13 @@ Generate End world
 | Boolean   | on            |
 
 Vanilla portals
+
+## `portal-ticks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 80            |
+
+Ticks required for the player to trigger the portal
 
 ## `multi-nether-worlds`
 | Data Type | Default Value |
