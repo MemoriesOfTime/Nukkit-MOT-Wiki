@@ -1,9 +1,11 @@
 import React from 'react';
 import Giscus from "@giscus/react";
 import { useColorMode } from '@docusaurus/theme-common';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export default function GiscusComponent() {
   const { colorMode } = useColorMode();
+  const { i18n: { currentLocale } } = useDocusaurusContext();
 
   return (
     <Giscus    
@@ -17,7 +19,7 @@ export default function GiscusComponent() {
       emitMetadata="0"
       inputPosition="top"
       theme={colorMode}
-      lang="zh-CN"
+      lang={currentLocale === 'zh' ? 'zh-CN' : 'en'}
       loading="lazy"
     />
   );
