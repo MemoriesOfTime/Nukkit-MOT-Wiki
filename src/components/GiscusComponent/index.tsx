@@ -10,7 +10,7 @@ export default function GiscusComponent() {
       repo="MemoriesOfTime/Nukkit-MOT-Wiki"
       repoId="R_kgDOLuXZqQ"
       category="General"
-      categoryId="DIC_kwDOLuXZqc4CtuuU"
+      categoryId="DIC_kwDOLuXZqc4CtuuV"
       mapping="pathname"
       strict="0"
       reactionsEnabled="1"
