@@ -103,7 +103,7 @@ white-list=false         # 是否启用白名单
 motd=A Nukkit Server     # 服务器描述
 ```
 
-详细配置说明请参考 [server.properties](server-config/server-properties.md)。
+详细配置说明请参考 [server.properties](server-config/server-properties.mdx)。
 
 ---
 

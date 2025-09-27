@@ -128,7 +128,7 @@ motd=A Nukkit Server     # Server description
 
 
 
-For a detailed configuration guide, please refer to [server.properties](https://server-config/server-properties.md).
+For a detailed configuration guide, please refer to [server.properties](server-config/server-properties.mdx).
 
 ------
 
