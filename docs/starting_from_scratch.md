@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Nukkit Server Setup Tutorial from Scratch
 
 This tutorial will guide you through setting up a **Nukkit Server** from scratch, allowing you to run your own **Minecraft Bedrock Edition server**.

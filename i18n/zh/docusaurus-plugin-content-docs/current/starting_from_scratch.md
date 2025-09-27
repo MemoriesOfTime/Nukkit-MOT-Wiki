@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # 从0开始的 Nukkit 服务器搭建教程
 
 本教程将引导你从零开始搭建一个 **Nukkit 服务器**，让你能够运行自己的 **Minecraft 基岩版服务器**。  
