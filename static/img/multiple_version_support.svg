@@ -1,0 +1,24 @@
+<svg width="300" height="180" xmlns="http://www.w3.org/2000/svg">
+    <rect width="300" height="180" rx="8" ry="8" fill="#f5f7fa" stroke="#e1e5eb" stroke-width="2"/>
+    <text x="150" y="45" font-family="Arial, sans-serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#2d3748">
+        Multiple Version Support
+        <animate attributeName="y" values="45;43;45" dur="3s" repeatCount="indefinite"/>
+    </text>
+    <line x1="60" y1="90" x2="240" y2="90" stroke="#4299e1" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="60" cy="90" r="12" fill="#4299e1">
+        <animate attributeName="r" values="12;14;12" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="60" y="120" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2d3748">1.2</text>
+    <circle cx="150" cy="90" r="12" fill="#4299e1">
+        <animate attributeName="r" values="12;14;12" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <text x="150" y="120" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2d3748">...</text>
+    <circle cx="240" cy="90" r="12" fill="none" stroke="#4299e1" stroke-width="3">
+        <animate attributeName="r" values="12;18;12" dur="3s" begin="1s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="240" cy="90" r="12" fill="#4299e1">
+        <animate attributeName="r" values="12;16;12" dur="3s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+    <text x="240" y="120" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#2d3748">Latest</text>
+</svg>

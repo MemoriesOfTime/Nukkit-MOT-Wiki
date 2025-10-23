@@ -1,0 +1,24 @@
+<svg width="300" height="180" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景与标题 -->
+    <rect width="300" height="180" rx="8" ry="8" fill="#f5f7fa" stroke="#e1e5eb" stroke-width="2"/>
+    <text x="150" y="40" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#2d3748">
+        Vanilla Command Support
+        <animate attributeName="y" values="40;38;40" dur="3s" repeatCount="indefinite"/>
+    </text>
+    <rect x="60" y="60" width="180" height="65" rx="4" ry="4" fill="#2d3748" stroke="#4a5568" stroke-width="2">
+        <animate attributeName="rx" values="4;6;4" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="4;6;4" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.95;1;0.95" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <text x="75" y="78" font-family="Courier New, monospace" font-size="14" fill="#4ade80">
+        /gamemode survival
+        <animate attributeName="opacity" values="1;0.7;1" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </text>
+    <text x="75" y="108" font-family="Courier New, monospace" font-size="14" fill="#4ade80">
+        /give @p diamond 1
+        <animate attributeName="opacity" values="1;0.7;1" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </text>
+    <rect x="70" y="98" width="2" height="14" fill="#4ade80">
+        <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+    </rect>
+</svg>

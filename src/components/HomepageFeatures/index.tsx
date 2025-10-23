@@ -10,8 +10,8 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Version Support',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Multiple Version Support',
+    Svg: require('@site/static/img/multiple_version_support.svg').default,
     description: (
       <>
         Supports versions from 1.2 to the latest, allowing you to set the minimum protocol in the config for seamless gameplay.
@@ -20,7 +20,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'AI Entity Support',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/ai_entity_support.svg').default,
     description: (
       <>
         Most entities with AI are fully supported, ensuring a dynamic and immersive environment for players.
@@ -29,7 +29,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Vanilla Command Support',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/vanilla_command_support.svg').default,
     description: (
       <>
         Fully supports vanilla commands, allowing you to manage and enhance gameplay with familiar commands.
