@@ -1,0 +1,35 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="7" ry="7" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2"/>
+    <text x="100" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e293b">
+        Vanilla Command Support
+    </text>
+    <rect x="25" y="70" width="150" height="60" rx="6" ry="6" fill="#1e293b" stroke="#64748b" stroke-width="1.2">
+        <animate attributeName="rx" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.98;1;0.98" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <text x="40" y="95" font-family="Courier New, monospace" font-size="9" fill="#94a3b8">></text>
+    <text x="40" y="115" font-family="Courier New, monospace" font-size="9" fill="#94a3b8">></text>
+    <text x="50" y="95" font-family="Courier New, monospace" font-size="9" fill="#22c55e">
+        <tspan id="cmd1">/gamemode survival</tspan>
+    </text>
+    <text x="50" y="115" font-family="Courier New, monospace" font-size="9" fill="#22c55e">
+        <tspan id="cmd2">/give @p diamond 1</tspan>
+    </text>
+    <script><![CDATA[
+        const typeEffect = (element, text, delay = 0) => {
+            element.textContent = '';
+            let i = 0;
+            setTimeout(() => {
+                const interval = setInterval(() => {
+                    element.textContent = text.slice(0, i++);
+                    if (i > text.length) clearInterval(interval);
+                }, 80);
+            }, delay);
+        };
+        const cmd1 = document.getElementById('cmd1');
+        const cmd2 = document.getElementById('cmd2');
+        typeEffect(cmd1, '/gamemode survival', 500);
+        typeEffect(cmd2, '/give @p diamond 1', 2500);
+    ]]></script>
+</svg>
