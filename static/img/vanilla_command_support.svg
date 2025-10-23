@@ -1,24 +1,36 @@
-<svg width="300" height="180" xmlns="http://www.w3.org/2000/svg">
-    <!-- 背景与标题 -->
-    <rect width="300" height="180" rx="8" ry="8" fill="#f5f7fa" stroke="#e1e5eb" stroke-width="2"/>
-    <text x="150" y="40" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#2d3748">
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="7" ry="7" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2"/>
+    <text x="100" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e293b">
         Vanilla Command Support
-        <animate attributeName="y" values="40;38;40" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="38;36;38" dur="3s" repeatCount="indefinite"/>
     </text>
-    <rect x="60" y="60" width="180" height="65" rx="4" ry="4" fill="#2d3748" stroke="#4a5568" stroke-width="2">
-        <animate attributeName="rx" values="4;6;4" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="ry" values="4;6;4" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.95;1;0.95" dur="3s" repeatCount="indefinite"/>
+    <rect x="25" y="70" width="150" height="60" rx="6" ry="6" fill="#1e293b" stroke="#64748b" stroke-width="1.2">
+        <animate attributeName="rx" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.98;1;0.98" dur="3s" repeatCount="indefinite"/>
     </rect>
-    <text x="75" y="78" font-family="Courier New, monospace" font-size="14" fill="#4ade80">
-        /gamemode survival
-        <animate attributeName="opacity" values="1;0.7;1" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    <text x="40" y="95" font-family="Courier New, monospace" font-size="9" fill="#94a3b8">></text>
+    <text x="40" y="115" font-family="Courier New, monospace" font-size="9" fill="#94a3b8">></text>
+    <text x="50" y="95" font-family="Courier New, monospace" font-size="9" fill="#22c55e">
+        <tspan id="cmd1">/gamemode survival</tspan>
     </text>
-    <text x="75" y="108" font-family="Courier New, monospace" font-size="14" fill="#4ade80">
-        /give @p diamond 1
-        <animate attributeName="opacity" values="1;0.7;1" dur="2s" begin="1s" repeatCount="indefinite"/>
+    <text x="50" y="115" font-family="Courier New, monospace" font-size="9" fill="#22c55e">
+        <tspan id="cmd2">/give @p diamond 1</tspan>
     </text>
-    <rect x="70" y="98" width="2" height="14" fill="#4ade80">
-        <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
-    </rect>
+    <script><![CDATA[
+        const typeEffect = (element, text, delay = 0) => {
+            element.textContent = '';
+            let i = 0;
+            setTimeout(() => {
+                const interval = setInterval(() => {
+                    element.textContent = text.slice(0, i++);
+                    if (i > text.length) clearInterval(interval);
+                }, 80);
+            }, delay);
+        };
+        const cmd1 = document.getElementById('cmd1');
+        const cmd2 = document.getElementById('cmd2');
+        typeEffect(cmd1, '/gamemode survival', 500);
+        typeEffect(cmd2, '/give @p diamond 1', 2500);
+    ]]></script>
 </svg>
