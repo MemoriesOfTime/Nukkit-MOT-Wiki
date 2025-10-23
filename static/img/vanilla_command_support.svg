@@ -2,7 +2,6 @@
     <rect width="200" height="200" rx="7" ry="7" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2"/>
     <text x="100" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#1e293b">
         Vanilla Command Support
-        <animate attributeName="y" values="38;36;38" dur="3s" repeatCount="indefinite"/>
     </text>
     <rect x="25" y="70" width="150" height="60" rx="6" ry="6" fill="#1e293b" stroke="#64748b" stroke-width="1.2">
         <animate attributeName="rx" values="6;8;6" dur="3s" repeatCount="indefinite"/>
