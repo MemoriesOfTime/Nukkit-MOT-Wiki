@@ -1,0 +1,8 @@
+{
+  "label": "快速入门",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "从零开始搭建 Nukkit 服务器的完整教程"
+  }
+}
