@@ -60,8 +60,7 @@ For complete documentation on `server.properties`, please refer to:
 
 Besides `server.properties`, there are other configuration files:
 
-- `nukkit.yml`: Nukkit core configuration
-- `server.properties`: Server basic configuration
+- `server.properties`: Server configuration
 - `ops.txt`: Administrator list
 - `white-list.txt`: Whitelist
 - `banned-players.txt`: Banned players list

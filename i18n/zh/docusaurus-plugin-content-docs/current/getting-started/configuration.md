@@ -60,8 +60,7 @@ motd=A Nukkit Server
 
 除了 `server.properties` 外,还有一些其他配置文件:
 
-- `nukkit.yml`: Nukkit 核心配置
-- `server.properties`: 服务器基本配置
+- `server.properties`: 服务器配置
 - `ops.txt`: 管理员列表
 - `white-list.txt`: 白名单列表
 - `banned-players.txt`: 封禁玩家列表
