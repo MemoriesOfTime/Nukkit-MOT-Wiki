@@ -3,6 +3,10 @@
     "message": "Next",
     "description": "The label for version current"
   },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "快速入门",
+    "description": "从零开始搭建 Nukkit 服务器的完整教程"
+  },
   "sidebar.tutorialSidebar.category.Server Config": {
     "message": "服务器配置",
     "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
