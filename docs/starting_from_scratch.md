@@ -10,10 +10,6 @@ Welcome to the Nukkit server setup tutorial! This guide will walk you through se
 
 This tutorial has been split into multiple chapters for easy reference:
 
-### 📚 Complete Tutorial Index
-
-Click [**Getting Started**](getting-started/index.md) to view the complete tutorial index.
-
 ### 📖 Chapter Navigation
 
 1. **[Preparation](getting-started/preparation.md)**
