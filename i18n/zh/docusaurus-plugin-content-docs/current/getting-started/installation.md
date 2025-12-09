@@ -10,7 +10,7 @@ sidebar_position: 2
 
 你可以从以下渠道获取最新版本的 Nukkit-MOT:
 
-- [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar/) - 国内访问较快
+- [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar) - 国内访问较快
 - [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster) - 官方构建
 
 下载完成后,你会得到一个名为 `Nukkit-MOT-SNAPSHOT.jar` 的文件。

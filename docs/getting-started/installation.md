@@ -10,7 +10,7 @@ This section will guide you through downloading Nukkit-MOT and completing the ba
 
 You can obtain the latest version of Nukkit-MOT from the following sources:
 
-- [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar/) - Faster access in China
+- [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar) - Faster access in China
 - [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster) - Official builds
 
 After downloading, you will get a file named `Nukkit-MOT-SNAPSHOT.jar`.

@@ -35,7 +35,7 @@ sidebar_position: 2
 如果你想快速体验，可以遵循以下最简步骤:
 
 1. **安装 Java 17+** - [准备工作](getting-started/preparation.md)
-2. **下载 Nukkit-MOT** - [下载链接](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar/)
+2. **下载 Nukkit-MOT** - [下载链接](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar)
 3. **创建启动脚本** - 参考 [安装教程](getting-started/installation.md)
 4. **启动服务器** - 双击运行脚本
 5. **连接游戏** - 使用 `127.0.0.1:19132`
