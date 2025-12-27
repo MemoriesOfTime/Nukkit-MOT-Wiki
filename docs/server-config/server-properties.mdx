@@ -1046,13 +1046,14 @@ Enable new chicken eggs laying
 ## `leveldb-cache-mb`
 | Data Type | Default Value |
 |-----------|---------------|
-| Integer   | 80            |
+| Integer   | 64            |
 
-used with 'use-native-leveldb'
+Used together with `use-native-leveldb`.
 
-set max size of chunk data cache used to reduce disk io
+Sets the maximum chunk data cache size per world to reduce disk I/O.
 
-per world, consider increasing if you only have a few large worlds and lots of ram
+Consider increasing this value if you have plenty of RAM and only a few large worlds.
+Consider decreasing it if you have many worlds and limited RAM.
 
 ## `forced-safety-enchant`
 | Data Type | Default Value |

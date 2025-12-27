@@ -1046,13 +1046,14 @@ Hastebin 令牌，方便生成 debug 链接
 ## `leveldb-cache-mb`
 | 数据类型    | 默认值 |
 |---------|-----|
-| Integer | 80  |
+| Integer | 64  |
 
 与 `use-native-leveldb` 一同使用
 
-用于减少每个世界硬盘读写操作的区块数据最大缓存大小
+用于限制每个世界硬盘读写操作的区块数据最大缓存大小
 
 如果你拥有大量内存并且仅有几个大型世界，可以调高此缓存大小
+相反，如果你拥有内存较少并且有多个世界，可以调低此缓存大小
 
 ## `forced-safety-enchant`
 | Data Type | Default Value |

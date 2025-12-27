@@ -13,7 +13,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 注意：如果你需要更高版本的功能，请使用 [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)。
 
 ### Nukkit-MOT 有什么新功能？ {#whats-new}
-1. 支持 1.2 – 1.21.120 版本（你可以在配置中设置最小协议）
+1. 支持 1.2 – 1.21.130 版本（你可以在配置中设置最小协议）
 2. 支持大多数具有 AI 的实体
 3. 支持下界和末地
 4. 生成地牢和洞穴
