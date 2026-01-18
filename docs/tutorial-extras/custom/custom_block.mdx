@@ -117,11 +117,32 @@ public class ExamplePlugin extends PluginBase {
 }
 ```
 
-:::warning Important Notes
+:::danger Critical: Plugin Load Order
+
+Your plugin **must** be configured with `load: STARTUP` in `plugin.yml`:
+
+```yaml title="plugin.yml"
+name: MyPlugin
+main: cn.example.MyPlugin
+version: 1.0.0
+# highlight-next-line
+load: STARTUP
+```
+
+This is because custom blocks must be registered **before** `CustomBlockManager.closeRegistry()` is called. The server startup sequence is:
+
+1. `enablePlugins(STARTUP)` → Calls `onEnable()` for STARTUP plugins
+2. `CustomBlockManager.closeRegistry()` → **Closes registration, generates palette**
+3. `enablePlugins(POSTWORLD)` → Calls `onEnable()` for POSTWORLD plugins
+
+If your plugin uses the default `load: POSTWORLD`, the block registry will already be closed when `onEnable()` is called, and registration will fail.
+
+:::
+
+:::warning Other Notes
 
 1. Custom block IDs must be >= 10000 (`CustomBlockManager.LOWEST_CUSTOM_BLOCK_ID`)
-2. Register blocks in `onEnable`, not `onLoad`
-3. The identifier should follow the format `namespace:block_name`
+2. The identifier should follow the format `namespace:block_name`
 
 :::
 

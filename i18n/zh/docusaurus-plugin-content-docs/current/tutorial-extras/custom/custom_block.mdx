@@ -115,11 +115,32 @@ public class ExamplePlugin extends PluginBase {
 }
 ```
 
-:::warning 注意事项
+:::danger 关键：插件加载顺序
+
+你的插件**必须**在 `plugin.yml` 中配置 `load: STARTUP`：
+
+```yaml title="plugin.yml"
+name: MyPlugin
+main: cn.example.MyPlugin
+version: 1.0.0
+# highlight-next-line
+load: STARTUP
+```
+
+这是因为自定义方块必须在 `CustomBlockManager.closeRegistry()` 调用**之前**注册。服务器启动顺序如下：
+
+1. `enablePlugins(STARTUP)` → 调用 STARTUP 插件的 `onEnable()`
+2. `CustomBlockManager.closeRegistry()` → **关闭注册，生成调色板**
+3. `enablePlugins(POSTWORLD)` → 调用 POSTWORLD 插件的 `onEnable()`
+
+如果你的插件使用默认的 `load: POSTWORLD`，当 `onEnable()` 被调用时方块注册表已经关闭，注册将会失败。
+
+:::
+
+:::warning 其他注意事项
 
 1. 自定义方块 ID 必须 >= 10000 (`CustomBlockManager.LOWEST_CUSTOM_BLOCK_ID`)
-2. 在 `onEnable` 中注册方块，而不是 `onLoad`
-3. 标识符应遵循 `命名空间:方块名` 的格式
+2. 标识符应遵循 `命名空间:方块名` 的格式
 
 :::
 
