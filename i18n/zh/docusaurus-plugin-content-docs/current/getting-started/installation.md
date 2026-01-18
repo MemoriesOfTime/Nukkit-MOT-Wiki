@@ -96,6 +96,28 @@ stop
 
 等待服务器完全关闭后,就可以进行配置了。
 
+## 可选：Bin 数据文件
+
+如果你计划使用带有**自定义方块**功能的插件，需要下载 Bin 数据文件：
+
+1. 从 [Bin_Data 仓库](https://github.com/MemoriesOfTime/Bin_Data) 下载
+2. 将 `bin` 文件夹放置到服务器根目录
+
+你的服务器目录结构应该如下：
+```
+NukkitServer/
+├── bin/                          ← 自定义方块必需
+│   ├── vanilla_palette_xxx.nbt
+│   └── ...
+├── plugins/
+├── worlds/
+└── Nukkit-MOT-SNAPSHOT.jar
+```
+
+:::tip
+如果你不使用任何需要自定义方块的插件，可以跳过此步骤。
+:::
+
 ## 下一步
 
-服务器安装完成后,你可以继续 [配置服务器](configuration.md) 来自定义你的服务器设置。
+服务器安装完成后，你可以继续 [配置服务器](configuration.md) 来自定义你的服务器设置。

@@ -8,6 +8,28 @@ import FolderView from '@site/src/components/FolderView';
 
 # Custom Block
 
+:::danger Prerequisites: Bin Data Files
+
+Before using custom blocks, you must download and place the Bin data files in your server directory:
+
+1. Download from [Bin_Data Repository](https://github.com/MemoriesOfTime/Bin_Data)
+2. Place the `bin` folder in your server root directory
+
+Your server directory should look like:
+```
+NukkitServer/
+├── bin/                          ← Required for custom blocks
+│   ├── vanilla_palette_xxx.nbt
+│   └── ...
+├── plugins/
+├── worlds/
+└── Nukkit-MOT-SNAPSHOT.jar
+```
+
+Without these files, custom block registration will fail.
+
+:::
+
 To create a custom block, you need to include two main components:
 
 1. Successfully register the block within the plugin to Nukkit-MOT.

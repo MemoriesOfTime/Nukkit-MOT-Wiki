@@ -6,6 +6,28 @@ import FolderView from '@site/src/components/FolderView';
 
 # 自定义方块
 
+:::danger 前提条件：Bin 数据文件
+
+在使用自定义方块之前，你必须下载并放置 Bin 数据文件到服务器目录：
+
+1. 从 [Bin_Data 仓库](https://github.com/MemoriesOfTime/Bin_Data) 下载
+2. 将 `bin` 文件夹放置到服务器根目录
+
+你的服务器目录结构应该如下：
+```
+NukkitServer/
+├── bin/                          ← 自定义方块必需
+│   ├── vanilla_palette_xxx.nbt
+│   └── ...
+├── plugins/
+├── worlds/
+└── Nukkit-MOT-SNAPSHOT.jar
+```
+
+没有这些文件，自定义方块注册将会失败。
+
+:::
+
 想要创建一个自定义方块，需要包含两个部分：
 
 1. 插件内成功注册到 Nukkit-MOT
