@@ -96,6 +96,28 @@ stop
 
 Wait for the server to completely shut down, then you can proceed with configuration.
 
+## Optional: Bin Data Files
+
+If you plan to use plugins with **custom blocks** feature, you need to download the Bin data files:
+
+1. Download from [Bin_Data Repository](https://github.com/MemoriesOfTime/Bin_Data)
+2. Place the `bin` folder in your server root directory
+
+Your server directory should look like:
+```
+NukkitServer/
+├── bin/                          ← Required for custom blocks
+│   ├── vanilla_palette_xxx.nbt
+│   └── ...
+├── plugins/
+├── worlds/
+└── Nukkit-MOT-SNAPSHOT.jar
+```
+
+:::tip
+If you're not using any plugins that require custom blocks, you can skip this step.
+:::
+
 ## Next Steps
 
 After server installation is complete, you can proceed to [Configure Server](configuration.md) to customize your server settings.
