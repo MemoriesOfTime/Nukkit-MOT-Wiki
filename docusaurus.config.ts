@@ -139,7 +139,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Memories Of Time`,
+      copyright: `<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2024044839号-17</a><br/>Copyright © ${new Date().getFullYear()} Memories Of Time`,
     },
     docs: {
       sidebar: {
