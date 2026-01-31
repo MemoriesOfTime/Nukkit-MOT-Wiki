@@ -286,14 +286,14 @@ int INVENTORY_START = 9;
 int INVENTORY_END = 35;
 int ARMOR_START = 36;
 int ARMOR_END = 39;
-int OFFHAND_SLOT = -106;
+int OFFHAND_SLOT = -106; // NBT存储用
 
 // 物品常量
 int AIR = 0;
 int MAX_STACK_SIZE = 64;
 
 // 玩家槽位数量
-int INVENTORY_SIZE = 36; // 玩家主物品栏槽位数
+int INVENTORY_SIZE = 36; // 快捷栏(9) + 主背包(27)
 ```
 
 ## 故障排除 {#troubleshooting}
