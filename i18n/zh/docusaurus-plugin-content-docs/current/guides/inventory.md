@@ -28,15 +28,15 @@ PlayerOffhandInventory offhandInv = player.getOffhandInventory();
 
 ### 离线玩家数据
 ```java
-// 通过UUID获取离线玩家数据处理器
-OfflinePlayer offlinePlayer = Server.getInstance()
-    .getOfflinePlayer(uuid);
+// 通过UUID获取离线玩家NBT数据
+CompoundTag playerData = Server.getInstance()
+    .getOfflinePlayerData(uuid);
 
 // 通过在线玩家转换
 Player onlinePlayer = Server.getInstance().getPlayer(name);
 if (onlinePlayer != null) {
-    OfflinePlayer offlinePlayer = (OfflinePlayer) Server.getInstance()
-        .getOfflinePlayer(onlinePlayer.getUniqueId());
+    CompoundTag onlineData = Server.getInstance()
+        .getOfflinePlayerData(onlinePlayer.getUniqueId());
 }
 ```
 
@@ -80,8 +80,8 @@ player.getOffhandInventory().setItem(0, Item.get(Item.SHIELD));
 // 从NBT数据加载物品时的槽位转换
 int nbtSlot = itemTag.getByte("Slot");
 if (nbtSlot >= 100 && nbtSlot < 104) {
-    // 盔甲槽位：100(靴子) -> 39, 101(护腿) -> 38, 102(胸甲) -> 37, 103(头盔) -> 36
-    inventory.setItem(103 - nbtSlot + 36, item);
+    // 盔甲槽位：100(头盔) -> 36, 101(胸甲) -> 37, 102(护腿) -> 38, 103(靴子) -> 39
+    inventory.setItem(nbtSlot - 100 + 36, item);
 } else if (nbtSlot == -106) {
     // 副手槽位
     player.getOffhandInventory().setItem(0, item);
@@ -148,12 +148,12 @@ player.getInventory().sendSlot(5, player);
 /**
  * 通过玩家名查找玩家（支持在线和离线）
  */
-public static OfflinePlayer findPlayerByName(String name) {
+public static CompoundTag findPlayerByName(String name) {
     // 1. 优先查找在线玩家
     Player onlinePlayer = Server.getInstance().getPlayer(name);
     if (onlinePlayer != null) {
-        return (OfflinePlayer) Server.getInstance()
-            .getOfflinePlayer(onlinePlayer.getUniqueId());
+        return Server.getInstance()
+            .getOfflinePlayerData(onlinePlayer.getUniqueId());
     }
     
     // 2. 扫描离线数据文件
@@ -170,10 +170,9 @@ public static OfflinePlayer findPlayerByName(String name) {
     if (playerFiles != null) {
         for (File file : playerFiles) {
             UUID uuid = UUID.fromString(file.getName().replace(".dat", ""));
-            OfflinePlayer offlinePlayer = (OfflinePlayer) 
-                Server.getInstance().getOfflinePlayer(uuid);
-            if (offlinePlayer != null && offlinePlayer.getName().equals(name)) {
-                return offlinePlayer;
+            CompoundTag playerData = Server.getInstance().getOfflinePlayerData(uuid);
+            if (playerData != null && playerData.getString("Name").equals(name)) {
+                return playerData;
             }
         }
     }
@@ -185,28 +184,38 @@ public static OfflinePlayer findPlayerByName(String name) {
 ### 库存数据转换
 ```java
 /**
- * 在线玩家背包转换为离线背包数据对象
+ * 在线玩家背包转换为NBT数据
  */
-public static OfflineInventory convertToOffline(PlayerInventory onlineInv) {
+public static CompoundTag convertToOffline(PlayerInventory onlineInv) {
     // 获取玩家NBT数据
     CompoundTag playerTag = Server.getInstance()
         .getOfflinePlayerData(onlineInv.getHolder().getUniqueId());
     
-    // 创建离线库存对象
-    OfflineInventory offlineInv = new OfflineInventory(
-        playerTag,
-        new OfflinePlayer(Server.getInstance(), onlineInv.getHolder().getUniqueId())
-    );
+    // 创建新的库存标签列表
+    ListTag<CompoundTag> inventoryList = new ListTag<>("Inventory");
     
-    // 复制主背包内容
-    offlineInv.setContents(onlineInv.getContents());
+    // 添加主背包内容
+    for (Map.Entry<Integer, Item> entry : onlineInv.getContents().entrySet()) {
+        int slot = entry.getKey();
+        Item item = entry.getValue();
+        
+        if (item == null || item.getId() == Item.AIR) continue;
+        
+        CompoundTag itemTag = NBTIO.putItemHelper(item, slot);
+        inventoryList.add(itemTag);
+    }
     
-    // 复制副手内容
-    offlineInv.setOffhandInventory(
-        onlineInv.getHolder().getOffhandInventory().getItem(0)
-    );
+    // 添加副手内容
+    Item offhandItem = onlineInv.getHolder().getOffhandInventory().getItem(0);
+    if (offhandItem != null && offhandItem.getId() != Item.AIR) {
+        CompoundTag offhandTag = NBTIO.putItemHelper(offhandItem, -106);
+        inventoryList.add(offhandTag);
+    }
     
-    return offlineInv;
+    // 更新玩家数据中的库存
+    playerTag.putList(inventoryList);
+    
+    return playerTag;
 }
 ```
 
@@ -284,7 +293,7 @@ int AIR = 0;
 int MAX_STACK_SIZE = 64;
 
 // 玩家槽位数量
-int SURVIVAL_SLOTS = 36; // Player.SURVIVAL_SLOTS
+int INVENTORY_SIZE = 36; // 玩家主物品栏槽位数
 ```
 
 ## 故障排除 {#troubleshooting}
