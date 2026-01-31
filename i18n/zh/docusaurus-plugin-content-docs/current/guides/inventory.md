@@ -4,190 +4,328 @@ sidebar_position: 8
 
 # Inventory 库存指南
 
-`Inventory` 类用于管理玩家、容器等实体的物品栏系统。本指南将介绍如何通过Nukkit API操作库存系统。
+`Inventory` 接口是Nukkit-MOT中所有物品栏系统的核心基类，用于管理玩家、容器等实体的物品存储与交互。
 
-## Inventory 类概述 \{#inventory-class-overview}
+## Inventory 核心概述 {#inventory-core-overview}
 
-位于 [cn.nukkit.inventory](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/inventory/Inventory.java) 包中，所有库存类型的基类。
+位于 [cn.nukkit.inventory](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/inventory/Inventory.java) 包中，定义了库存操作的基本契约。
 
-:::tip 常用子类
-- **PlayerInventory** 玩家随身物品栏
-- **ChestInventory** 箱子容器库存
-- **EnderChestInventory** 末影箱库存
+:::tip 主要实现类
+- **PlayerInventory** - 玩家随身物品栏（36格背包+4格装备+副手）
+- 各类容器库存（ChestInventory, EnderChestInventory等）
 :::
 
-## 获取库存实例 \{#obtaining-inventory}
+## 获取库存实例 {#obtaining-inventory-instances}
 
-通常不需要直接实例化库存对象，而是通过实体获取：
-
+### 在线玩家库存
 ```java
-// 获取玩家物品栏
+// 获取玩家主物品栏
 PlayerInventory playerInv = player.getInventory();
 
-// 获取打开的箱子库存
-ChestInventory chestInv = (ChestInventory) player.getWindowById(WindowId.CHEST);
+// 获取玩家副手物品栏
+PlayerOffhandInventory offhandInv = player.getOffhandInventory();
 ```
 
-## 主要操作方法 \{#main-operations}
-
-### 添加物品 \{#add-items}
+### 离线玩家数据
 ```java
-Item diamond = Item.get(Item.DIAMOND);
+// 通过UUID获取离线玩家NBT数据
+CompoundTag playerData = Server.getInstance()
+    .getOfflinePlayerData(uuid);
 
-// 直接给予玩家
-player.giveItem(diamond);
-
-// 安全添加（返回未放入的物品）
-Item[] leftovers = playerInv.addItem(diamond);
-
-// 强制添加到指定槽位
-playerInv.setItem(0, diamond); // 0为热键栏第一个格子
-```
-
-### 移除物品 \{#remove-items}
-```java
-// 移除指定数量的物品
-playerInv.removeItem(Item.get(Item.DIAMOND, 0, 5)); // 移除5个钻石
-
-// 清空指定槽位
-playerInv.clear(36); // 移除装备栏头盔位置
-```
-
-### 物品查询 \{#item-query}
-```java
-// 获取主手物品
-Item mainHand = playerInv.getItemInHand();
-
-// 检查是否有至少64个圆石
-boolean hasCobble = playerInv.contains(Item.get(Item.COBBLESTONE, 0, 64));
-
-// 获取所有物品
-Item[] contents = playerInv.getContents().values().toArray(new Item[0]);
-```
-
-## 槽位系统 \{#slot-system}
-
-### 玩家库存槽位对应表
-| 槽位编号 | 说明               |
-|----------|--------------------|
-| 0-8      | 快捷栏             |
-| 9-35     | 主物品栏           |
-| 36-39    | 装备栏（头盔-靴子）|
-| 40       | 副手               |
-
-### 装备操作示例
-```java
-// 给玩家装备钻石胸甲
-Item chestplate = Item.get(Item.DIAMOND_CHESTPLATE);
-playerInv.setItem(38, chestplate); // 38为胸甲槽位
-
-// 获取玩家头盔
-Item helmet = playerInv.getHelmet();
-```
-
-## 库存事件监听 \{#inventory-events}
-
-### 基础监听示例
-```java
-@EventHandler
-public void onInventoryClick(InventoryClickEvent event) {
-    Player player = event.getPlayer();
-    Item clicked = event.getSourceItem();
-    
-    // 取消所有钻石的点击
-    if(clicked.getId() == Item.DIAMOND) {
-        event.setCancelled();
-        player.sendMessage("禁止操作钻石！");
-    }
+// 通过在线玩家转换
+Player onlinePlayer = Server.getInstance().getPlayer(name);
+if (onlinePlayer != null) {
+    CompoundTag onlineData = Server.getInstance()
+        .getOfflinePlayerData(onlinePlayer.getUniqueId());
 }
 ```
 
-### 高级交易监听
+## 库存基本操作 {#basic-inventory-operations}
+
+### 获取与设置内容
 ```java
-@EventHandler
-public void onTransaction(InventoryTransactionEvent event) {
-    for(InventoryAction action : event.getTransaction().getActions()) {
-        if(action instanceof SlotChangeAction) {
-            SlotChangeAction slotAction = (SlotChangeAction) action;
-            // 检测箱子第一格被放入钻石
-            if(slotAction.getInventory() instanceof ChestInventory 
-               && slotAction.getSlot() == 0 
-               && slotAction.getTargetItem().getId() == Item.DIAMOND) {
-                event.setCancelled();
+// 获取全部物品（返回Map<槽位, 物品>）
+Map<Integer, Item> allItems = inventory.getContents();
+
+// 批量设置库存内容
+inventory.setContents(itemMap);
+
+// 操作单个槽位
+Item item = inventory.getItem(0);      // 获取槽位0的物品
+inventory.setItem(0, newItem);          // 设置槽位0的物品
+inventory.clear(0);                     // 清空槽位0
+```
+
+### 玩家副手操作
+```java
+// 获取副手物品
+Item offhandItem = player.getOffhandInventory().getItem(0);
+
+// 设置副手物品
+player.getOffhandInventory().setItem(0, Item.get(Item.SHIELD));
+```
+
+## 槽位系统详解 {#slot-system-details}
+
+### 槽位标识对照表
+| 槽位范围/标识 | 对应区域 | Inventory API 槽位 | NBT存储槽位 |
+|--------------|----------|-------------------|------------|
+| 0-8 | 快捷栏 | 0-8 | 0-8 |
+| 9-35 | 主物品栏 | 9-35 | 9-35 |
+| 36-39 | 装备栏（头盔-靴子） | 36-39 | 100-103 |
+| 特殊标识 | 副手 | 通过`getOffhandInventory()` | -106 |
+
+### 槽位转换示例
+```java
+// 从NBT数据加载物品时的槽位转换
+int nbtSlot = itemTag.getByte("Slot");
+if (nbtSlot >= 100 && nbtSlot < 104) {
+    // 盔甲槽位：100(头盔) -> 36, 101(胸甲) -> 37, 102(护腿) -> 38, 103(靴子) -> 39
+    inventory.setItem(nbtSlot - 100 + 36, item);
+} else if (nbtSlot == -106) {
+    // 副手槽位
+    player.getOffhandInventory().setItem(0, item);
+} else if (nbtSlot >= 0 && nbtSlot < 36) {
+    // 主背包槽位（NBT与API槽位一致）
+    inventory.setItem(nbtSlot, item);
+}
+```
+
+## NBT数据操作 {#nbt-data-operations}
+
+### 读写玩家NBT数据
+```java
+// 获取玩家完整NBT数据
+CompoundTag playerData = Server.getInstance()
+    .getOfflinePlayerData(player.getUniqueId());
+
+// 获取库存NBT列表
+ListTag<CompoundTag> inventoryTag = playerData.getList("Inventory", CompoundTag.class);
+
+// 保存修改后的数据
+Server.getInstance().saveOfflinePlayerData(
+    player.getUniqueId(), 
+    playerData, 
+    false // 异步保存
+);
+```
+
+### 物品与NBT互相转换
+```java
+// Item 转换为 CompoundTag（包含槽位信息）
+CompoundTag itemTag = NBTIO.putItemHelper(item, slot);
+
+// CompoundTag 转换为 Item
+Item item = NBTIO.getItemHelper(itemTag);
+```
+
+## 库存同步机制 {#inventory-synchronization}
+
+### 实时同步模式
+```java
+// 场景：玩家A查看玩家B的背包
+// 1. 将B的背包内容同步到A的查看界面
+viewerInventory.setContents(targetPlayer.getInventory().getContents());
+
+// 2. 将A的修改同步回B的实际背包
+targetPlayer.getInventory()
+    .setContents(viewerInventory.getContents());
+```
+
+### 强制客户端更新
+```java
+// 更新玩家整个库存视图
+player.getInventory().sendContents(player);
+
+// 更新单个槽位
+player.getInventory().sendSlot(5, player);
+```
+
+## 实用工具方法 {#utility-methods}
+
+### 玩家查找工具
+```java
+/**
+ * 通过玩家名查找玩家（支持在线和离线）
+ */
+public static CompoundTag findPlayerByName(String name) {
+    // 1. 优先查找在线玩家
+    Player onlinePlayer = Server.getInstance().getPlayer(name);
+    if (onlinePlayer != null) {
+        return Server.getInstance()
+            .getOfflinePlayerData(onlinePlayer.getUniqueId());
+    }
+    
+    // 2. 扫描离线数据文件
+    File dataDir = new File(Server.getInstance().getDataPath(), "players/");
+    Pattern uuidPattern = Pattern.compile(
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.dat$"
+    );
+    
+    File[] playerFiles = dataDir.listFiles(file -> 
+        file != null && uuidPattern.matcher(file.getName()).matches()
+    );
+    
+    // 3. 比对玩家名
+    if (playerFiles != null) {
+        for (File file : playerFiles) {
+            UUID uuid = UUID.fromString(file.getName().replace(".dat", ""));
+            CompoundTag playerData = Server.getInstance().getOfflinePlayerData(uuid);
+            if (playerData != null && playerData.getString("Name").equals(name)) {
+                return playerData;
             }
         }
     }
+    
+    return null;
 }
 ```
 
-## 特殊库存操作 \{#advanced-operations}
-
-### 保存/恢复库存
+### 库存数据转换
 ```java
-// 保存全部物品
-Map<Integer, Item> savedItems = new HashMap<>(playerInv.getContents());
-
-// 清空库存
-playerInv.clearAll();
-
-// 恢复库存
-savedItems.forEach((slot, item) -> playerInv.setItem(slot, item));
-```
-
-### 自定义库存布局
-```java
-// 创建虚拟库存
-CustomInventory myInv = new CustomInventory(InventoryType.CHEST.getDefaultTitle());
-
-// 设置占位符
-Item border = Item.get(Item.STAINED_GLASS_PANE, 14).setCustomName(" ");
-for(int i : new int[]{0,1,7,8,9,17,18,26,27,35,36,44}){
-    myInv.setItem(i, border);
-}
-
-// 添加功能按钮
-Item infoBtn = Item.get(Item.BOOK).setCustomName("§e点击查看信息");
-myInv.setItem(22, infoBtn);
-```
-
-:::warning 重要提醒
-1. 操作非玩家库存时（如箱子），务必先检查 `inventory.getHolder()` 是否有效
-2. 修改库存后可能需要调用 `inventory.sendContents(player)` 同步客户端
-3. 对于容器库存，使用 `InventoryCloseEvent` 来保存数据
-:::
-
-## 实用工具方法 \{#utility-methods}
-
-### 快速填充方法
-```java
-// 填充一组圆石到所有空位
-Item cobble = Item.get(Item.COBBLESTONE, 0, 64);
-for(int i=0; i<playerInv.getSize(); i++){
-    if(playerInv.getItem(i).isNull()){
-        playerInv.setItem(i, cobble.clone());
+/**
+ * 在线玩家背包转换为NBT数据
+ */
+public static CompoundTag convertToOffline(PlayerInventory onlineInv) {
+    // 获取玩家NBT数据
+    CompoundTag playerTag = Server.getInstance()
+        .getOfflinePlayerData(onlineInv.getHolder().getUniqueId());
+    
+    // 创建新的库存标签列表
+    ListTag<CompoundTag> inventoryList = new ListTag<>("Inventory");
+    
+    // 添加主背包内容
+    for (Map.Entry<Integer, Item> entry : onlineInv.getContents().entrySet()) {
+        int slot = entry.getKey();
+        Item item = entry.getValue();
+        
+        if (item == null || item.getId() == Item.AIR) continue;
+        
+        CompoundTag itemTag = NBTIO.putItemHelper(item, slot);
+        inventoryList.add(itemTag);
     }
+    
+    // 添加副手内容
+    Item offhandItem = onlineInv.getHolder().getOffhandInventory().getItem(0);
+    if (offhandItem != null && offhandItem.getId() != Item.AIR) {
+        CompoundTag offhandTag = NBTIO.putItemHelper(offhandItem, -106);
+        inventoryList.add(offhandTag);
+    }
+    
+    // 更新玩家数据中的库存
+    playerTag.putList(inventoryList);
+    
+    return playerTag;
 }
-
-// 随机清空库存
-List<Integer> slots = new ArrayList<>(playerInv.getContents().keySet());
-Collections.shuffle(slots);
-slots.subList(0, 5).forEach(slot -> playerInv.clear(slot)); // 随机清空5格
 ```
 
-## 常见问题处理 \{#troubleshooting}
+## 创建自定义库存界面 {#creating-custom-inventory}
+
+### 使用 FakeInventories（推荐）
+```java
+// 添加Maven依赖
+/*
+<dependency>
+    <groupId>com.nukkitx</groupId>
+    <artifactId>fakeinventories</artifactId>
+    <version>1.0.3-MOT-SNAPSHOT</version>
+    <scope>provided</scope>
+</dependency>
+*/
+
+// 创建自定义GUI
+ChestFakeInventory menu = new ChestFakeInventory(null, "§6自定义菜单");
+
+// 设置物品和事件监听
+menu.setItem(13, Item.get(Item.BOOK).setCustomName("§e信息手册"));
+menu.addListener(event -> {
+    event.setCancelled();
+    event.getPlayer().sendMessage("菜单被点击！");
+});
+
+// 显示给玩家
+player.addWindow(menu);
+```
+
+## 注意事项与最佳实践 {#notes-and-best-practices}
+
+### 线程安全
+- 库存操作应在主服务器线程执行
+- 使用状态标记控制并发访问
+- 考虑使用`ScheduledExecutorService`进行定时更新
+
+### 槽位注意事项
+1. **槽位偏移**：NBT存储的槽位与API槽位存在差异，需注意转换
+2. **特殊槽位**：副手槽位标识为-106，盔甲槽位从100开始
+3. **客户端同步**：修改后可能需要手动调用`sendContents()`或`sendSlot()`
+
+### 内存管理
+```java
+// 及时清理不再使用的库存引用
+inventoryHolder = null;
+// 建议在合适时机调用，避免强制垃圾回收
+// System.gc(); // 通常不建议手动调用
+```
+
+### 数据保存
+```java
+// 修改离线玩家数据后必须保存
+Server.getInstance().saveOfflinePlayerData(uuid, playerData, false);
+
+// 在线玩家数据会自动保存，但重要操作可强制保存
+player.save();
+```
+
+## 常用常量参考 {#common-constants}
+
+```java
+// 槽位常量
+int HOTBAR_START = 0;
+int HOTBAR_END = 8;
+int INVENTORY_START = 9;
+int INVENTORY_END = 35;
+int ARMOR_START = 36;
+int ARMOR_END = 39;
+int OFFHAND_SLOT = -106; // NBT存储用
+
+// 物品常量
+int AIR = 0;
+int MAX_STACK_SIZE = 64;
+
+// 玩家槽位数量
+int INVENTORY_SIZE = 36; // 快捷栏(9) + 主背包(27)
+```
+
+## 故障排除 {#troubleshooting}
 
 ### 物品不同步问题
-使用以下方法强制更新：
 ```java
-playerInv.sendContents(player); // 更新整个库存
-playerInv.sendSlot(0, player);  // 更新指定槽位
+// 1. 检查是否在主线程操作
+Server.getInstance().getScheduler()
+    .scheduleTask(this, () -> {
+        // 库存操作代码
+    });
+
+// 2. 强制更新客户端视图
+player.getInventory().sendContents(player);
+
+// 3. 检查槽位映射是否正确
+System.out.println("槽位映射: " + inventory.getContents().keySet());
 ```
 
-### 处理不可堆叠物品
+### NBT数据损坏
 ```java
-Item specialItem = Item.get(Item.DIAMOND_SWORD);
-specialItem.setCompoundTag(new CompoundTag().putString("UniqueID", UUID.randomUUID().toString()));
-
-// 添加时会占用不同槽位
-playerInv.addItem(specialItem.clone(), specialItem.clone()); 
+try {
+    CompoundTag data = Server.getInstance()
+        .getOfflinePlayerData(uuid);
+    // 操作数据...
+} catch (IOException e) {
+    // 备份损坏文件并创建新数据
+    File backup = new File("players/" + uuid + ".dat.bak");
+    File playerDataFile = new File("players/" + uuid + ".dat");
+    if (playerDataFile.exists()) {
+        playerDataFile.renameTo(backup);
+    }
+    player.kick("数据损坏，已修复");
+}
 ```
