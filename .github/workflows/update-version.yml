@@ -1,0 +1,79 @@
+name: Update Supported Version
+
+on:
+  schedule:
+    # 每天 UTC 08:00 (北京时间 16:00) 检查一次
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Wiki
+        uses: actions/checkout@v4
+
+      - name: Fetch version from Nukkit-MOT README
+        id: fetch
+        run: |
+          # 从 Nukkit-MOT 仓库的 README 中提取支持版本范围
+          README=$(curl -sf https://raw.githubusercontent.com/MemoriesOfTime/Nukkit-MOT/master/README.md)
+          if [ $? -ne 0 ]; then
+            echo "::error::Failed to fetch Nukkit-MOT README"
+            exit 1
+          fi
+
+          # 提取版本范围，匹配 "Support for X.X – X.X.X version" 格式
+          NEW_VERSION=$(echo "$README" | grep -oP 'Support for \K[\d.]+ [–-] [\d.]+' | head -1)
+          if [ -z "$NEW_VERSION" ]; then
+            echo "::error::Failed to parse version from README"
+            exit 1
+          fi
+
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $NEW_VERSION"
+
+      - name: Check current version in Wiki
+        id: check
+        run: |
+          # 从英文文档中读取当前版本
+          CURRENT_VERSION=$(grep -oP 'Support for \K[\d.]+ [–-] [\d.]+' docs/intro.md | head -1)
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current version: $CURRENT_VERSION"
+
+          if [ "$CURRENT_VERSION" = "${{ steps.fetch.outputs.new_version }}" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged, skipping update"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: $CURRENT_VERSION -> ${{ steps.fetch.outputs.new_version }}"
+          fi
+
+      - name: Update version in docs
+        if: steps.check.outputs.changed == 'true'
+        env:
+          NEW_VERSION: ${{ steps.fetch.outputs.new_version }}
+          OLD_VERSION: ${{ steps.check.outputs.current_version }}
+        run: |
+          # 更新英文文档
+          sed -i "s|$OLD_VERSION|$NEW_VERSION|g" docs/intro.md
+
+          # 更新中文文档
+          ZH_INTRO="i18n/zh/docusaurus-plugin-content-docs/current/intro.md"
+          if [ -f "$ZH_INTRO" ]; then
+            sed -i "s|$OLD_VERSION|$NEW_VERSION|g" "$ZH_INTRO"
+          fi
+
+          echo "Updated version: $OLD_VERSION -> $NEW_VERSION"
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/intro.md i18n/zh/docusaurus-plugin-content-docs/current/intro.md
+          git commit -m "chore: update supported version to ${{ steps.fetch.outputs.new_version }}"
+          git push
