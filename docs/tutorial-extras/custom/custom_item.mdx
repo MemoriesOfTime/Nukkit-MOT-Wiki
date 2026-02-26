@@ -31,7 +31,6 @@ sequenceDiagram
     
     Plugin->>ItemCustom: Create new item class and inherit
     ItemCustom->>ItemCustom: Override getMaxStackSize()
-    ItemCustom->>ItemCustom: Override scaleOffset()
     ItemCustom->>CustomItemDefinition: Override getDefinition()
     CustomItemDefinition->>CustomItemDefinition: Use builder to set properties
     CustomItemDefinition-->>ItemCustom: Return CustomItemDefinition
@@ -47,9 +46,8 @@ package cn.nukkitmot.exampleplugin.custom.item;
 
 import cn.nukkit.item.customitem.CustomItemDefinition;
 import cn.nukkit.item.customitem.ItemCustom;
-import cn.nukkit.item.customitem.data.ItemCreativeCategory;
-import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
+import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemCategory;
 
 public class CandyCaneSword extends ItemCustom {
     // highlight-start
@@ -71,8 +69,8 @@ public class CandyCaneSword extends ItemCustom {
     @Override
     public CustomItemDefinition getDefinition() {
         return CustomItemDefinition
-                .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
-                .creativeGroup(ItemCreativeGroup.SWORD)
+                .simpleBuilder(this, CreativeItemCategory.EQUIPMENT)
+                .creativeGroup("itemGroup.name.sword")
                 .allowOffHand(true)
                 .handEquipped(true)
                 .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
@@ -111,9 +109,6 @@ We need to use `@Override` to override the following methods:
 - `getMaxStackSize()`
 Used to set the maximum stack size for the custom item.
 
-- `scaleOffset()`
-Used to set the texture size of the custom item, return values must be multiples of 16, such as 32, 64, 128.
-
 - `getDefinition()`
 Returns a CustomItemDefinition class that summarizes the basic attributes of the item, such as whether it is allowed in the off-hand, its category in creative mode, and enchantment effects.
 
@@ -128,11 +123,13 @@ From [cn.nukkit.item.customitem.CustomItemDefinition](https://github.com/Memorie
 - `toolBuilder` - A builder for tool items.
 - `armorBuilder` - A builder for armor items.
 - `edibleBuilder` - A builder for edible items.
+- `legacyBuilder` - A Legacy mode item builder (server only registers the identifier, textures are provided by the resource pack).
+- `legacyFoodBuilder` - A Legacy mode food builder.
 
 Start with a builder to return a `CustomItemDefinition` class.
 
 ```java title="java"
-CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativeCategory);
+CustomItemDefinition.simpleBuilder(ItemCustom item, CreativeItemCategory creativeCategory);
 ```
 
 #### Common Methods \{#common-methods}
@@ -142,12 +139,35 @@ Since methods directly return `this`, we can use a flattened writing style:
 - `allowOffHand(boolean allowOffHand)` - Whether to allow the item to be held in the off-hand.
 - `handEquipped(boolean handEquipped)` - Controls how the item is displayed in third-person view when held.
 - `foil(boolean foil)` - Whether the item has an enchantment glow effect, like enchanted books.
-- `creativeGroup(ItemCreativeGroup creativeGroup)` - Controls the custom item's group in the creative inventory, such as all enchanted books being in the `ItemCreativeGroup.ENCHANTED_BOOK` group.
+- `creativeGroup(String creativeGroup)` - Controls the custom item's group in the creative inventory using a string identifier, such as `"itemGroup.name.sword"`. See the [ItemCreativeGroup reference](#itemcreativegroup-key-methods) for common values.
+- `tag(String... tags)` - Adds one or more tags to the custom item.
 - `canDestroyInCreative(boolean value)` - Controls whether a player holding the item can break blocks in creative mode.
 
-### ItemCreativeGroup Key Methods \{#itemcreativegroup-key-methods}
+### ItemCreativeGroup Reference \{#itemcreativegroup-key-methods}
 
 From [cn.nukkit.item.customitem.data.ItemCreativeGroup](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/ItemCreativeGroup.java):
+
+:::warning Deprecated
+
+The `ItemCreativeGroup` enum is deprecated (`@Deprecated`). It is recommended to use string values directly, for example: `.creativeGroup("itemGroup.name.sword")`.
+
+:::
+
+Common creative group string values:
+
+| String Value | Description |
+|---|---|
+| `itemGroup.name.sword` | Swords |
+| `itemGroup.name.pickaxe` | Pickaxes |
+| `itemGroup.name.axe` | Axes |
+| `itemGroup.name.shovel` | Shovels |
+| `itemGroup.name.hoe` | Hoes |
+| `itemGroup.name.arrow` | Arrows |
+| `itemGroup.name.helmet` | Helmets |
+| `itemGroup.name.chestplate` | Chestplates |
+| `itemGroup.name.leggings` | Leggings |
+| `itemGroup.name.boots` | Boots |
+| `itemGroup.name.enchantedBook` | Enchanted Books |
 
 ### Registering the Item \{#register-item}
 
@@ -250,6 +270,21 @@ Sorry to hear that, but keep your cool. Check the following to troubleshoot:
 :::
 
 ## Further Exploration \{#further-exploration}
+
+### Custom Item Types \{#custom-item-types}
+
+Nukkit-MOT provides several base classes for different types of custom items:
+
+| Class | Description |
+|---|---|
+| `ItemCustom` | Base custom item class |
+| `ItemCustomTool` | Custom tool (pickaxe, axe, shovel, etc.) |
+| `ItemCustomArmor` | Custom armor (helmet, chestplate, leggings, boots) |
+| `ItemCustomEdible` | Custom food item |
+| `ItemCustomProjectile` | Custom throwable/projectile item |
+| `ItemCustomBookEnchanted` | Custom enchanted book |
+
+Choose the appropriate base class based on the type of item you're creating. Each class provides specific methods and behaviors tailored to its item type.
 
 ### Built-in Resource Packs in Plugin \{#resource_packs-in-plugin}
 

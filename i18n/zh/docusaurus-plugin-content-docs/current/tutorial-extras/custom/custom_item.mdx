@@ -29,7 +29,6 @@ sequenceDiagram
     
     Plugin->>ItemCustom: 创建新物品类并继承
     ItemCustom->>ItemCustom: 重写getMaxStackSize()
-    ItemCustom->>ItemCustom: 重写scaleOffset()
     ItemCustom->>CustomItemDefinition: 重写getDefinition()
     CustomItemDefinition->>CustomItemDefinition: 使用构建器设置属性
     CustomItemDefinition-->>ItemCustom: 返回CustomItemDefinition
@@ -45,9 +44,8 @@ package cn.nukkitmot.exampleplugin.custom.item;
 
 import cn.nukkit.item.customitem.CustomItemDefinition;
 import cn.nukkit.item.customitem.ItemCustom;
-import cn.nukkit.item.customitem.data.ItemCreativeCategory;
-import cn.nukkit.item.customitem.data.ItemCreativeGroup;
 import cn.nukkit.item.customitem.data.RenderOffsets;
+import cn.nukkit.network.protocol.types.inventory.creative.CreativeItemCategory;
 
 public class CandyCaneSword extends ItemCustom {
     // highlight-start
@@ -69,8 +67,8 @@ public class CandyCaneSword extends ItemCustom {
     @Override
     public CustomItemDefinition getDefinition() {
         return CustomItemDefinition
-                .simpleBuilder(this, ItemCreativeCategory.EQUIPMENT)
-                .creativeGroup(ItemCreativeGroup.SWORD)
+                .simpleBuilder(this, CreativeItemCategory.EQUIPMENT)
+                .creativeGroup("itemGroup.name.sword")
                 .allowOffHand(true)
                 .handEquipped(true)
                 .renderOffsets(RenderOffsets.scaleOffset(scaleOffset()))
@@ -109,9 +107,6 @@ public class CandyCaneSword extends ItemCustom {
 - `getMaxStackSize()`
 方法用于设置自定义物品的最大堆叠数量。
 
-- `scaleOffset()`
-方法用于设置自定义物品的贴图大小，返回值需要是16的倍数，如 32、64、128。
-
 - `getDefinition()`
 返回一个 CustomItemDefinition 类概括了该物品的基本属性，如 是否允许副手、在创造栏的分类、附魔效果。
 
@@ -131,10 +126,14 @@ public class CandyCaneSword extends ItemCustom {
 
 - `edibleBuilder` 食品的构建器
 
+- `legacyBuilder` Legacy 模式物品构建器（服务端仅注册标识符，贴图由资源包提供）
+
+- `legacyFoodBuilder` Legacy 模式食物构建器
+
 先使用构建器返回一个 `CustomItemDefinition` 类
 
 ```java title="java"
-CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativeCategory);
+CustomItemDefinition.simpleBuilder(ItemCustom item, CreativeItemCategory creativeCategory);
 ```
 
 #### 常用方法 \{#common-methods}
@@ -147,13 +146,37 @@ CustomItemDefinition.simpleBuilder(ItemCustom item, ItemCreativeCategory creativ
 
 - `foil(boolean foil)` 是否有附魔光辉效果，比如附魔书就有。
 
-- `creativeGroup(ItemCreativeGroup creativeGroup)` 控制自定义物品在创造栏的分组，例如所有的附魔书都是 `ItemCreativeGroup.ENCHANTED_BOOK` 组。
+- `creativeGroup(String creativeGroup)` 控制自定义物品在创造栏的分组，使用字符串标识符，例如 `"itemGroup.name.sword"`。常用值请参考 [ItemCreativeGroup 参考](#itemcreativegroup-key-methods)。
+
+- `tag(String... tags)` 为自定义物品添加一个或多个标签。
 
 - `canDestroyInCreative(boolean value)` 控制拿该物品的玩家是否可以在创造模式挖掘方块。
 
-### ItemCreativeGroup 主要方法 \{#itemcreativegroup-key-methods}
+### ItemCreativeGroup 参考 \{#itemcreativegroup-key-methods}
 
 引自 [cn.nukkit.item.customitem.data.ItemCreativeGroup](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/customitem/data/ItemCreativeGroup.java)
+
+:::warning 已废弃
+
+`ItemCreativeGroup` 枚举已被标注为废弃（`@Deprecated`）。推荐直接使用字符串值，例如：`.creativeGroup("itemGroup.name.sword")`。
+
+:::
+
+常用创造栏分组字符串值：
+
+| 字符串值 | 说明 |
+|---|---|
+| `itemGroup.name.sword` | 剑 |
+| `itemGroup.name.pickaxe` | 镐 |
+| `itemGroup.name.axe` | 斧 |
+| `itemGroup.name.shovel` | 铲 |
+| `itemGroup.name.hoe` | 锄 |
+| `itemGroup.name.arrow` | 箭 |
+| `itemGroup.name.helmet` | 头盔 |
+| `itemGroup.name.chestplate` | 胸甲 |
+| `itemGroup.name.leggings` | 护腿 |
+| `itemGroup.name.boots` | 靴子 |
+| `itemGroup.name.enchantedBook` | 附魔书 |
 
 ### 注册物品 \{#register-item}
 
@@ -260,6 +283,21 @@ public class ExamplePlugin extends PluginBase {
 :::
 
 ## 深入了解 \{#further-exploration}
+
+### 自定义物品类型 \{#custom-item-types}
+
+Nukkit-MOT 提供了多个基类用于不同类型的自定义物品：
+
+| 类名 | 说明 |
+|---|---|
+| `ItemCustom` | 基础自定义物品 |
+| `ItemCustomTool` | 自定义工具（镐、斧、铲等） |
+| `ItemCustomArmor` | 自定义盔甲（头盔、胸甲、护腿、靴子） |
+| `ItemCustomEdible` | 自定义食物 |
+| `ItemCustomProjectile` | 自定义投掷物 |
+| `ItemCustomBookEnchanted` | 自定义附魔书 |
+
+根据你要创建的物品类型选择合适的基类，每个类都提供了针对其物品类型的特定方法和行为。
 
 ### 插件内置资源包 \{#resource_packs-in-plugin}
 
