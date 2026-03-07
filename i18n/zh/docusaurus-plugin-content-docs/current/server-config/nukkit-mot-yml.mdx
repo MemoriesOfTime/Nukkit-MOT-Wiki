@@ -6,7 +6,7 @@ import Image from '@theme/IdealImage';
 
 # nukkit-mot.yml
 
-Nukkit-MOT 服务器高级配置。设置按类别组织。
+Nukkit-MOT 服务器高级配置。设置按类别分组排序。
 
 如需标准 Minecraft 服务器设置，请参阅 [server.properties](server-properties.mdx)。
 
@@ -104,8 +104,6 @@ LevelDB 自动压缩任务运行的频率
 |---------|-----|
 | Integer | 64  |
 
-与 `use-native-leveldb` 一同使用
-
 用于限制每个世界硬盘读写操作的区块数据最大缓存大小
 
 如果你拥有大量内存并且仅有几个大型世界，可以调高此缓存大小
@@ -139,8 +137,9 @@ LevelDB 自动压缩任务运行的频率
 0 = ZlibOriginal，1 = ZlibSingleThreadLowMem，2 = ZlibThreadLocal
 
 默认：2
-
-其他提供程序可能会对服务器的性能产生负面影响
+:::warning
+使用其他提供程序可能会对服务器的性能产生负面影响
+:::
 
 ### `compression-level`
 | 数据类型    | 默认值 |
@@ -191,6 +190,10 @@ LevelDB 自动压缩任务运行的频率
 启用此选项后，服务器会在客户端连接时发送一个 Cookie，用于验证客户端的合法性。
 
 这将增强连接的安全性，防止潜在的恶意连接或攻击。
+
+:::note
+如果您无法进入服务器（尤其是使用代理时），可以尝试将此项设置为 `false`。
+:::
 
 ### `timeout-milliseconds`
 | 数据类型    | 默认值   |
@@ -291,12 +294,6 @@ ViaProxy 连接的用户名前缀
 
 将区块保存到内存中以加快发送速度
 
-:::note
-
-多版本支持的效果不佳
-
-:::
-
 ### `async-chunks`
 | 数据类型    | 默认值 |
 |---------|-----|
@@ -322,7 +319,7 @@ ViaProxy 连接的用户名前缀
 |---------|-----|
 | Boolean | on  |
 
-启用 MobPlugin 的生物 AI
+启用生物 AI
 
 ### `auto-spawn-task`
 | 数据类型    | 默认值 |
@@ -480,8 +477,6 @@ worlds:
 
 如果启用，则以其 UUID 保存玩家数据的格式，并自动将旧格式的玩家数据转换为新格式
 
-如果使用旧版 Waterdog 代理，请禁用此功能
-
 如果存在新的玩家数据，请勿禁用
 
 ### `save-player-data-by-uuid`
@@ -491,13 +486,7 @@ worlds:
 
 如果启用，则以 NukkitX 使用的格式保存玩家数据，并自动将旧格式的玩家数据转换为新格式
 
-如果使用旧版 WaterdogPE 代理，请禁用此功能
-
-:::note
-
 如果存在新的玩家数据，请勿禁用
-
-:::
 
 ### `persona-skins`
 | 数据类型    | 默认值 |
@@ -615,7 +604,7 @@ worlds:
 |---------|-----|
 | Boolean | on  |
 
-您可以禁用 EntityMotionEvent 以获得更好的性能，如果您的插件没有使用它
+如果没有插件使用它，可以禁用 `EntityMotionEvent` 以获得更好的性能
 
 ### `block-listener`
 | 数据类型    | 默认值 |
@@ -775,7 +764,7 @@ Hastebin 令牌，方便生成 debug 链接
 |---------|-----|
 | Boolean | on  |
 
-启用鲜艳视觉效果支持
+启用灵动视效效果支持
 
 ### `enable-raytracing`
 | 数据类型    | 默认值 |

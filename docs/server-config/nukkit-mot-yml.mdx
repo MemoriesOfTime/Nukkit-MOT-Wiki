@@ -6,7 +6,7 @@ import Image from '@theme/IdealImage';
 
 # nukkit-mot.yml
 
-Advanced Nukkit-MOT server configuration. Settings are organized by category.
+Advanced Nukkit-MOT server configuration. Settings are grouped and sorted by category.
 
 For standard Minecraft server settings, see [server.properties](server-properties.mdx).
 
@@ -106,8 +106,6 @@ in ticks, 20 ticks = 1 second (default: 36000 = 30 minutes)
 |-----------|---------------|
 | Integer   | 64            |
 
-Used together with `use-native-leveldb`.
-
 Sets the maximum chunk data cache size per world to reduce disk I/O.
 
 Consider increasing this value if you have plenty of RAM and only a few large worlds.
@@ -142,7 +140,9 @@ select zlib provider
 
 default: 2
 
-other providers may have negative impact on the server's performance
+:::warning
+Using other providers may negatively impact server performance.
+:::
 
 ### `compression-level`
 | Data Type | Default Value |
@@ -193,6 +193,10 @@ IPs exceeding this limit will be temporarily banned
 When enabled, the server will send a Cookie to the client during the connection process to verify the client's legitimacy.
 
 This enhances connection security and helps prevent potential malicious connections or attacks.
+
+:::note
+If you cannot join the server (especially when using a proxy), try setting this to `false`.
+:::
 
 ### `timeout-milliseconds`
 | Data Type | Default Value |
@@ -293,12 +297,6 @@ how many chunks need to be loaded before player spawns
 
 save chunks to memory for faster sending
 
-:::note
-
-no proper multiversion support
-
-:::
-
 ### `async-chunks`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -324,7 +322,7 @@ Enable spawn eggs, allowing entity spawning via spawn eggs
 |-----------|---------------|
 | Boolean   | on            |
 
-Enable MobPlugin's creature AI
+Enable creature AI
 
 ### `auto-spawn-task`
 | Data Type | Default Value |
@@ -482,8 +480,6 @@ Each world entry supports:
 
 if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
 
-disable this if you use the legacy Waterdog proxy
-
 do not disable if new player data exists
 
 ### `save-player-data-by-uuid`
@@ -493,13 +489,7 @@ do not disable if new player data exists
 
 if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
 
-disable this if you use the legacy Waterdog proxy
-
-:::note
-
 do not disable if new player data exists
-
-:::
 
 ### `persona-skins`
 | Data Type | Default Value |
@@ -617,7 +607,7 @@ you can disable BatchPacketsEvent for better performance if none of your plugins
 |-----------|---------------|
 | Boolean   | on            |
 
-you can disable EntityMotionEvent for better performance if none of your plugins uses it
+If no plugin uses it, you can disable `EntityMotionEvent` for better performance
 
 ### `block-listener`
 | Data Type | Default Value |
@@ -777,7 +767,7 @@ Enable forced safety enchantments (up max lvl)
 |-----------|---------------|
 | Boolean   | on            |
 
-Enable vibrant visuals support
+Enable vibrant visuals effects support
 
 ### `enable-raytracing`
 | Data Type | Default Value |

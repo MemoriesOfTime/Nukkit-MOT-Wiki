@@ -212,7 +212,7 @@ require Xbox account to join
 
 does not bypass client side requirements
 
-if you disable this (not recommended), make sure player names and UUIDs are verified before passing them to permission managers/op
+if you disable this (not recommended), install a login plugin to protect player account security
 
 :::
 
@@ -231,8 +231,6 @@ it's recommended to enable this if you don't use a proxy software
 | Boolean   | off           |
 
 force players to download server's resource pack if they want to join
-
-also see `force-resources-allow-client-packs`
 
 ## `force-resources-allow-client-packs`
 | Data Type | Default Value |
@@ -260,7 +258,13 @@ enable monster spawning
 |-----------|---------------|
 | Boolean   | off           |
 
-enable / disable fly anticheat
+enable / disable allowing players to fly
+
+:::note
+
+if players are often kicked for flying, try setting this to `on`
+
+:::
 
 ## `auto-save`
 | Data Type | Default Value |
@@ -312,8 +316,6 @@ Port for RCON connections
 | Boolean   | on            |
 
 enable extended query
-
-See: https://wiki.vg/Query
 
 ## `server-authoritative-movement`
 | Data Type | Default Value |
