@@ -2,54 +2,11 @@
 sidebar_position: 1
 ---
 
-import Image from '@theme/IdealImage';
-
 # server.properties
 
 Modify the running configuration of the server to customize some basic functionalities.
 
-## `server-ip`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | 0.0.0.0       |
-
-server's port
-
-:::note
-
-there can't be two servers running in the same port
-
-you will need to port forward in order to have your server publicly accessible
-
-bedrock edition uses UDP
-
-:::
-
-## `server-port`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 19132         |
-
-server's port
-
-:::note
-
-there can't be two servers running in the same port
-
-you will need to port forward in order to have your server publicly accessible
-
-bedrock edition uses UDP
-
-:::
-
-## `enable-query`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable extended query
-
-See: https://wiki.vg/Query
+These are the standard Minecraft server settings defined in `server.properties`. For advanced Nukkit-MOT settings, see [nukkit-mot.yml](nukkit-mot-yml.mdx).
 
 ## `motd`
 | Data Type | Default Value    |
@@ -79,6 +36,40 @@ can't be empty since 1.16.210
 
 :::
 
+## `server-port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 19132         |
+
+server's port
+
+:::note
+
+there can't be two servers running in the same port
+
+you will need to port forward in order to have your server publicly accessible
+
+bedrock edition uses UDP
+
+:::
+
+## `server-ip`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | 0.0.0.0       |
+
+server's IP address
+
+:::note
+
+there can't be two servers running in the same port
+
+you will need to port forward in order to have your server publicly accessible
+
+bedrock edition uses UDP
+
+:::
+
 ## `view-distance`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -88,27 +79,6 @@ maximum view distance in chunks
 
 bigger value = more chunks loaded = more ram & cpu usage
 
-## `achievements`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable player achievements
-
-## `announce-player-achievements`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-broadcast achievement earned messages to all players
-
-## `spawn-protection`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 10            |
-
-size of the spawn area in blocks where non op players can't build or break blocks
-
 ## `max-players`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -116,31 +86,35 @@ size of the spawn area in blocks where non op players can't build or break block
 
 Maximum number of players allowed on the server
 
-## `drop-spawners`
+## `language`
 | Data Type | Default Value |
 |-----------|---------------|
-| Boolean   | on            |
+| String    | eng           |
 
-Drop spawners upon destruction
+default language that Nukkit uses
 
-## `spawn-animals`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-enable animal spawning
-
-## `spawn-mobs`
+## `force-language`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | off           |
 
-enable monster spawning
+force server side translations to be used
+
+enable only if you have a plugin to implement those
+
+## `shutdown-message`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | Server closed |
+
+message that shows for players when you stop the server
+
+use `§` for colors and `§n` for new line
 
 ## `gamemode`
 | Data Type | Default Value |
 |-----------|---------------|
-| Integer   | 2             |
+| Integer   | 0             |
 
 server's default gamemode
 
@@ -174,6 +148,43 @@ players will be banned when they die
 
 Whether to enable player versus player combat
 
+## `level-name`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | world         |
+
+Name of the default world
+
+## `level-seed`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Seed for the default level
+
+## `level-type`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | default       |
+
+generator used to create the default level if it doesn't exist
+
+supported by default: default, normal, flat, nether, the_end or void
+
+## `generator-settings`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Special world generator settings for the default level
+
+## `spawn-protection`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 10            |
+
+size of the spawn area in blocks where non op players can't build or break blocks
+
 ## `white-list`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -190,35 +201,83 @@ use `/whitelist` command or modify `white-list.txt` to add players to whitelist
 
 Reason for enabling the whitelist, displayed to players when they are denied access
 
-## `generator-settings`
+## `xbox-auth`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    |               |
+| Boolean   | on            |
 
-Special world generator settings for the default level
+require Xbox account to join
 
-## `level-name`
+:::note
+
+does not bypass client side requirements
+
+if you disable this (not recommended), install a login plugin to protect player account security
+
+:::
+
+## `encryption`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | world           |
+| Boolean   | on            |
 
-Name of the default world
+enable network encryption
 
-## `level-seed`
+it's recommended to enable this if you don't use a proxy software
+
+## `force-resources`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    |               |
+| Boolean   | off           |
 
-Seed for the default level
+force players to download server's resource pack if they want to join
 
-## `level-type`
+## `force-resources-allow-client-packs`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | void          |
+| Boolean   | off           |
 
-generator used to create the default level if it doesn't exist
+don't disable client's own packs when force-resources is enabled
 
-supported by default: default, normal, flat, nether, the_end or void
+## `spawn-animals`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+enable animal spawning
+
+## `spawn-mobs`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+enable monster spawning
+
+## `allow-flight`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+enable / disable allowing players to fly
+
+:::note
+
+if players are often kicked for flying, try setting this to `on`
+
+:::
+
+## `auto-save`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+automatically save the world and player data
+
+:::note
+
+if disabled, changes to worlds are not saved automatically even on unload, use plugin to save manually if needed
+
+:::
 
 ## `enable-rcon`
 | Data Type | Default Value |
@@ -251,710 +310,12 @@ Password for RCON connections
 
 Port for RCON connections
 
-## `auto-save`
+## `enable-query`
 | Data Type | Default Value |
 |-----------|---------------|
 | Boolean   | on            |
 
-automatically save the world and player data
-
-:::note
-
-if disabled, changes to worlds are not saved automatically even on unload, use plugin to save manually if needed
-
-:::
-
-you can use `worlds-level-auto-save-disabled` to only disable the auto save task instead
-
-## `force-resources`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-force players to download server's resource pack if they want to join
-
-also see `force-resources-allow-client-packs`
-
-## `force-resources-allow-client-packs`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-don't disable client's own packs when force-resources is enabled
-
-## `xbox-auth`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-require Xbox account to join
-
-:::note
-
-does not bypass client side requirements
-
-if you disable this (not recommended), make sure player names and UUIDs are verified before passing them to permission managers/op
-
-:::
-
-## `encryption`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable network encryption
-
-it's recommended to enable this if you don't use a proxy software
-
-## `bed-spawnpoints`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-allow players to set spawn point using beds and respawn anchors
-
-## `explosion-break-blocks`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable explosion damage to blocks
-
-affects all explosions such as tnt, creepers and end crystals
-
-## `stop-in-game`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-allow op to use `/stop` command in game
-
-## `op-in-game`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-allow op to use `/op` command to op other players in game
-
-## `space-name-mode`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | ignore        |
-
-Handling player names with spaces
-
-"disabled" - Players with names containing spaces are prohibited from entering the server
-
-"ignore" - Ignore names with spaces (default)
-
-"replacing" - Replace spaces in player names with "_"
-
-## `xp-bottles-on-creative`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-allow players to throw experience bottles on creative
-
-## `spawn-eggs`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Enable spawn eggs, allowing entity spawning via spawn eggs
-
-## `mob-ai`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable MobPlugin's creature AI
-
-## `entity-auto-spawn-task`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-enable task for auto spawning of mobs and animals
-
-spawning works by the server's difficulty setting
-
-note: spawn-animals, spawn-mobs or both must be enabled if you want anything to be spawned
-
-## `entity-despawn-task`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-enable despawning of mobs and animals without a name tag
-
-:::note
-
-there are special cases such as the ender dragon, withers and villagers that do not despawn
-
-:::
-
-## `language`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | eng           |
-
-default language that Nukkit uses
-
-## `force-language`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-force server side translations to be used
-
-enable only if you have a plugin to implement those
-
-## `shutdown-message`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | Server closed |
-
-message that shows for players when you stop the server
-
-use `§` for colors and `§n` for new line
-
-## `save-player-data`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
-
-disable this if you use the legacy Waterdog proxy
-
-do not disable if new player data exists
-
-## `query-plugins`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-include list of plugins in query (enable-query=on)
-
-## `debug-level`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 1             |
-
-set a higher value (1-3) if you want more debug logging
-
-## `async-workers`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    | auto          |
-
-number of async worker threads
-
-if set to auto, it will try to automatically detect the number of cores and use that
-
-## `zlib-provider`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 2             |
-
-select zlib provider
-
-0 = ZlibOriginal, 1 = ZlibSingleThreadLowMem, 2 = ZlibThreadLocal
-
-default: 2
-
-other providers may have negative impact on the server's performance
-
-## `compression-level`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 4             |
-
-Zlib compression level for sent packets (0-9)
-
-higher = more cpu usage but less bandwidth usage
-
-## `compression-threshold`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 256           |
-
-don't compress batch packets smaller than this (Zlib only)
-
-## `use-snappy-compression`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Use Snappy compression for packets
-
-## ~~min-mtu~~
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 576           |
-
-~~set minimum MTU size~~
-
-~~default: 576~~
-
-## ~~max-mtu~~
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 1492          |
-
-~~set maximum MTU size (576 - 1492)~~
-
-~~higher is more efficient but smaller values could fix issues on some connections~~
-
-## `rak-packet-limit`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 120           |
-
-A number of datagram packets each address can send within one RakNet tick (10ms)
-
-IPs exceeding this limit will be temporarily banned
-
-## `enable-rak-send-cookie`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on           |
-
-When enabled, the server will send a Cookie to the client during the connection process to verify the client's legitimacy.
-
-This enhances connection security and helps prevent potential malicious connections or attacks.
-
-## `timeout-milliseconds`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 25000         |
-
-how long should the server wait before kicking player if no response from the client
-
-in milliseconds, 1000 milliseconds = 1 second
-
-## `auto-tick-rate`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-allow the server to automatically change level tick rate to maintain 20 ticks per second
-
-## `auto-tick-rate-limit`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 20            |
-
-how much the server can temporary drop tick rate
-
-## `base-tick-rate`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 1             |
-
-default tick rate
-
-1 = 20 ticks per second, 2 = 10 ticks per second, etc.
-
-recommended to keep it as default (1)
-
-## `always-tick-players`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Always tick players
-
-## `light-updates`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Light updates
-
-## `clear-chunk-tick-list`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Allow the server to clear the list `chunkTickList` that tracks which chunks need logical updates after each game tick is completed.
-
-This can help optimize server performance by preventing unnecessary computations, especially in the case of large servers or when there are many chunks to manage.
-
-## `spawn-threshold`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 56            |
-
-how many chunks need to be loaded before player spawns
-
-## `chunk-sending-per-tick`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 4             |
-
-how many chunks can be sent per tick
-
-## `chunk-ticking-per-tick`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 40            |
-
-how many chunks can be ticked per tick
-
-## `chunk-ticking-radius`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 3             |
-
-radius of chunks around players to get ticked
-
-## `chunk-generation-queue-size`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 8             |
-
-how many chunks can be waiting for generation
-
-## `chunk-generation-population-queue-size`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 8             |
-
-how many chunks can be waiting for population
-
-## `ticks-per-autosave`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 6000          |
-
-how often world autosave task runs
-
-in ticks, 20 ticks = 1 second
-
-## `ticks-per-entity-spawns`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 200           |
-
-how often entity auto spawn task runs
-
-in ticks, 20 ticks = 1 second
-
-## `ticks-per-entity-despawns`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 12000         |
-
-how long entities live
-
-in ticks, 20 ticks = 1 second
-
-## `thread-watchdog`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable a task that checks if the server is frozen and kills it
-
-useful if you have an auto restart script or the server runs on a panel with this feature
-
-## `thread-watchdog-tick`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 60000         |
-
-Milliseconds the watchdog waits, if the Nukkit-MOT main thread is suspended for more than 60000 milliseconds, a fatal error is thrown and execution is terminated
-
-## `nether`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Generate Nether world
-
-## `end`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Generate End world
-
-## `vanilla-portals`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Vanilla portals
-
-## `portal-ticks`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 80            |
-
-Ticks required for the player to trigger the portal
-
-## `multi-nether-worlds`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-if you need multiple nether worlds, list worlds which should have their own nethers here, otherwise using the default nether world
-
-## `anti-xray-worlds`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-list of worlds where the experimental built-in anti xray is enabled
-
-example: `world, survival, factions`
-
-## `do-not-tick-worlds`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-list of worlds where random block ticking is disabled
-
-this disables plants growing, leaves decacying, dirt turning into grass, falling blocks etc.
-
-you may want to add your lobby and minigame worlds here
-
-## `worlds-entity-spawning-disabled`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-list of world where entity auto spawning is not allowed
-
-example: `lobby, pvp, creative`
-
-## `load-all-worlds`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Load all worlds
-
-## `ansi-title`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Enable to display server occupancy information in Windows CMD title
-
-<Image img={require('@site/static/images/server-config/windows_cmd_title.png')} alt="Windows CMD Title" />
-
-## `block-listener`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable checks used for snow and iron golems, monster egg stone etc.
-
-## `allow-flight`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-enable / disable fly anticheat
-
-## `multiversion-min-protocol`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 0             |
-
-Minimum protocol for multiversion
-
-## `multiversion-max-protocol`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | -1            |
-
-Maximum protocol for multiversion
-
-## `vanilla-bossbars`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-show boss bar for wither and ender dragon (experimental)
-
-## `strong-ip-bans`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Strong IP bans
-
-## `worlds-level-auto-save-disabled`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-Worlds where level auto-save is disabled
-
-## `temp-ip-ban-failed-xbox-auth`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Temporary ban failed Xbox authentication
-
-## `call-data-pk-send-event`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-you can disable DataPacketSendEvent for better performance if none of your plugins uses it
-
-## `call-batch-pk-send-event`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-you can disable BatchPacketsEvent for better performance if none of your plugins uses it
-
-## `do-level-gc`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-do level garbage collection between ticks
-
-## `skin-change-cooldown`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 15            |
-
-Skin change cooldown in seconds
-
-## ~~check-op-movement~~
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-~~enable movement checking for operators~~
-
-## `do-not-limit-interactions`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-disables a hack which is used to limit right click interaction spamming by client
-
-## `do-not-limit-skin-geometry`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-disables maximum skin geometry size checks
-
-may be required for some persona skins to be usable
-
-## `automatic-bug-report`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable automatic bug reports
-
-## ~~anvils-enabled~~
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-~~enable anvils~~
-
-~~anvils on Nukkit are pretty experimental and issues with item renaming or lost items are quite common~~
-
-## `save-player-data-by-uuid`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-if enabled, saving player data by their uuid in the format NukkitX uses and automatically converting player data in the old format to the new format
-
-disable this if you use the legacy Waterdog proxy
-
-:::note
-
-do not disable if new player data exists
-
-:::
-
-## `persona-skins`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-persona skins allowed
-
-:::note
-
-default steve skin will show if disabled
-
-enabling do-not-limit-skin-geometry may be required for some persona skins to be usable
-
-:::
-
-## ~~call-entity-motion-event~~
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-~~you can disable EntityMotionEvent for better performance if none of your plugins uses it~~
-
-## `update-notifications`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-notify operators about new Nukkit MOT releases on join
-
-## `bstats-metrics`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable bStats metrics
-
-https://bstats.org/plugin/server-implementation/Nukkit/
-
-data collected anonymously: server software (Nukkit MOT), player count, players game versions, xbox auth required, Java version, operating system, cpu arch & core count, host country
-
-## `cache-chunks`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-save chunks to memory for faster sending
-
-:::note
-
-no proper multiversion support
-
-:::
-
-## `async-chunks`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-enable asynchronous chunk sending
-
-this can improve the performance a lot when lots of chunks are being sent to players on different versions
-
-it's recommended to keep this enabled
-
-## `deprecated-verbose`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Verbose API deprecations
+enable extended query
 
 ## `server-authoritative-movement`
 | Data Type | Default Value |
@@ -962,7 +323,8 @@ Verbose API deprecations
 | String    | server-auth   |
 
 Server authoritative movement
-Optional:`client-auth / server-auth-with-rewind / server-auth`
+
+Optional: `client-auth / server-auth-with-rewind / server-auth`
 
 ## `server-authoritative-block-breaking`
 | Data Type | Default Value |
@@ -970,108 +332,3 @@ Optional:`client-auth / server-auth-with-rewind / server-auth`
 | Boolean   | on            |
 
 Server authoritative block breaking
-
-## `use-client-spectator`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Use client spectator
-
-## `enable-experiment-mode`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable experiment mode
-
-## `use-waterdog`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Attempt to get the real IP of clients provided by WaterdogPE
-
-See: https://waterdog.dev/
-
-## `enable-spark`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Enabling Spark for Performance Analysis
-
-See: https://spark.lucko.me/docs
-
-## `hastebin-token`
-| Data Type | Default Value |
-|-----------|---------------|
-| String    |               |
-
-Hastebin token for generating debug links
-
-See: https://www.toptal.com/developers/hastebin/documentation
-
-## `use-native-leveldb`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-use native leveldb implementation
-
-## `enable-raw-ores`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable raw ores; when enabled, coarse copper, coarse iron, and raw gold drop from higher-version players
-
-As of [1.17.0](https://minecraft.wiki/w/Bedrock_Edition_1.17.0)
-
-## `enable-new-paintings`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable the new paintings added in version 1.21
-
-## `enable-new-chicken-eggs-laying`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable new chicken eggs laying
-(Blue Egg & Brown Egg)
-
-## `leveldb-cache-mb`
-| Data Type | Default Value |
-|-----------|---------------|
-| Integer   | 64            |
-
-Used together with `use-native-leveldb`.
-
-Sets the maximum chunk data cache size per world to reduce disk I/O.
-
-Consider increasing this value if you have plenty of RAM and only a few large worlds.
-Consider decreasing it if you have many worlds and limited RAM.
-
-## `forced-safety-enchant`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | on            |
-
-Enable forced safety enchantments (up max lvl)
-
-## `netease-client-support`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Enable NetEase client support will allow NetEase players to enter the server
-
-## `only-allow-netease-client`
-| Data Type | Default Value |
-|-----------|---------------|
-| Boolean   | off           |
-
-Only NetEase players are allowed to enter the server, and after opening, Microsoft version players will be prohibited from entering the server, and only NetEase players will be allowed to join the server
