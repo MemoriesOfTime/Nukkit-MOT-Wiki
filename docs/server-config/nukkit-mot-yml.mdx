@@ -230,6 +230,39 @@ See: https://waterdog.dev/
 
 Username prefix for ViaProxy connections
 
+### `enable-proxy-protocol`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+Enables HAProxy Proxy Protocol v2 parsing for UDP proxies such as FRP.
+
+When a trusted proxy sends a valid PPv2 header, Nukkit-MOT replaces the proxy source address with the real client address.
+This allows IP-based logs, bans, and plugins to see the player's real IP instead of the proxy IP.
+
+:::warning
+Enable this only when your server is behind a compatible UDP proxy.
+Whitelisted proxy sources must send a valid PPv2 header.
+:::
+
+### `proxy-protocol-whitelist`
+| Data Type    | Default Value      |
+|--------------|--------------------|
+| `List<String>` | ["127.0.0.1/32"] |
+
+List of trusted proxy source IPs or CIDR ranges allowed to send Proxy Protocol headers.
+
+Use proxy addresses here, not player addresses.
+Examples: `127.0.0.1/32`, `10.0.0.0/8`, `203.0.113.5/32`
+
+:::note
+This whitelist currently supports IPv4/CIDR entries.
+
+If the list is empty, all source IPs are trusted for Proxy Protocol, which is less secure.
+
+Headerless or invalid packets coming from a whitelisted source will be dropped.
+:::
+
 ## Chunk Settings {#chunk-settings}
 
 ### `sending-per-tick`

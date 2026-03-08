@@ -227,6 +227,39 @@ LevelDB 自动压缩任务运行的频率
 
 ViaProxy 连接的用户名前缀
 
+### `enable-proxy-protocol`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | off |
+
+为 FRP 等 UDP 代理启用 HAProxy Proxy Protocol v2 解析。
+
+当受信任代理发送合法的 PPv2 头时，Nukkit-MOT 会把代理源地址替换为玩家真实地址。
+这样依赖 IP 的日志、封禁和插件都能看到玩家真实 IP，而不是代理 IP。
+
+:::warning
+仅当服务器位于兼容的 UDP 代理之后时才应启用此项。
+加入白名单的代理来源必须发送合法的 PPv2 头。
+:::
+
+### `proxy-protocol-whitelist`
+| 数据类型         | 默认值              |
+|--------------|------------------|
+| `List<String>` | ["127.0.0.1/32"] |
+
+允许发送 Proxy Protocol 头的受信任代理源 IP 或 CIDR 范围列表。
+
+这里填写代理地址，而不是玩家地址。
+示例：`127.0.0.1/32`、`10.0.0.0/8`、`203.0.113.5/32`
+
+:::note
+当前白名单仅支持 IPv4/CIDR 条目。
+
+如果该列表为空，则会信任所有来源 IP 的 Proxy Protocol 头，安全性会降低。
+
+来自白名单来源但不带头或携带非法头的报文会被直接丢弃。
+:::
+
 ## 区块设置 {#chunk-settings}
 
 ### `sending-per-tick`
