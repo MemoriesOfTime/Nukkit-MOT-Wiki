@@ -6,6 +6,10 @@ sidebar_position: 4
 
 Nukkit 支持通过插件来扩展服务器功能,例如添加新的游戏玩法、管理工具、经济系统等。
 
+## 想自己开发插件？
+
+如果你想自己编写插件，而不是安装现成插件，请先阅读[第一个 Java 插件](../../developer-guide/tutorial-basics/frist_java_plugin)，然后继续阅读[插件基础结构](../../developer-guide/tutorial-basics/plugin-basics)。
+
 ## 获取插件
 
 你可以从以下渠道下载 Nukkit 插件:

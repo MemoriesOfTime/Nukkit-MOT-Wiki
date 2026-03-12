@@ -1,11 +1,109 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 ---
 
 # Publish Your First Plugin
 
-Here is an example using GitHub.
+Publishing is not just uploading a jar. A usable release also needs metadata, instructions, and a quick validation pass.
 
-1. Use the combination keys `Alt + \ + G` to open Git.
-2. Select GitHub.
-3. From the submenu, choose `Share Project on GitHub`.
+:::tip Where You Are
+Step 4 of 4: turn your local plugin into a release other people can install.
+
+Previous: [Run and Debug Your Plugin](./debug_plugin)
+:::
+
+## Release Checklist
+
+Before publishing, confirm all of these:
+
+- The version in `pom.xml` matches the version in `plugin.yml`
+- The plugin loads on a clean local server
+- Debug-only logs and temporary test code are removed
+- Your README explains installation, usage, and dependencies
+- Required plugins are listed clearly if you use `depend`
+- The tested Nukkit-MOT version or API is written down somewhere users can see it
+
+## Build the Release Jar
+
+Generate a fresh artifact:
+
+```bash
+mvn clean package
+```
+
+Publish the jar from `target/`, or from your configured `plugins/` output folder if you enabled automatic copying on the previous page.
+
+## Prepare the Project Page
+
+Even a simple plugin page should answer these questions:
+
+- What does the plugin do
+- Which Nukkit-MOT build or API was it tested with
+- How do users install it
+- Does it provide commands, permissions, or config files
+- Are there known limitations or incompatibilities
+
+A minimal README structure works well:
+
+```md title="README.md"
+# HelloWorldPlugin
+
+## Overview
+Short description of the plugin.
+
+## Installation
+Place the jar into `plugins/` and restart the server.
+
+## Commands
+List commands here if the plugin has any.
+
+## Permissions
+List permissions here if the plugin has any.
+
+## Compatibility
+Tested with Nukkit-MOT MOT-SNAPSHOT.
+```
+
+## Choose Where to Publish
+
+Common release channels include:
+
+- GitHub Releases: upload the jar and write release notes
+- Nukkit-MOT community forums: add a short introduction, screenshots if needed, and install steps
+- Cloudburst / Nukkit-related forums: useful when you want wider plugin visibility
+- Chinese communities such as MineBBS: useful if your user base is mainly Chinese-speaking
+
+If you share the source code publicly, add a `LICENSE` file as well.
+
+## Suggested Release Notes Template
+
+```md
+## HelloWorldPlugin 1.0.0
+
+- Tested with: Nukkit-MOT MOT-SNAPSHOT
+- Requires: no extra dependencies
+- Installation: place the jar into `plugins/` and restart the server
+- Features:
+  - Logs a startup message
+- Known issues:
+  - None
+```
+
+## Final Validation Before Public Release
+
+Do one last pass on a clean server:
+
+- Delete the old plugin jar
+- Copy the new release jar into `plugins/`
+- Start the server
+- Run `plugins` or `pl`
+- Confirm the version and plugin name are correct
+
+If that works, your first public plugin release is ready.
+
+## Next Steps
+
+After finishing the first release, the most useful follow-up topics are usually:
+
+- [Events](../guides/event)
+- [Permissions](../guides/permission)

@@ -4,149 +4,171 @@ sidebar_position: 3
 
 import Image from '@theme/IdealImage';
 
-# Debug Your Plugin
+# Run and Debug Your Plugin
 
-During the plugin development process, you will often encounter challenges such as logic errors in the code, compatibility issues with other components, performance bottlenecks, and so on.
+Before setting breakpoints, make sure the plugin can actually load on a local server.
 
-Using breakpoints effectively can help us quickly analyze and locate issues.
+:::tip Where You Are
+Step 3 of 4: put the jar into a server, verify that it loads, and then attach the debugger.
 
-Plugin debugging requires editing the `Run/Debug Configurations` in IntelliJ IDEA beforehand.
+Previous: [Plugin Basics](./plugin-basics)
 
-## Editing Debug Configurations \{#edit-debug-config}
+Next: [Publish Your First Plugin](./publish_first_plugin)
+:::
+
+## 1. Prepare a Local Server Folder
+
+Create a clean folder for your test server and place the Nukkit-MOT server jar in it.
+
+Start the server once:
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+After the first start, the server will usually generate folders such as `plugins/`, `worlds/`, and configuration files. Stop the server after that.
+
+## 2. Put Your Plugin into `plugins/`
+
+Copy the jar built on the previous page into the server's `plugins/` folder:
+
+```text
+target/hello-world-plugin-1.0.0.jar -> <your-server>/plugins/
+```
+
+If you renamed the build artifact, copy that file instead.
+
+## 3. Start the Server and Verify the Plugin Loads
+
+Start the server again:
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+You should look for two kinds of confirmation:
+
+- A server log line that mentions `HelloWorldPlugin v1.0.0`
+- The log line from your `onEnable()` method, such as `Hello from my first Nukkit-MOT plugin!`
+
+After the server is running, use one of these commands:
+
+```text
+plugins
+```
+
+or:
+
+```text
+pl
+```
+
+If the plugin loads correctly, it should appear in the plugin list. In many consoles, a successful plugin name is shown in green.
+
+## 4. Check These First If Loading Fails
+
+Most first-plugin failures come from one of these problems:
+
+- `plugin.yml` is missing from the jar root
+- The `main` field does not match the real package name and class name
+- The jar was copied to the server root instead of `plugins/`
+- A required dependency from `depend` is missing
+- You changed the code but forgot to rebuild the jar
+
+If the plugin name appears in red or the server prints a stack trace, start by checking these items before you debug Java code.
+
+## 5. Optional: Copy the Jar into `plugins/` After Every Build
+
+Once the plugin can load manually, you can speed up your workflow by writing the built jar directly into the server's `plugins/` folder.
+
+Add a property to `pom.xml`:
+
+```xml title="pom.xml"
+<properties>
+  <maven.compiler.release>17</maven.compiler.release>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <nukkitPluginsPath>D:\BedrockServer\MOT\plugins</nukkitPluginsPath>
+</properties>
+```
+
+Then add a build section:
+
+```xml title="pom.xml"
+<build>
+  <defaultGoal>clean package</defaultGoal>
+
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.2</version>
+      <configuration>
+        <outputDirectory>${nukkitPluginsPath}</outputDirectory>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-clean-plugin</artifactId>
+      <version>3.5.0</version>
+      <configuration>
+        <filesets>
+          <fileset>
+            <directory>${nukkitPluginsPath}</directory>
+            <includes>
+              <include>${artifactId}*.jar</include>
+            </includes>
+          </fileset>
+        </filesets>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>pre-clean</phase>
+          <goals>
+            <goal>clean</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+Now `mvn clean package` writes the newest jar directly into your server plugin folder.
+
+## 6. Attach the IntelliJ IDEA Debugger
+
+After the plugin loads normally, configure IntelliJ IDEA to debug the server process.
 
 1. Open your project in IntelliJ IDEA.
 
 <Image img={require('./images/debug_config_edit_menu.png')} alt="Edit Debug Configurations Menu" />
 
-2. In the top bar, open the `Run/Debug Configurations` window.
+2. Open the `Run/Debug Configurations` window from the top bar.
 3. Choose the `JAR Application` template.
 
 <Image img={require('./images/add_jarapp_debug_config.png')} alt="Add JAR Application Debug Configuration" />
 
-4. Edit the configuration settings as follows:
+4. Use settings like these:
 
 | Field | Description |
 | --- | --- |
-| Name | Nukkit-MOT |
-| JAR Path | Specify the full path to `Nukkit-MOT-SNAPSHOT.jar` |
-| Working Directory | Specify the folder path where `Nukkit-MOT` server is located |
-| JRE | Choose Java 17 Runtime |
+| Name | `Nukkit-MOT` |
+| JAR Path | Full path to `Nukkit-MOT-SNAPSHOT.jar` |
+| Working Directory | Your local Nukkit-MOT server folder |
+| JRE | Java 17 runtime |
 
 Finally, click `OK`.
 
 <Image img={require('./images/edit_debug_config_window.png')} alt="Edit Debug Configuration Window" />
 
-## Auto-Update Plugin to Plugins Dir After Build \{#auto-update-plugin}
+Set a breakpoint in `onEnable()` and start debugging with `Shift + F9`.
 
-With the above steps, we can now use the `Shift + F9` shortcut to debug code.
+:::tip Keep the jar up to date
+Breakpoints only match the code you built. If the server is still running an old jar, your breakpoint results will be confusing.
+:::
 
-It's important to note that debugging with breakpoints is only possible if the JAR plugin matches the current project's build artifacts.
+## Before You Continue
 
-For convenience, we aim to automatically update the plugin to the `plugins` directory each time a build is successful.
-
-Here’s how to configure the `pom.xml` file in a Maven project to meet our needs.
-
-### Adding Relevant Properties \{#adding-relevant-properties}
-
-included within `<project>`.
-
-```xml title="pom.xml"
-    <groupId>cn.nukkitmot</groupId>
-    // highlight-start
-    <artifactId>example-plugin</artifactId>
-    // highlight-end
-    <version>1.0.0</version>
-    <name>ExamplePlugin</name>
-    <description>An Example Nukkit-MOT Plugin</description>
-    <url>https://github.com/MemoriesOfTime/ExamplePlugin-Maven/</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        
-        // highlight-start
-        <nukkitPluginsPath>C:\BedrockServer\MOT\plugins</nukkitPluginsPath>
-        // highlight-end
-    </properties>
-```
-
-`artifactId` is the name of the plugin, which by default is used as the name for the build artifact.
-
-`nukkitPluginsPath` is the path to the plugins directory, which you need to manually add in your debugging environment.
-
-### Adding Maven plugins Tag \{#adding-maven-plugins-tag}
-
-The `<build>` tag is included within `<project>`.
-
-```xml title="pom.xml"
-    <build>
-        <defaultGoal>clean package</defaultGoal>
-
-        <plugins>
-            // highlight-start
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <outputDirectory>${nukkitPluginsPath}</outputDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${nukkitPluginsPath}</directory>
-                            <includes>
-                                <include>${artifactId}*.jar</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>pre-clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            // highlight-end
-        </plugins>
-    </build>
-```
-
-### Usage \{#usage}
-
-1. Click the letter **M** icon on the right side of IDEA to open the Maven panel.
-2. Click `clean` to clean, then `package` to build and package.
-
-Note that you need to clean before building and packaging, or the previous JAR artifacts won't be updated.
-
-```txt
-ExamplePlugin
-    Lifecycle
-        // highlight-start
-        clean
-        // highlight-end
-        validate
-        compile 
-        test 
-        // highlight-start
-        package
-        // highlight-end
-        verify
-        install
-        site 
-        deploy
-    Plugins
-    Dependencies
-    Repositories
-```
-
-Congratulations, you have now completed all the configurations.
+- Manual loading is your first validation step
+- Breakpoint debugging is the second step, not the first
+- When the plugin loads and you can reproduce changes locally, continue to [Publish Your First Plugin](./publish_first_plugin)
