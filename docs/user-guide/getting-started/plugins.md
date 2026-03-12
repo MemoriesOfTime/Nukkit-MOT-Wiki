@@ -6,6 +6,10 @@ sidebar_position: 4
 
 Nukkit supports extending server functionality through plugins, such as adding new gameplay mechanics, management tools, economy systems, etc.
 
+## Want to Build Your Own Plugin?
+
+If you want to develop a plugin instead of installing an existing one, start with [First Java Plugin](../../developer-guide/tutorial-basics/frist_java_plugin) and then continue with [Plugin Basics](../../developer-guide/tutorial-basics/plugin-basics).
+
 ## Getting Plugins
 
 You can download Nukkit plugins from the following sources:

@@ -1,17 +1,109 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 ---
 
-# 发布您的第一个插件
+# 发布你的第一个插件
 
-这里以 github 为例。
+发布插件不只是上传一个 jar，还要把元数据、说明文档和最后一次验证一起做好。
 
-1. 使用组合键 `Alt + \ + G` 打开 Git。
-2. 选择 Github
-3. 二级菜单中选择 `在 Github 上共享项目`
+:::tip 你现在的位置
+第 4 步 / 共 4 步：把本地插件整理成其他人可以安装使用的正式发布版本。
 
-:::warning
-
-您可能需要开启网络代理软件中的 `Tun 模式` 才能访问 Github。
-
+上一步：[运行并调试你的插件](./debug_plugin)
 :::
+
+## 发布前检查清单
+
+正式发布前，至少确认下面这些项：
+
+- `pom.xml` 中的版本号和 `plugin.yml` 中的版本号一致
+- 插件能在一个干净的本地服务端中成功加载
+- 已移除调试专用日志和临时代码
+- `README.md` 已说明安装方式、用法和依赖项
+- 如果使用了 `depend`，依赖插件已经明确写给用户
+- 用户能看到你测试过的 Nukkit-MOT 版本或 API 信息
+
+## 构建发布产物
+
+重新构建一份干净的发布 jar：
+
+```bash
+mvn clean package
+```
+
+如果你没有配置自动复制功能，就从 `target/` 目录取 jar；如果你已经配置了自动复制，也可以从服务端插件输出目录中取最终产物。
+
+## 准备项目说明页
+
+即使是一个很简单的插件页面，也最好能回答下面这些问题：
+
+- 这个插件是做什么的
+- 你用哪个 Nukkit-MOT 构建或 API 测过
+- 用户如何安装它
+- 它是否提供命令、权限或配置文件
+- 是否存在已知限制或兼容性问题
+
+一个最小可用的 README 结构可以像这样：
+
+```md title="README.md"
+# HelloWorldPlugin
+
+## Overview
+Short description of the plugin.
+
+## Installation
+Place the jar into `plugins/` and restart the server.
+
+## Commands
+List commands here if the plugin has any.
+
+## Permissions
+List permissions here if the plugin has any.
+
+## Compatibility
+Tested with Nukkit-MOT MOT-SNAPSHOT.
+```
+
+## 选择发布渠道
+
+常见的发布渠道包括：
+
+- GitHub Releases：上传 jar，并附上 release notes
+- Nukkit-MOT 社区论坛：附简要介绍、截图和安装方式
+- Cloudburst / Nukkit 相关论坛：适合扩大插件曝光
+- MineBBS 等中文社区：适合中文用户为主的项目
+
+如果你要公开源代码，记得同时加入 `LICENSE` 文件。
+
+## 推荐的发布说明模板
+
+```md
+## HelloWorldPlugin 1.0.0
+
+- Tested with: Nukkit-MOT MOT-SNAPSHOT
+- Requires: no extra dependencies
+- Installation: place the jar into `plugins/` and restart the server
+- Features:
+  - Logs a startup message
+- Known issues:
+  - None
+```
+
+## 对外发布前的最后一次验证
+
+在一个干净服务端里再走一遍：
+
+- 删除旧版本插件 jar
+- 把新版本 jar 复制到 `plugins/`
+- 启动服务端
+- 执行 `plugins` 或 `pl`
+- 确认插件名和版本号都正确
+
+如果这一步也通过了，你的第一个公开插件版本就可以发布了。
+
+## 下一步
+
+完成第一次发布之后，通常最值得继续学习的是：
+
+- [事件系统](../guides/event)
+- [权限系统](../guides/permission)

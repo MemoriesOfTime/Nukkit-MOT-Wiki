@@ -4,147 +4,171 @@ sidebar_position: 3
 
 import Image from '@theme/IdealImage';
 
-# 调试您的插件
+# 运行并调试你的插件
 
-插件开发过程中，通常会遇到一些代码逻辑错误、插件的兼容性问题、性能瓶颈等挑战。
+在打断点之前，先确保插件已经能在本地服务端里正常加载。
 
-合理的使用断点能够帮助我们快速分析、定位问题。
+:::tip 你现在的位置
+第 3 步 / 共 4 步：把插件放进服务端，确认它能加载，然后再接入调试器。
 
-而插件调试需要先在 IDEA 中进行 `运行/调试配置` 的编辑。
+上一步：[插件基础结构](./plugin-basics)
 
-## 编辑调试配置 \{#edit-debug-config}
+下一步：[发布你的第一个插件](./publish_first_plugin)
+:::
 
-使用 IDEA 打开项目。
+## 1. 准备本地服务端目录
+
+先准备一个干净的测试目录，把 Nukkit-MOT 服务端 jar 放进去。
+
+先启动一次服务端：
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+第一次启动后，服务端通常会生成 `plugins/`、`worlds/` 以及一些配置文件。生成完之后先把服务端关闭。
+
+## 2. 把插件放进 `plugins/`
+
+把上一页打出来的 jar 复制到服务端的 `plugins/` 目录：
+
+```text
+target/hello-world-plugin-1.0.0.jar -> <你的服务端>/plugins/
+```
+
+如果你改过构建产物名称，就复制你自己的那个 jar。
+
+## 3. 启动服务端并确认插件已加载
+
+再次启动服务端：
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+你至少应该看到两类成功信号：
+
+- 服务端日志里出现包含 `HelloWorldPlugin v1.0.0` 的加载信息
+- 你在 `onEnable()` 里输出的日志，例如 `Hello from my first Nukkit-MOT plugin!`
+
+服务端启动后，还可以在控制台执行：
+
+```text
+plugins
+```
+
+或者：
+
+```text
+pl
+```
+
+如果插件加载成功，它就会出现在插件列表里。很多控制台主题下，成功加载的插件名会显示为绿色。
+
+## 4. 如果加载失败，先排查这几项
+
+大多数“第一个插件跑不起来”的问题都集中在这里：
+
+- `plugin.yml` 没有被打到 jar 根目录
+- `main` 字段和真实包名、类名不一致
+- jar 被复制到了服务端根目录，而不是 `plugins/`
+- `depend` 里声明的硬依赖没有安装
+- 你改了代码，但忘了重新构建 jar
+
+如果插件名显示为红色，或者控制台直接打印异常堆栈，先检查这些，再考虑 Java 级别的断点调试。
+
+## 5. 可选：每次构建后自动复制到 `plugins/`
+
+当你已经能手动加载成功后，可以继续优化工作流，让 Maven 在构建完成后直接把 jar 写进服务端 `plugins/` 目录。
+
+先给 `pom.xml` 增加一个属性：
+
+```xml title="pom.xml"
+<properties>
+  <maven.compiler.release>17</maven.compiler.release>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <nukkitPluginsPath>D:\BedrockServer\MOT\plugins</nukkitPluginsPath>
+</properties>
+```
+
+然后添加构建配置：
+
+```xml title="pom.xml"
+<build>
+  <defaultGoal>clean package</defaultGoal>
+
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.2</version>
+      <configuration>
+        <outputDirectory>${nukkitPluginsPath}</outputDirectory>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-clean-plugin</artifactId>
+      <version>3.5.0</version>
+      <configuration>
+        <filesets>
+          <fileset>
+            <directory>${nukkitPluginsPath}</directory>
+            <includes>
+              <include>${artifactId}*.jar</include>
+            </includes>
+          </fileset>
+        </filesets>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>pre-clean</phase>
+          <goals>
+            <goal>clean</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+这样之后执行 `mvn clean package`，最新的 jar 就会直接写入插件目录。
+
+## 6. 在 IntelliJ IDEA 中接入调试器
+
+当插件已经能够正常加载后，再去配置 IntelliJ IDEA 调试服务端进程。
+
+1. 使用 IntelliJ IDEA 打开你的插件工程。
 
 <Image img={require('./images/debug_config_edit_menu.png')} alt="编辑调试配置菜单" />
 
-1. 在顶栏中，打开 `运行/调试配置` 窗口。
-2. 选择 `JAR 应用程序` 模板。
+2. 在顶栏打开 `运行/调试配置` 窗口。
+3. 选择 `JAR Application` 模板。
 
-<Image img={require('./images/add_jarapp_debug_config.png')} alt="选择JAR应用程序" />
+<Image img={require('./images/add_jarapp_debug_config.png')} alt="添加 JAR Application 调试配置" />
 
-3. 编辑窗口内容
+4. 参考下面这组配置：
 
-| 字段 | 描述 |
+| 字段 | 说明 |
 | --- | --- |
-| 名称 | Nukkit-MOT |
-| JAR 路径 | 指 `Nukkit-MOT-SNAPSHOT.jar` 的完整路径 |
-| 工作目录 | 指 `Nukkit-MOT` 服务端所处的文件夹路径 |
-| JRE | 选择 Java 17 运行时 |
+| Name | `Nukkit-MOT` |
+| JAR Path | `Nukkit-MOT-SNAPSHOT.jar` 的完整路径 |
+| Working Directory | 你的本地 Nukkit-MOT 服务端目录 |
+| JRE | Java 17 运行时 |
 
-最后点击 `确定` 即可。
+最后点击 `OK`。
 
 <Image img={require('./images/edit_debug_config_window.png')} alt="编辑调试配置窗口" />
 
-## 自动更新插件到插件目录 \{#auto-update-plugin}
+接着在 `onEnable()` 中打一个断点，使用 `Shift + F9` 启动调试。
 
-通过上述操作，我们已经可以使用 `Shift + F9` 组合键进行代码调试。
+:::tip 记得保持 jar 最新
+断点只能命中你当前构建出来的代码。如果服务端还在加载旧 jar，调试结果会非常混乱。
+:::
 
-值得注意的是，只有 jar 插件与现在项目中的构建产物相同时，才能使用断点进行分析。
+## 继续之前
 
-在此，为了方便，我们希望在每次构建成功后自动更新插件到 `plugins` 目录下。
-
-下面介绍如何对 Maven 项目的 `pom.xml` 文件进行配置，以实现我们的需求。
-
-### 添加相关属性 \{#adding-relevant-properties}
-
-```xml title="pom.xml"
-    <groupId>cn.nukkitmot</groupId>
-    // highlight-start
-    <artifactId>example-plugin</artifactId>
-    // highlight-end
-    <version>1.0.0</version>
-    <name>ExamplePlugin</name>
-    <description>An Example Nukkit-MOT Plugin</description>
-    <url>https://github.com/MemoriesOfTime/ExamplePlugin-Maven/</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        
-        // highlight-start
-         <nukkitPluginsPath>C:\BedrockServer\MOT\plugins</nukkitPluginsPath>
-        // highlight-end
-    </properties>
-```
-
-artifactId 是插件名称，默认情况下构建产物的名称为包含此值。
-
-nukkitPluginsPath 是插件目录的路径，需要手动添加调试环境中的 `plugins` 目录。
-
-### 添加 Maven plugins 标签 \{#adding-maven-plugins-tag}
-
-标签 `<build>` 被包含在 `<project>` 中。
-
-```xml title="pom.xml"
-    <build>
-        <defaultGoal>clean package</defaultGoal>
-
-        <plugins>
-            // highlight-start
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <outputDirectory>${nukkitPluginsPath}</outputDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${nukkitPluginsPath}</directory>
-                            <includes>
-                                <include>${artifactId}*.jar</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>pre-clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            // highlight-end
-        </plugins>
-    </build>
-```
-
-### 使用 \{#usage}
-
-1. 在 IDEA 右侧点击字母 **M** 图标，打开 Maven 选项卡。
-2. 点击 `clean` 进行清理，点击 `package` 进行构建打包。
-
-请注意需要先进行清理而后再进行构建打包，否则上一次的 jar 产物不会被更新。
-
-```txt
-ExamplePlugin
-    生命周期
-        // highlight-start
-        clean
-        // highlight-end
-        validate
-        compile 
-        test 
-        // highlight-start
-        package
-        // highlight-end
-        verify
-        install
-        site 
-        deploy
-    插件
-    依赖项
-    仓库
-```
-
-恭喜你，至此已经完成所有配置。
+- 手动加载成功，是第一层验证
+- 断点调试，是第二层验证
+- 当插件已经能在本地稳定复现并调试后，继续阅读[发布你的第一个插件](./publish_first_plugin)

@@ -2,61 +2,147 @@
 sidebar_position: 1
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 # 第一个 Java 插件
 
-本篇是零基础教程，皆在让所有人都能独立的构建出第一个 Nukkit-MOT 插件
+本页带你从零创建一个最小可运行的 HelloWorld 插件。完成后，你会得到一个可以被 Nukkit-MOT 加载的 `.jar` 文件。
 
-## 环境准备 \{#env-preparation}
+:::tip 你现在的位置
+第 1 步 / 共 4 步：创建工程、添加依赖、打出第一个插件 jar。
 
-### Git \{#git}
+下一步：[插件基础结构](./plugin-basics)
+:::
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">
-  [下载 Git](https://git-scm.com/download/win)
+## 你需要准备什么
 
-  需下载 **Standalone Installer** 下的 **Git for Windows Setup.** 进行安装，否则没有环境变量。
-  </TabItem>
-  <TabItem value="mac" label="macOS">[下载 Git](https://git-scm.com/download/mac)</TabItem>
-  <TabItem value="linux" label="Linux">[下载 Git](https://git-scm.com/download/linux)</TabItem>
-</Tabs>
+- Java 17 或更高版本
+- IntelliJ IDEA Community 或其他 Java IDE
+- Maven
+- 一个本地 Nukkit-MOT 服务端目录，下一页会用到
 
-### IDEA \{#idea}
+## 创建 Maven 工程
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=windows) 社区版</TabItem>
-  <TabItem value="mac" label="macOS">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=mac) 社区版</TabItem>
-  <TabItem value="linux" label="Linux">安装 [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=linux) 社区版</TabItem>
-</Tabs>
+新建一个标准 Maven 工程，参数可以参考下面这组：
 
-请注意，并非页面中的 `IntelliJ IDEA Ultimate`，下滑页面可以看到 `IntelliJ IDEA Community`。
+| 设置项 | 示例值 |
+| --- | --- |
+| GroupId | `com.example` |
+| ArtifactId | `hello-world-plugin` |
+| Name | `HelloWorldPlugin` |
+| Package | `com.example.helloworld` |
+| JDK | `17` |
 
-## 拉取示例项目 \{#pull-example-project}
+工程创建完成后，将 `pom.xml` 替换为下面这个示例。仓库地址和依赖坐标与当前 `Nukkit-MOT` 的 `README.md` 保持一致：
 
-打开 IDEA 依次点击 **文件 -> 新建 -> 来自版本控制的项目...**
+```xml title="pom.xml"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-![from git](/images/tutorial-basics/1.jpg)
+  <groupId>com.example</groupId>
+  <artifactId>hello-world-plugin</artifactId>
+  <version>1.0.0</version>
+  <name>HelloWorldPlugin</name>
 
-而后在新的窗口中输入
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
-```url
-https://github.com/MemoriesOfTime/ExamplePlugin-Maven.git
+  <repositories>
+    <repository>
+      <id>repo-lanink-cn</id>
+      <url>https://repo.lanink.cn/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>cn.nukkit</groupId>
+      <artifactId>Nukkit</artifactId>
+      <version>MOT-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
 ```
 
-![input git url](/images/tutorial-basics/2.png)
+## 工程结构
 
-点击 **克隆**
+请创建下面这些文件：
 
-## 构建项目 \{#build-example-project}
+```text
+hello-world-plugin/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/
+      │     └─ example/
+      │        └─ helloworld/
+      │           └─ HelloWorldPlugin.java
+      └─ resources/
+         └─ plugin.yml
+```
 
-在 IDEA 索引分析完毕后。
+## 创建主类
 
-依次点击 **右侧 Maven 图标 -> 生命周期 -> package** 即可构建
+创建 `src/main/java/com/example/helloworld/HelloWorldPlugin.java`：
 
-![input git url](/images/tutorial-basics/3.jpg)
+```java title="src/main/java/com/example/helloworld/HelloWorldPlugin.java"
+package com.example.helloworld;
 
-构建产物通常存放于 **target** 文件夹下
+import cn.nukkit.plugin.PluginBase;
 
-![input git url](/images/tutorial-basics/4.jpg)
+public final class HelloWorldPlugin extends PluginBase {
+
+    @Override
+    public void onEnable() {
+        this.getLogger().info("Hello from my first Nukkit-MOT plugin!");
+    }
+}
+```
+
+`onEnable()` 是最常用的插件生命周期方法之一。插件被服务端成功启用后，这个方法就会被调用。
+
+## 创建 `plugin.yml`
+
+创建 `src/main/resources/plugin.yml`：
+
+```yaml title="src/main/resources/plugin.yml"
+name: HelloWorldPlugin
+main: com.example.helloworld.HelloWorldPlugin
+version: "1.0.0"
+api: ["1.0.0"]
+author: YourName
+description: My first Nukkit-MOT plugin
+```
+
+这个文件是必须的。Nukkit-MOT 会从 jar 中读取它，并根据其中的信息找到你的插件入口类。
+
+:::warning 仔细检查 `main` 字段
+`main` 必须和你的 Java 包名、类名完全一致。只要指向错了，插件就无法加载。
+:::
+
+## 构建插件 Jar
+
+在工程根目录执行：
+
+```bash
+mvn clean package
+```
+
+如果你使用 IntelliJ IDEA，也可以在 Maven 面板中先执行 `clean`，再执行 `package`。
+
+构建产物通常是：
+
+```text
+target/hello-world-plugin-1.0.0.jar
+```
+
+由于 `plugin.yml` 位于 `src/main/resources/`，Maven 会自动把它打进 jar 根目录。
+
+## 继续之前
+
+- 如果 Maven 无法解析 `cn.nukkit:Nukkit:MOT-SNAPSHOT`，先检查仓库地址和网络连接
+- 如果工程已经能成功构建，继续阅读[插件基础结构](./plugin-basics)
