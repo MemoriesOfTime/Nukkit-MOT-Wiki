@@ -1,5 +1,266 @@
 ---
 sidebar_position: 3
+title: 自定义附魔
+sidebar_label: 自定义附魔
 ---
 
 # 自定义附魔
+
+当你想给武器、工具、盔甲加入原版没有的行为，并且希望同一套效果同时作用于原版物品和自定义物品时，自定义附魔就是很合适的方案。
+
+常见场景包括：
+
+- 给工具或武器添加原版附魔没有提供的特殊效果
+- 让原版物品和自定义物品复用同一套成长或战斗逻辑
+- 通过命令、战利品、GUI 或自定义附魔书发放特殊装备
+
+## Nukkit-MOT 中的自定义附魔是怎么工作的
+
+自定义附魔本质上仍然是一个 `Enchantment`，但注册时不是使用原版数字 ID，而是使用 `Identifier`。
+
+- 用 `new Identifier("你的命名空间", "你的附魔名")`
+- 不要使用保留命名空间 `minecraft`
+- 通过 `EnchantmentType` 定义默认可附魔物品范围
+- 如果希望自动生成各等级对应的自定义附魔书物品，注册时使用 `Enchantment.register(enchantment, true)`
+
+`EnchantmentType` 只负责基础分类。如果你的自定义物品并不天然匹配 `DIGGER`、`SWORD`、`ARMOR` 这些类型，就需要额外重写 `canEnchant(Item item)`，自行判断物品的命名空间 ID。
+
+:::warning 当前版本的持久化限制
+普通物品上的附魔 NBT 只存数字 `id` 和 `lvl`。在当前 Nukkit-MOT 实现里，插件自定义附魔共用同一个 `Enchantment.CUSTOM_ENCHANTMENT_ID`。
+
+这意味着你不能只依赖物品原生附魔 NBT 来区分多个不同的插件自定义附魔。实际项目里，建议同时保存一份你自己的标记，例如自定义 NBT 字段、lore，或者直接使用专门的自定义物品类。
+
+下面的完整示例会额外写入一个简单的自定义 NBT 标记，这样事件触发和重启后的识别都会更稳定。
+:::
+
+## 附魔类结构
+
+一个自定义附魔类通常需要定义五件事：
+
+- 唯一的 `Identifier`
+- 展示名称对应的语言键
+- 稀有度
+- 默认作用范围，也就是 `EnchantmentType`
+- 等级、兼容性、特殊规则等重写方法
+
+```java title="custom/enchantment/AutoRemeltedEnchantment.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentType;
+import cn.nukkit.utils.Identifier;
+
+public final class AutoRemeltedEnchantment extends Enchantment {
+    public static final Identifier ID = new Identifier("exampleplugin", "auto_remelted");
+
+    public AutoRemeltedEnchantment() {
+        super(ID, "auto_remelted", Rarity.COMMON, EnchantmentType.DIGGER);
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return 3;
+    }
+
+    @Override
+    public int getMinEnchantAbility(int level) {
+        return 5 + (level - 1) * 10;
+    }
+
+    @Override
+    public int getMaxEnchantAbility(int level) {
+        return this.getMinEnchantAbility(level) + 15;
+    }
+
+    @Override
+    protected boolean checkCompatibility(Enchantment enchantment) {
+        return enchantment.getId() != Enchantment.ID_SILK_TOUCH
+                && super.checkCompatibility(enchantment);
+    }
+
+    @Override
+    public boolean canEnchant(Item item) {
+        return super.canEnchant(item)
+                || "exampleplugin:blaze_pickaxe".equals(item.getNamespaceId());
+    }
+
+    @Override
+    public String getName() {
+        return "%enchantment.custom.auto_remelted";
+    }
+}
+```
+
+这个例子把附魔类型设为 `EnchantmentType.DIGGER`，所以原版的镐、斧、铲、锄都会自动符合条件。额外的 `canEnchant` 判断，则让名为 `exampleplugin:blaze_pickaxe` 的自定义工具也能使用同一个附魔。
+
+## 完整示例：自动冶炼
+
+一个真正可用的自定义附魔，一般要走完整的四步：
+
+1. 定义附魔类
+2. 在插件生命周期早期注册
+3. 把附魔应用到物品上
+4. 在对应事件里触发实际行为
+
+### 注册附魔
+
+注册动作要尽量靠前，至少要在你尝试获取、发放这个附魔之前完成：
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.plugin.PluginBase;
+import com.example.myplugin.custom.enchantment.AutoRemeltedEnchantment;
+import com.example.myplugin.listener.AutoRemeltedListener;
+
+public final class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        Enchantment.register(new AutoRemeltedEnchantment(), true).assertOK();
+    }
+
+    @Override
+    public void onEnable() {
+        this.getServer().getPluginManager().registerEvents(new AutoRemeltedListener(), this);
+    }
+}
+```
+
+这里 `register(..., true)` 的意思是：除了把附魔放进注册表，还会按等级自动生成对应的自定义附魔书物品。
+
+### 应用到原版物品或自定义物品
+
+如果你希望插件逻辑里能稳定识别这个附魔，建议同时做两件事：
+
+- 添加真正的 `Enchantment` 对象，让物品保持“已附魔”状态
+- 写入你自己的 NBT 标记，供事件监听时可靠识别
+
+```java title="AutoRemeltedItems.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public final class AutoRemeltedItems {
+    public static final String AUTO_REMELTED_TAG = "exampleplugin:auto_remelted_level";
+
+    private AutoRemeltedItems() {
+    }
+
+    public static Item apply(Item item, int level) {
+        Enchantment enchantment = Enchantment.getEnchantment(AutoRemeltedEnchantment.ID).setLevel(level);
+        item.addEnchantment(enchantment);
+
+        CompoundTag tag = item.hasCompoundTag() ? item.getNamedTag() : new CompoundTag();
+        tag.putInt(AUTO_REMELTED_TAG, enchantment.getLevel());
+        item.setNamedTag(tag);
+        return item;
+    }
+}
+```
+
+原版物品可以这样处理：
+
+```java title="java"
+Item ironPickaxe = Item.fromString("minecraft:iron_pickaxe");
+ironPickaxe = AutoRemeltedItems.apply(ironPickaxe, 2);
+```
+
+自定义物品也可以复用同一个辅助方法：
+
+```java title="java"
+Item blazePickaxe = Item.fromString("exampleplugin:blaze_pickaxe");
+blazePickaxe = AutoRemeltedItems.apply(blazePickaxe, 2);
+```
+
+### 触发行为
+
+注册附魔只代表“服务器认识了这个附魔”。真正的效果逻辑，仍然应该写在与你设计目标匹配的事件里。
+
+对于“自动冶炼”这种效果，`BlockBreakEvent` 是一个稳定的触发点：
+
+```java title="listener/AutoRemeltedListener.java"
+package com.example.myplugin.listener;
+
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.block.BlockBreakEvent;
+import cn.nukkit.inventory.FurnaceRecipe;
+import cn.nukkit.item.Item;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.myplugin.custom.enchantment.AutoRemeltedItems.AUTO_REMELTED_TAG;
+
+public final class AutoRemeltedListener implements Listener {
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        int level = this.getAutoRemeltedLevel(event.getItem());
+        if (level <= 0) {
+            return;
+        }
+
+        List<Item> remeltedDrops = new ArrayList<>();
+        boolean changed = false;
+
+        for (Item drop : event.getDrops()) {
+            FurnaceRecipe recipe = Server.getInstance().getCraftingManager().matchFurnaceRecipe(drop);
+            if (recipe == null) {
+                remeltedDrops.add(drop);
+                continue;
+            }
+
+            Item result = recipe.getResult();
+            result.setCount(drop.getCount());
+            remeltedDrops.add(result);
+            changed = true;
+        }
+
+        if (changed) {
+            event.setDrops(remeltedDrops.toArray(new Item[0]));
+            event.setDropExp(event.getDropExp() + Math.max(0, level - 1));
+        }
+    }
+
+    private int getAutoRemeltedLevel(Item item) {
+        if (!item.hasCompoundTag()) {
+            return 0;
+        }
+        return item.getNamedTag().getInt(AUTO_REMELTED_TAG);
+    }
+}
+```
+
+这里最重要的思路是：附魔注册表负责定义“有这个附魔”，而事件监听器才是插件侧“效果真正生效”的行为触发点。
+
+## 附魔等级、兼容性、触发时机
+
+| 主题 | 主要 API | 作用 |
+| --- | --- | --- |
+| 等级范围 | `getMinLevel()`、`getMaxLevel()`、`setLevel()` | 约束合法等级，并在安全模式下自动裁剪 |
+| 附魔能力 | `getMinEnchantAbility(level)`、`getMaxEnchantAbility(level)` | 用于平衡附魔等级出现区间 |
+| 物品范围 | `EnchantmentType`、`canEnchant(Item)` | 控制哪些原版物品和自定义物品可附魔 |
+| 兼容性 | `checkCompatibility(Enchantment enchantment)` | 阻止和某些附魔共存，例如和精准采集冲突 |
+| 触发时机 | `BlockBreakEvent`、`EntityDamageByEntityEvent`、`PlayerInteractEvent`、`EntityShootBowEvent`、`ProjectileHitEvent` 等普通事件 | 在真正需要执行效果的游戏时刻触发逻辑 |
+
+`Enchantment` 基类里还提供了 `doAttack`、`doPostAttack`、`doPostHurt` 这类回调入口。它们是引擎层的附魔扩展点，但对于普通插件里的自定义附魔，当前更稳妥的方式仍然是“用事件 + 你自己的标记”来驱动行为。
+
+## 与原版物品和自定义物品的交互方式
+
+- 原版物品通常只要选对 `EnchantmentType`，例如 `DIGGER`、`SWORD`、`ARMOR`，就能直接使用
+- 自定义物品如果本身暴露了对应行为，例如 `isPickaxe()`、`isSword()`，也能直接复用这些类型判断
+- 如果自定义物品不适合归到某个内置类型，就重写 `canEnchant(Item item)`，按 `getNamespaceId()` 精确放行
+
+这样同一个附魔实现就能同时服务原版装备和自定义装备。
+
+## 常见坑
+
+- 不要给插件自定义附魔使用 `minecraft` 命名空间
+- 不要默认认为 `register(enchantment, true)` 会自动接入附魔台或铁砧流程
+- 不要只靠数字附魔 ID 去识别普通物品上的插件自定义附魔
+- 如果同一件物品需要承载多个不同的自定义附魔效果，请把每个效果都存进你自己的 NBT 或其他插件侧元数据
+
+当你把 `Enchantment` 注册表视为“定义层”，把自定义元数据和事件监听视为“行为层”时，自定义附魔会更容易维护，也更符合当前 Nukkit-MOT 的实际实现方式。

@@ -1,5 +1,266 @@
 ---
 sidebar_position: 3
+title: Custom Enchantments
+sidebar_label: Custom Enchantments
 ---
 
 # Custom Enchantments
+
+Custom enchantments are a good fit when you want plugin-defined combat effects, mining rules, or progression that can be shared by both vanilla items and your own custom items.
+
+Typical use cases include:
+
+- Giving a tool or weapon a behavior that vanilla enchantments do not have
+- Reusing the same effect on both vanilla items and custom items
+- Distributing special gear through commands, loot tables, GUIs, or custom book items
+
+## How custom enchantments work in Nukkit-MOT
+
+A custom enchantment is still an `Enchantment`, but it is registered by `Identifier` instead of a vanilla numeric ID.
+
+- Use `new Identifier("yourplugin", "your_enchantment")`
+- Do not use the reserved `minecraft` namespace
+- Pick an `EnchantmentType` to define the default item scope
+- Call `Enchantment.register(enchantment, true)` if you also want generated custom enchanted-book items for each level
+
+`EnchantmentType` only covers the basic item category. If your custom item does not naturally match `DIGGER`, `SWORD`, `ARMOR`, and so on, override `canEnchant(Item item)` and check the custom namespace ID yourself.
+
+:::warning Current persistence limitation
+Regular item enchantment NBT stores only numeric `id` and `lvl`. In the current Nukkit-MOT implementation, plugin custom enchantments share `Enchantment.CUSTOM_ENCHANTMENT_ID`.
+
+That means you should not rely on the built-in enchantment NBT alone to distinguish different plugin custom enchantments on the same item. For a practical plugin, keep your own marker as well, such as a custom NBT field, lore, or a dedicated custom item class.
+
+The example below uses a small custom NBT tag so the enchantment can be detected reliably in events and after restarts.
+:::
+
+## Enchantment class structure
+
+The custom enchantment class usually defines five things:
+
+- A unique `Identifier`
+- A display name key
+- A rarity
+- A default item scope through `EnchantmentType`
+- Level, compatibility, and special rules through method overrides
+
+```java title="custom/enchantment/AutoRemeltedEnchantment.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentType;
+import cn.nukkit.utils.Identifier;
+
+public final class AutoRemeltedEnchantment extends Enchantment {
+    public static final Identifier ID = new Identifier("exampleplugin", "auto_remelted");
+
+    public AutoRemeltedEnchantment() {
+        super(ID, "auto_remelted", Rarity.COMMON, EnchantmentType.DIGGER);
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return 3;
+    }
+
+    @Override
+    public int getMinEnchantAbility(int level) {
+        return 5 + (level - 1) * 10;
+    }
+
+    @Override
+    public int getMaxEnchantAbility(int level) {
+        return this.getMinEnchantAbility(level) + 15;
+    }
+
+    @Override
+    protected boolean checkCompatibility(Enchantment enchantment) {
+        return enchantment.getId() != Enchantment.ID_SILK_TOUCH
+                && super.checkCompatibility(enchantment);
+    }
+
+    @Override
+    public boolean canEnchant(Item item) {
+        return super.canEnchant(item)
+                || "exampleplugin:blaze_pickaxe".equals(item.getNamespaceId());
+    }
+
+    @Override
+    public String getName() {
+        return "%enchantment.custom.auto_remelted";
+    }
+}
+```
+
+This example uses `EnchantmentType.DIGGER`, so vanilla pickaxes, axes, shovels, and hoes are accepted automatically. The extra `canEnchant` check makes the same enchantment available to a custom tool named `exampleplugin:blaze_pickaxe`.
+
+## Complete example: Auto Remelted
+
+The following flow gives us a fully usable custom enchantment:
+
+1. Define the enchantment class
+2. Register it early in the plugin lifecycle
+3. Apply it to an item
+4. Trigger the actual effect from a normal event
+
+### Register the enchantment
+
+Register early, before you try to fetch or distribute the enchantment:
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.plugin.PluginBase;
+import com.example.myplugin.custom.enchantment.AutoRemeltedEnchantment;
+import com.example.myplugin.listener.AutoRemeltedListener;
+
+public final class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        Enchantment.register(new AutoRemeltedEnchantment(), true).assertOK();
+    }
+
+    @Override
+    public void onEnable() {
+        this.getServer().getPluginManager().registerEvents(new AutoRemeltedListener(), this);
+    }
+}
+```
+
+Passing `true` to `register(...)` tells Nukkit-MOT to generate a custom enchanted-book item for each level of the enchantment.
+
+### Apply it to vanilla items or custom items
+
+If you want the effect to be reliable in plugin code, add both:
+
+- The actual `Enchantment` object, so the item behaves like an enchanted item visually
+- Your own NBT marker, so your listener can identify the enchantment later
+
+```java title="AutoRemeltedItems.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public final class AutoRemeltedItems {
+    public static final String AUTO_REMELTED_TAG = "exampleplugin:auto_remelted_level";
+
+    private AutoRemeltedItems() {
+    }
+
+    public static Item apply(Item item, int level) {
+        Enchantment enchantment = Enchantment.getEnchantment(AutoRemeltedEnchantment.ID).setLevel(level);
+        item.addEnchantment(enchantment);
+
+        CompoundTag tag = item.hasCompoundTag() ? item.getNamedTag() : new CompoundTag();
+        tag.putInt(AUTO_REMELTED_TAG, enchantment.getLevel());
+        item.setNamedTag(tag);
+        return item;
+    }
+}
+```
+
+You can use the helper on a vanilla item:
+
+```java title="java"
+Item ironPickaxe = Item.fromString("minecraft:iron_pickaxe");
+ironPickaxe = AutoRemeltedItems.apply(ironPickaxe, 2);
+```
+
+Or on a custom item:
+
+```java title="java"
+Item blazePickaxe = Item.fromString("exampleplugin:blaze_pickaxe");
+blazePickaxe = AutoRemeltedItems.apply(blazePickaxe, 2);
+```
+
+### Trigger the behavior
+
+Registration only puts the enchantment into the registry. The actual behavior should still be executed from the event that matches your design.
+
+For an auto-smelting effect, `BlockBreakEvent` is a stable trigger point:
+
+```java title="listener/AutoRemeltedListener.java"
+package com.example.myplugin.listener;
+
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.block.BlockBreakEvent;
+import cn.nukkit.inventory.FurnaceRecipe;
+import cn.nukkit.item.Item;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.myplugin.custom.enchantment.AutoRemeltedItems.AUTO_REMELTED_TAG;
+
+public final class AutoRemeltedListener implements Listener {
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        int level = this.getAutoRemeltedLevel(event.getItem());
+        if (level <= 0) {
+            return;
+        }
+
+        List<Item> remeltedDrops = new ArrayList<>();
+        boolean changed = false;
+
+        for (Item drop : event.getDrops()) {
+            FurnaceRecipe recipe = Server.getInstance().getCraftingManager().matchFurnaceRecipe(drop);
+            if (recipe == null) {
+                remeltedDrops.add(drop);
+                continue;
+            }
+
+            Item result = recipe.getResult();
+            result.setCount(drop.getCount());
+            remeltedDrops.add(result);
+            changed = true;
+        }
+
+        if (changed) {
+            event.setDrops(remeltedDrops.toArray(new Item[0]));
+            event.setDropExp(event.getDropExp() + Math.max(0, level - 1));
+        }
+    }
+
+    private int getAutoRemeltedLevel(Item item) {
+        if (!item.hasCompoundTag()) {
+            return 0;
+        }
+        return item.getNamedTag().getInt(AUTO_REMELTED_TAG);
+    }
+}
+```
+
+This is the key idea: the registry tells Nukkit-MOT that your enchantment exists, but the event listener is the real behavior trigger point for plugin-side custom logic.
+
+## Levels, compatibility, and trigger timing
+
+| Topic | Main API | What to use it for |
+| --- | --- | --- |
+| Level range | `getMinLevel()`, `getMaxLevel()`, `setLevel()` | Define the legal level range and clamp unsafe values |
+| Enchantability | `getMinEnchantAbility(level)`, `getMaxEnchantAbility(level)` | Control balancing if your workflow uses enchantability rules |
+| Item scope | `EnchantmentType` and `canEnchant(Item)` | Decide which vanilla and custom items may receive the enchantment |
+| Compatibility | `checkCompatibility(Enchantment enchantment)` | Block combinations such as Silk Touch plus Auto Remelted |
+| Trigger timing | Normal events such as `BlockBreakEvent`, `EntityDamageByEntityEvent`, `PlayerInteractEvent`, `EntityShootBowEvent`, `ProjectileHitEvent` | Run the actual effect at the gameplay moment that matters |
+
+`Enchantment` also exposes hooks such as `doAttack`, `doPostAttack`, and `doPostHurt`. They are useful engine-level extension points, but for regular plugin-side custom enchantments on items, normal events plus your own marker are the safer approach today.
+
+## Interaction with vanilla items and custom items
+
+- Vanilla items are usually covered by `EnchantmentType`, such as `DIGGER`, `SWORD`, or `ARMOR`
+- Custom items can join the same enchantment if they expose the expected item behavior, for example `isPickaxe()` or `isSword()`
+- If a custom item does not map cleanly to a built-in type, override `canEnchant(Item item)` and match its namespace ID directly
+
+That makes one enchantment implementation reusable across both vanilla and custom equipment.
+
+## Common pitfalls
+
+- Do not use the `minecraft` namespace for plugin enchantments
+- Do not assume `register(enchantment, true)` automatically adds your enchantment to the enchanting table or anvil workflow
+- Do not identify a plugin custom enchantment on a normal item only by numeric enchantment ID
+- If you need multiple different custom enchantments on one item, store each effect in your own NBT or other plugin-side metadata
+
+When you treat the `Enchantment` registry as the public definition layer and your own metadata plus events as the behavior layer, custom enchantments become much easier to maintain.
