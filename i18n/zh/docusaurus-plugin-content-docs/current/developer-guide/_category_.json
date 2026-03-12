@@ -1,0 +1,8 @@
+{
+  "label": "开发文档",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "面向插件开发者的开发入门、API 指南与高级自定义教程。"
+  }
+}

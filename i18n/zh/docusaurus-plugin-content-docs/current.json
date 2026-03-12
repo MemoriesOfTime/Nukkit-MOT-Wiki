@@ -3,6 +3,22 @@
     "message": "Next",
     "description": "The label for version current"
   },
+  "sidebar.tutorialSidebar.category.User Documentation": {
+    "message": "使用文档",
+    "description": "The label for category User Documentation in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.User Documentation.link.generated-index.description": {
+    "message": "面向服主与管理员的部署、配置、运维和排障文档。",
+    "description": "The generated-index page description for category User Documentation in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Developer Documentation": {
+    "message": "开发文档",
+    "description": "The label for category Developer Documentation in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Developer Documentation.link.generated-index.description": {
+    "message": "面向插件开发者的开发入门、API 指南与高级自定义教程。",
+    "description": "The generated-index page description for category Developer Documentation in sidebar tutorialSidebar"
+  },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "快速入门",
     "description": "从零开始搭建 Nukkit 服务器的完整教程"
