@@ -1,0 +1,8 @@
+{
+  "label": "Developer Documentation",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Plugin development, API guides, and advanced customization for Nukkit-MOT."
+  }
+}

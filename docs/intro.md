@@ -30,6 +30,13 @@ note: if you need higher version features, please use [PowerNukkitX](https://git
 - __🔌 Plugins: [Nukkit Forum](https://cloudburstmc.org/resources/categories/nukkit-plugins.1/) / [Nukkit-MOT Forum](https://bbs.nukkit-mot.com/resources/)__
 - __🐞 [Report a Bug](https://github.com/MemoriesOfTime/Nukkit-MOT/issues/new/choose)__
 
+## Documentation Paths {#documentation-paths}
+
+The documentation is now split into two main tracks:
+
+- **User Documentation**: for server owners and administrators. Start with [Start from Scratch](user-guide/starting_from_scratch.md), then continue with [Getting Started](user-guide/getting-started/preparation.md) and [Server Config](user-guide/server-config/server-properties.mdx).
+- **Developer Documentation**: for plugin and tooling developers. Start with [First Java Plugin](developer-guide/tutorial-basics/frist_java_plugin.mdx), then continue with [Guides](developer-guide/guides/world.md) and [Advanced Tutorials](developer-guide/tutorial-extras/runtime_block_state.mdx).
+
 ## Maven {#maven}
 #### Repository: {#maven-repository}
 ```xml

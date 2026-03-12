@@ -1,0 +1,8 @@
+{
+  "label": "用户使用文档",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "面向服主与管理员的部署、配置、运维和排障文档。"
+  }
+}

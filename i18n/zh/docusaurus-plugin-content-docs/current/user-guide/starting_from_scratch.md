@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
 ---
 
 # 从0开始的 Nukkit 服务器搭建教程
