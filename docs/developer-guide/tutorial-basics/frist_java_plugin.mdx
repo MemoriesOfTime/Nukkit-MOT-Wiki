@@ -2,59 +2,147 @@
 sidebar_position: 1
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 # First Java Plugin
 
-This is a zero-base tutorial to enable anyone to build their first Nukkit-MOT plugin independently.
+Build a minimal HelloWorld plugin from scratch. At the end of this page, you will have a `.jar` file that Nukkit-MOT can load.
 
-## Environmental preparation \{#env-preparation}
+:::tip Where You Are
+Step 1 of 4: create the project, add the dependency, and build the first plugin jar.
 
-### Git \{#git}
+Next: [Plugin Basics](./plugin-basics)
+:::
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">
-  [Download Git](https://git-scm.com/download/win)
+## What You Need
 
-  You need to download **Git for Windows Setup.** under **Standalone Installer** to install it, otherwise there are no environment variables.
-  </TabItem>
-  <TabItem value="mac" label="macOS">[Download Git](https://git-scm.com/download/mac)</TabItem>
-  <TabItem value="linux" label="Linux">[Download Git](https://git-scm.com/download/linux)</TabItem>
-</Tabs>
+- Java 17 or newer
+- IntelliJ IDEA Community or another Java IDE
+- Maven
+- A local Nukkit-MOT server folder for the next page
 
-### IDEA \{#idea}
+## Create a Maven Project
 
-<Tabs groupId="operating-systems">
-  <TabItem value="win" label="Windows">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=windows) Community</TabItem>
-  <TabItem value="mac" label="macOS">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=mac) Community</TabItem>
-  <TabItem value="linux" label="Linux">Install [IDEA](https://www.jetbrains.com/zh-cn/idea/download/?section=linux) Community</TabItem>
-</Tabs>
+Create a standard Maven project and use values similar to these:
 
-## Pulling the Example Project \{#pull-example-project}
+| Setting | Value |
+| --- | --- |
+| GroupId | `com.example` |
+| ArtifactId | `hello-world-plugin` |
+| Name | `HelloWorldPlugin` |
+| Package | `com.example.helloworld` |
+| JDK | `17` |
 
-Open IDEA and navigate to **File -> New -> Project from Version Control...**
+After the project is created, replace `pom.xml` with this example. The repository URL and dependency coordinates match the current `Nukkit-MOT` README:
 
-![from git](/images/tutorial-basics/1.jpg)
+```xml title="pom.xml"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-Then, in the new window, enter the following URL:
+  <groupId>com.example</groupId>
+  <artifactId>hello-world-plugin</artifactId>
+  <version>1.0.0</version>
+  <name>HelloWorldPlugin</name>
 
-```url
-https://github.com/MemoriesOfTime/ExamplePlugin-Maven.git
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>repo-lanink-cn</id>
+      <url>https://repo.lanink.cn/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>cn.nukkit</groupId>
+      <artifactId>Nukkit</artifactId>
+      <version>MOT-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>
 ```
 
-![input git url](/images/tutorial-basics/2.png)
+## Project Layout
 
-Click **Clone**.
+Create the following files:
 
-## Building the Project \{#build-example-project}
+```text
+hello-world-plugin/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/
+      │     └─ example/
+      │        └─ helloworld/
+      │           └─ HelloWorldPlugin.java
+      └─ resources/
+         └─ plugin.yml
+```
 
-After IDEA has finished indexing:
+## Create the Main Class
 
-Navigate to **the Maven icon on the right -> Lifecycle -> package** to build the project.
+Create `src/main/java/com/example/helloworld/HelloWorldPlugin.java`:
 
-![input git url](/images/tutorial-basics/3.jpg)
+```java title="src/main/java/com/example/helloworld/HelloWorldPlugin.java"
+package com.example.helloworld;
 
-The build output is typically located in the **target** folder.
+import cn.nukkit.plugin.PluginBase;
 
-![input git url](/images/tutorial-basics/4.jpg)
+public final class HelloWorldPlugin extends PluginBase {
+
+    @Override
+    public void onEnable() {
+        this.getLogger().info("Hello from my first Nukkit-MOT plugin!");
+    }
+}
+```
+
+`onEnable()` is the first lifecycle method most plugin authors use. When the server enables your plugin successfully, this method is called.
+
+## Create `plugin.yml`
+
+Create `src/main/resources/plugin.yml`:
+
+```yaml title="src/main/resources/plugin.yml"
+name: HelloWorldPlugin
+main: com.example.helloworld.HelloWorldPlugin
+version: "1.0.0"
+api: ["1.0.0"]
+author: YourName
+description: My first Nukkit-MOT plugin
+```
+
+This file is required. Nukkit-MOT reads it from the jar and uses it to locate your plugin entry class.
+
+:::warning Check the `main` field carefully
+`main` must exactly match your Java package name and class name. If it points to the wrong class, the plugin will not load.
+:::
+
+## Build the Plugin Jar
+
+Run this command in the project root:
+
+```bash
+mvn clean package
+```
+
+If you prefer IntelliJ IDEA, open the Maven panel and run `clean`, then `package`.
+
+The output is usually:
+
+```text
+target/hello-world-plugin-1.0.0.jar
+```
+
+Because `plugin.yml` is under `src/main/resources/`, Maven copies it into the jar automatically.
+
+## Before You Continue
+
+- If Maven cannot resolve `cn.nukkit:Nukkit:MOT-SNAPSHOT`, re-check the repository URL and your network connection.
+- If the project builds successfully, continue to [Plugin Basics](./plugin-basics).

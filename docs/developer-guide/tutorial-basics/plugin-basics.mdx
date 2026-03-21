@@ -1,0 +1,165 @@
+---
+sidebar_position: 2
+---
+
+# Plugin Basics
+
+Understand how Nukkit-MOT recognizes, loads, and enables your plugin before you try to run it on a real server.
+
+:::tip Where You Are
+Step 2 of 4: understand `plugin.yml`, the main class, and the plugin lifecycle.
+
+Previous: [First Java Plugin](./frist_java_plugin)
+
+Next: [Run and Debug Your Plugin](./debug_plugin)
+:::
+
+## How Nukkit-MOT Loads a Plugin
+
+When you place a jar into `plugins/`, the loading flow is roughly:
+
+1. `PluginManager` scans the `plugins/` directory for `.jar` files.
+2. `JavaPluginLoader` reads `plugin.yml` from the jar root.
+3. The loader looks up the class declared in `main`.
+4. That class is instantiated as a `PluginBase`.
+5. `onLoad()` is called.
+6. The plugin is enabled later and `onEnable()` is called.
+7. When the server stops or the plugin is disabled, `onDisable()` is called.
+
+If a required dependency from `depend` is missing, the plugin will not load.
+
+## Minimal Project Layout
+
+For a normal Java plugin, keep this structure:
+
+```text
+hello-world-plugin/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/example/helloworld/HelloWorldPlugin.java
+      └─ resources/
+         └─ plugin.yml
+```
+
+Two beginner rules matter most:
+
+- Put your Java entry class under `src/main/java/`
+- Put `plugin.yml` under `src/main/resources/`
+
+## Required `plugin.yml` Fields
+
+According to the current `PluginDescription` implementation, these fields are required:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `name` | Yes | Plugin name. It is also used for the plugin data folder name. |
+| `main` | Yes | Fully qualified entry class name, such as `com.example.helloworld.HelloWorldPlugin`. |
+| `version` | Yes | Plugin version string. Quote values like `"1.0.0"`. |
+| `api` | Yes | Supported Nukkit API version string or list. A list such as `["1.0.0"]` is the clearest style for new plugins. |
+
+:::warning Important restrictions
+- Your main class must extend `PluginBase`
+- Your main class should not be inside the `cn.nukkit.*` package
+- `plugin.yml` must end up at the jar root after packaging
+:::
+
+## Common Optional Fields
+
+These fields are not required for a minimal HelloWorld plugin, but you will use them often:
+
+| Field | Use |
+| --- | --- |
+| `author` / `authors` | Show who maintains the plugin |
+| `description` | Short summary shown in metadata |
+| `website` | Project page, docs, or repository |
+| `prefix` | Prefix used by the plugin logger |
+| `load` | Load timing: `STARTUP` or `POSTWORLD` |
+| `depend` | Hard dependencies; missing ones block plugin loading |
+| `softdepend` | Optional dependencies; plugin still loads without them |
+| `loadbefore` | Hint that your plugin should load before another plugin |
+| `commands` | Command metadata registered from `plugin.yml` |
+| `permissions` | Permission nodes registered from `plugin.yml` |
+
+`load` defaults to `POSTWORLD`. Use `STARTUP` only when your plugin really needs to register something before worlds or other registries finish loading.
+
+## A Complete `plugin.yml` Example
+
+You only need the first four fields for the basic HelloWorld plugin, but a more realistic file often looks like this:
+
+```yaml title="plugin.yml"
+name: HelloWorldPlugin
+main: com.example.helloworld.HelloWorldPlugin
+version: "1.0.0"
+api: ["1.0.0"]
+author: YourName
+description: A minimal example plugin for Nukkit-MOT
+website: https://example.com
+prefix: HelloWorld
+load: POSTWORLD
+softdepend:
+  - SomeOptionalPlugin
+commands:
+  helloworld:
+    description: Send a hello message
+    usage: "/helloworld"
+    permission: helloworld.command
+permissions:
+  helloworld.command:
+    description: Allows the player to use /helloworld
+    default: true
+```
+
+You can delete the `commands` and `permissions` sections until you are ready to add those features.
+
+## Main Class and Lifecycle
+
+Your plugin entry class usually extends `PluginBase` and overrides one or more lifecycle methods:
+
+```java title="HelloWorldPlugin.java"
+package com.example.helloworld;
+
+import cn.nukkit.plugin.PluginBase;
+
+public final class HelloWorldPlugin extends PluginBase {
+
+    @Override
+    public void onLoad() {
+        this.getLogger().info("Plugin is loading");
+    }
+
+    @Override
+    public void onEnable() {
+        this.getLogger().info("Plugin is enabled");
+    }
+
+    @Override
+    public void onDisable() {
+        this.getLogger().info("Plugin is disabled");
+    }
+}
+```
+
+Use them like this:
+
+- `onLoad()` for early lightweight initialization
+- `onEnable()` for normal startup work such as registering listeners, commands, or tasks
+- `onDisable()` for saving state and cleaning up resources
+
+Do not put plugin startup logic in the constructor. Let the server control the lifecycle.
+
+## Data Folder and Resources
+
+Nukkit-MOT creates a data folder for your plugin based on the plugin `name`, usually:
+
+```text
+plugins/HelloWorldPlugin/
+```
+
+Files inside `src/main/resources/` are bundled into the jar. That is why `plugin.yml` belongs there, and later your default `config.yml` will belong there too.
+
+## Before You Continue
+
+- The most common load failures are a missing `plugin.yml` and a wrong `main` class name
+- If your structure and metadata look correct, continue to [Run and Debug Your Plugin](./debug_plugin)

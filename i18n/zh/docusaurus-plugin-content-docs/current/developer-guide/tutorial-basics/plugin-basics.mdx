@@ -1,0 +1,165 @@
+---
+sidebar_position: 2
+---
+
+# 插件基础结构
+
+在把插件丢进真实服务端之前，先搞清楚 Nukkit-MOT 是如何识别、加载并启用插件的。
+
+:::tip 你现在的位置
+第 2 步 / 共 4 步：理解 `plugin.yml`、主类和插件生命周期。
+
+上一步：[第一个 Java 插件](./frist_java_plugin)
+
+下一步：[运行并调试你的插件](./debug_plugin)
+:::
+
+## Nukkit-MOT 如何加载插件
+
+当你把一个 jar 放进 `plugins/` 目录后，整体流程大致如下：
+
+1. `PluginManager` 扫描 `plugins/` 目录下的 `.jar` 文件
+2. `JavaPluginLoader` 从 jar 根目录读取 `plugin.yml`
+3. 加载器根据 `main` 字段找到入口类
+4. 将这个类实例化为 `PluginBase`
+5. 调用 `onLoad()`
+6. 随后在启用阶段调用 `onEnable()`
+7. 当服务端停止或插件被禁用时调用 `onDisable()`
+
+如果 `depend` 中声明的硬依赖缺失，插件不会被加载。
+
+## 最小工程结构
+
+一个普通 Java 插件建议保持下面这个结构：
+
+```text
+hello-world-plugin/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/example/helloworld/HelloWorldPlugin.java
+      └─ resources/
+         └─ plugin.yml
+```
+
+对初学者来说，最重要的两条规则是：
+
+- Java 入口类放在 `src/main/java/`
+- `plugin.yml` 放在 `src/main/resources/`
+
+## `plugin.yml` 必填字段
+
+根据当前 `PluginDescription` 的实现，下面这些字段是必填项：
+
+| 字段 | 是否必填 | 作用 |
+| --- | --- | --- |
+| `name` | 是 | 插件名，同时也会用于插件数据目录名 |
+| `main` | 是 | 插件入口类的完整类名，例如 `com.example.helloworld.HelloWorldPlugin` |
+| `version` | 是 | 插件版本字符串，像 `"1.0.0"` 这样的值建议加引号 |
+| `api` | 是 | 支持的 Nukkit API 版本，可以是字符串，也可以是字符串列表。入门阶段推荐写成 `["1.0.0"]` |
+
+:::warning 重要限制
+- 你的主类必须继承 `PluginBase`
+- 主类不应该放在 `cn.nukkit.*` 包下
+- 打包后 `plugin.yml` 必须位于 jar 根目录
+:::
+
+## 常见可选字段
+
+这些字段对最小 HelloWorld 插件不是必需的，但很快你就会用到：
+
+| 字段 | 用途 |
+| --- | --- |
+| `author` / `authors` | 声明作者或作者列表 |
+| `description` | 插件简介 |
+| `website` | 项目主页、文档或仓库地址 |
+| `prefix` | 插件日志前缀 |
+| `load` | 加载时机：`STARTUP` 或 `POSTWORLD` |
+| `depend` | 硬依赖，缺失时插件无法加载 |
+| `softdepend` | 软依赖，缺失时插件仍可继续加载 |
+| `loadbefore` | 提示当前插件应先于其他插件加载 |
+| `commands` | 通过 `plugin.yml` 注册命令元数据 |
+| `permissions` | 通过 `plugin.yml` 注册权限节点 |
+
+`load` 的默认值是 `POSTWORLD`。只有在确实需要在世界或某些注册表初始化完成前就运行逻辑时，才使用 `STARTUP`。
+
+## 一个更完整的 `plugin.yml` 示例
+
+前一页那个 HelloWorld 插件实际上只需要前四个字段，但真实项目里常见的写法通常更接近下面这样：
+
+```yaml title="plugin.yml"
+name: HelloWorldPlugin
+main: com.example.helloworld.HelloWorldPlugin
+version: "1.0.0"
+api: ["1.0.0"]
+author: YourName
+description: A minimal example plugin for Nukkit-MOT
+website: https://example.com
+prefix: HelloWorld
+load: POSTWORLD
+softdepend:
+  - SomeOptionalPlugin
+commands:
+  helloworld:
+    description: Send a hello message
+    usage: "/helloworld"
+    permission: helloworld.command
+permissions:
+  helloworld.command:
+    description: Allows the player to use /helloworld
+    default: true
+```
+
+如果你现在还没有实现命令和权限系统，可以先把 `commands` 和 `permissions` 两段删掉。
+
+## 主类与生命周期
+
+插件入口类通常继承 `PluginBase`，并覆写一个或多个生命周期方法：
+
+```java title="HelloWorldPlugin.java"
+package com.example.helloworld;
+
+import cn.nukkit.plugin.PluginBase;
+
+public final class HelloWorldPlugin extends PluginBase {
+
+    @Override
+    public void onLoad() {
+        this.getLogger().info("Plugin is loading");
+    }
+
+    @Override
+    public void onEnable() {
+        this.getLogger().info("Plugin is enabled");
+    }
+
+    @Override
+    public void onDisable() {
+        this.getLogger().info("Plugin is disabled");
+    }
+}
+```
+
+它们通常这样使用：
+
+- `onLoad()`：做较早、较轻量的初始化
+- `onEnable()`：做正常启动逻辑，例如注册监听器、命令、任务
+- `onDisable()`：保存状态、清理资源
+
+不要把插件启动逻辑塞进构造方法里，应该让服务端来控制生命周期。
+
+## 数据目录与资源文件
+
+Nukkit-MOT 会根据插件的 `name` 创建数据目录，通常是：
+
+```text
+plugins/HelloWorldPlugin/
+```
+
+`src/main/resources/` 里的文件会被一起打进 jar，所以 `plugin.yml` 要放这里。后续如果你要加入默认 `config.yml`，也应该放在这里。
+
+## 继续之前
+
+- 初学者最常见的加载失败原因就是 `plugin.yml` 缺失，或者 `main` 类名写错
+- 如果结构和元数据都已经确认无误，就继续阅读[运行并调试你的插件](./debug_plugin)
