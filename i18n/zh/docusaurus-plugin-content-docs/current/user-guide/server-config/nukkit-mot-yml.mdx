@@ -182,17 +182,25 @@ LevelDB 自动压缩任务运行的频率
 
 超过此限制的 IP 将被暂时封禁
 
-### `enable-rak-send-cookie`
-| 数据类型    | 默认值 |
-|---------|-----|
-| Boolean | on  |
+### `rak-cookie-mode`
+| 数据类型   | 默认值    |
+|--------|--------|
+| String | active |
 
-启用此选项后，服务器会在客户端连接时发送一个 Cookie，用于验证客户端的合法性。
+RakNet Cookie 模式，用于连接安全验证。可用值：
 
-这将增强连接的安全性，防止潜在的恶意连接或攻击。
+| 值 | 说明 |
+|---|------|
+| `active` | 密钥由服务器生成和管理。处理并响应 `ID_OPEN_CONNECTION_REQUEST_1`，使用无状态 Cookie（默认） |
+| `offloaded` | 密钥未知。忽略 `ID_OPEN_CONNECTION_REQUEST_1`。在 `ID_OPEN_CONNECTION_REQUEST_2` 时，仅验证时间戳是否为最近的，忽略签名 |
+| `offloaded_psk` | 密钥已知。忽略 `ID_OPEN_CONNECTION_REQUEST_1`。在 `ID_OPEN_CONNECTION_REQUEST_2` 时，验证时间戳是否为最近的并检查 Cookie 签名 |
+| `off` | 在 `ID_OPEN_CONNECTION_REQUEST_2` 时接受任何 Cookie |
+| `invalid` | 如果客户端发送了 Cookie 则视为无效 |
 
 :::note
-如果您无法进入服务器（尤其是使用代理时），可以尝试将此项设置为 `false`。
+如果您无法进入服务器（尤其是使用代理时），可以尝试将此项设置为 `off`。
+
+为了向后兼容，`true` 会被视为 `active`，`false` 会被视为 `off`。
 :::
 
 ### `timeout-milliseconds`

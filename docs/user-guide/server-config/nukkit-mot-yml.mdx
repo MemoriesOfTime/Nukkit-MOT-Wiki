@@ -185,17 +185,25 @@ A number of datagram packets each address can send within one RakNet tick (10ms)
 
 IPs exceeding this limit will be temporarily banned
 
-### `enable-rak-send-cookie`
+### `rak-cookie-mode`
 | Data Type | Default Value |
 |-----------|---------------|
-| Boolean   | on            |
+| String    | active        |
 
-When enabled, the server will send a Cookie to the client during the connection process to verify the client's legitimacy.
+RakNet cookie mode for connection security. Available values:
 
-This enhances connection security and helps prevent potential malicious connections or attacks.
+| Value | Description |
+|-------|-------------|
+| `active` | Key is generated and managed by the server. Handles and responds to `ID_OPEN_CONNECTION_REQUEST_1` with a stateless cookie (default) |
+| `offloaded` | Key is unknown. Ignores `ID_OPEN_CONNECTION_REQUEST_1`. On `ID_OPEN_CONNECTION_REQUEST_2`, verifies timestamp is recent. Signature is ignored |
+| `offloaded_psk` | Key is known. Ignores `ID_OPEN_CONNECTION_REQUEST_1`. On `ID_OPEN_CONNECTION_REQUEST_2`, verifies timestamp is recent and checks cookie signature |
+| `off` | Accepts any cookie at `ID_OPEN_CONNECTION_REQUEST_2` |
+| `invalid` | Client is invalid if it sends a cookie |
 
 :::note
-If you cannot join the server (especially when using a proxy), try setting this to `false`.
+If you cannot join the server (especially when using a proxy), try setting this to `off`.
+
+For backward compatibility, `true` is treated as `active` and `false` is treated as `off`.
 :::
 
 ### `timeout-milliseconds`
