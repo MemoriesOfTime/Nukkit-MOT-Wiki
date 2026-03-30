@@ -1,0 +1,249 @@
+---
+sidebar_position: 3
+---
+
+# DDUI Guide
+
+DDUI, short for Data-Driven UI, is Nukkit-MOT's reactive UI system built on top of Bedrock's data store packets. Unlike classic `FormWindow*` forms, DDUI screens can keep server state and client UI synchronized while the screen remains open.
+
+The current implementation provides two built-in screen types:
+
+- [CustomForm](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/CustomForm.java): a composable form layout with reactive components.
+- [MessageBox](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/MessageBox.java): a lightweight two-button confirmation dialog.
+
+## When To Use DDUI
+
+Use DDUI when you need one or more of the following:
+
+- Live updates while the screen is open
+- State bound to server-side values
+- A more native Bedrock screen flow than JSON forms
+
+Use classic forms when you only need one-shot submission and broad compatibility with existing `FormWindow*` code.
+
+## Version Notes
+
+Based on the current packet processors in Nukkit-MOT:
+
+- Client data-store updates are handled from protocol `v1_21_130_28` and above.
+- Screen-close cleanup packets are handled from protocol `v1_26_10` and above.
+
+That means DDUI is intended for modern Bedrock protocol support. If you target older protocol ranges, validate the exact behavior before relying on reactive callbacks.
+
+## Core Concepts
+
+### `DataDrivenScreen`
+
+[DataDrivenScreen](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/DataDrivenScreen.java) is the base class for DDUI screens.
+
+- `show(player)` sends the initial data store and opens the screen.
+- `close(player)` closes the active DDUI screen for that player.
+- The server tracks one active DDUI screen per player.
+
+### `Observable<T>`
+
+[Observable](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/Observable.java) is the binding layer between your plugin state and the UI.
+
+- When the client edits a bound field, the server-side `Observable` is updated.
+- When your plugin calls `setValue(...)`, Nukkit-MOT pushes the new value to every viewer of that screen.
+
+In practice, editable DDUI controls bind to these types:
+
+- `Observable<String>`
+- `Observable<Boolean>`
+- `Observable<Long>`
+
+#### `ObservableOptions` and `clientWritable`
+
+By default, an `Observable` is **read-only from the client** — the server can push updates to the client, but client edits do not flow back. To allow the client to write back to a specific `Observable`, create it with `clientWritable` enabled:
+
+```java
+Observable<String> name = new Observable<>("default", new ObservableOptions(true));
+```
+
+When `clientWritable` is `true`, incoming data store packets from the client will update the `Observable` value and fire its listeners. The built-in editable components (`textField`, `toggle`, `slider`, `dropdown`) automatically propagate `clientWritable` from their options to the bound `Observable`.
+
+## CustomForm
+
+`CustomForm` is the main DDUI entry point for building interactive layouts.
+
+### Builder Overloads
+
+Besides the basic string-based examples, `CustomForm` also supports reactive overloads in several places:
+
+- `new CustomForm(Observable<String> title)` and `title(Observable<String>)`
+- `button(Observable<String> label, Consumer<Player> listener, ButtonOptions options)`
+- `label(Observable<String>)`
+- `header(Observable<String>)`
+
+This is useful when the screen title or button text should change while the UI is already open.
+
+### Example
+
+```java title="form/DemoDDUICustomForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.CustomForm;
+import cn.nukkit.ddui.Observable;
+import cn.nukkit.ddui.element.DropdownElement;
+import cn.nukkit.ddui.element.options.ButtonOptions;
+import cn.nukkit.ddui.element.options.DropdownOptions;
+import cn.nukkit.ddui.element.options.SliderElementOptions;
+import cn.nukkit.ddui.element.options.TextFieldOptions;
+import cn.nukkit.ddui.element.options.ToggleOptions;
+
+import java.util.List;
+
+public final class DemoDDUICustomForm {
+    public static void open(Player player) {
+        Observable<String> serverName = new Observable<>("Nukkit-MOT");
+        Observable<Boolean> whitelistEnabled = new Observable<>(false);
+        Observable<Long> maxPlayers = new Observable<>(20L);
+        Observable<Long> gamemode = new Observable<>(0L);
+        Observable<Boolean> showAdvanced = new Observable<>(false);
+
+        CustomForm form = new CustomForm("Server Settings")
+                .header("General")
+                .label("Changes made in the screen are synchronized back to the server.")
+                .textField("Server Name", serverName, TextFieldOptions.builder()
+                        .description("Displayed in the server list")
+                        .build())
+                .toggle("Enable Whitelist", whitelistEnabled, ToggleOptions.builder()
+                        .description("Only invited players can join")
+                        .build())
+                .slider("Max Players", 1, 100, maxPlayers, SliderElementOptions.builder()
+                        .description("Visible player capacity")
+                        .step(1)
+                        .build())
+                .dropdown("Default Gamemode", List.of(
+                                DropdownElement.Item.builder().label("Survival").description("Standard gameplay").build(),
+                                DropdownElement.Item.builder().label("Creative").description("Unlimited blocks").build(),
+                                DropdownElement.Item.builder().label("Adventure").description("Map-based gameplay").build()
+                        ), gamemode, DropdownOptions.builder()
+                        .description("Used for newly joined players")
+                        .build())
+                .spacer()
+                .toggle("Show Advanced Settings", showAdvanced)
+                .textField("MOTD", new Observable<>("Welcome to Nukkit-MOT"), TextFieldOptions.builder()
+                        .description("Shown to players in the server list")
+                        .visible(showAdvanced)
+                        .build())
+                .button("Apply", p -> {
+                    p.sendMessage("Saved settings:");
+                    p.sendMessage("Name: " + serverName.getValue());
+                    p.sendMessage("Whitelist: " + whitelistEnabled.getValue());
+                    p.sendMessage("Max Players: " + maxPlayers.getValue());
+                    p.sendMessage("Gamemode Index: " + gamemode.getValue());
+                }, ButtonOptions.builder()
+                        .tooltip("Persist the current values")
+                        .build())
+                .closeButton();
+
+        form.show(player);
+    }
+}
+```
+
+### Available Components
+
+| Component | Purpose | Bound value type |
+| --- | --- | --- |
+| `header(...)` | Section title | `Observable<String>` or plain text |
+| `label(...)` | Static or reactive text | `Observable<String>` or plain text |
+| `textField(...)` | Text input | `Observable<String>` |
+| `toggle(...)` | Boolean switch | `Observable<Boolean>` |
+| `slider(...)` | Numeric range input | `Observable<Long>` |
+| `dropdown(...)` | Option selection | `Observable<Long>` |
+| `button(...)` | Click action | callback only |
+| `closeButton(...)` | Built-in close action | callback only |
+| `spacer(...)` | Visual spacing | visible state only |
+| `divider(...)` | Horizontal divider line | visible state only |
+
+For `dropdown(...)`, each `DropdownElement.Item` supports:
+
+- `label`: the text shown to the player
+- `description`: optional secondary text for the option
+- `value`: optional `Long` to map a custom value to this item (when set, the `Observable<Long>` bound to the dropdown reflects this value instead of the raw index)
+
+### Component Options
+
+Most controls accept an options builder from `cn.nukkit.ddui.element.options`.
+
+- Shared state flags are usually `visible` and `disabled`.
+- `textField`, `toggle`, `slider`, and `dropdown` support `description`.
+- `slider` also supports `step`.
+- `button` supports `tooltip`.
+- `closeButton` supports a custom `label`.
+- `divider` and `spacer` support `visible`.
+
+Each option can usually be given either a plain value or an `Observable`, which makes the UI itself reactive.
+
+## MessageBox
+
+`MessageBox` is suitable for simple confirmations and warning prompts.
+
+It also supports reactive text sources through:
+
+- `new MessageBox(Observable<String> title)` and `title(Observable<String>)`
+- `body(Observable<String>)`
+
+Both `button1` and `button2` accept an optional tooltip string as the second argument:
+
+- `button1(String label, String tooltip, Consumer<Player> listener)`
+- `button2(String label, String tooltip, Consumer<Player> listener)`
+
+```java title="form/DemoDDUIMessageBox.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.MessageBox;
+
+public final class DemoDDUIMessageBox {
+    public static void open(Player player) {
+        MessageBox box = new MessageBox("Delete World")
+                .body("This action cannot be undone.")
+                .button1("Confirm", "Delete the selected world", p -> {
+                    p.sendMessage("World deleted.");
+                })
+                .button2("Cancel", p -> {
+                    p.sendMessage("Operation cancelled.");
+                });
+
+        box.show(player);
+    }
+}
+```
+
+## Reactive Update Flow
+
+The DDUI event flow is different from classic forms:
+
+1. Build the screen with bound `Observable` values.
+2. Call `show(player)`.
+3. The client edits a control.
+4. Nukkit-MOT maps the incoming path back to the matching property.
+5. Your listeners and the bound `Observable` receive the updated value.
+6. If your plugin changes an `Observable`, all current viewers receive a live UI update.
+
+This makes DDUI a good fit for settings panels, admin consoles, and multi-step screens where values need to stay synchronized.
+
+## Interaction Model
+
+DDUI does not follow the same "fill the whole form, then submit once" pattern as `FormWindowCustom`.
+
+- Editable controls such as `textField`, `toggle`, `slider`, and `dropdown` synchronize values immediately.
+- Buttons are independent click actions.
+- There is no form-wide submit callback in `CustomForm`.
+
+In other words, DDUI behaves more like a reactive settings panel than a traditional submit form.
+
+## Notes And Limitations
+
+- DDUI currently exposes `CustomForm` and `MessageBox` as the main public screen types.
+- `DropdownElement` returns the selected index (or custom `value` if set), not the option label.
+- `SliderElement` uses `long` values and clamps input to the configured min/max range. The min, max, and step values can also be set as `Observable<Long>` for reactive updates.
+- `closeButton()` adds a built-in close control and calls `close(player)` when clicked.
+- Showing another DDUI screen for the same player replaces the server-side active screen reference.
+- `Observable` values are **not** client-writable by default. Use `ObservableOptions(true)` to allow client edits to flow back.
+- If you need simple compatibility-first menus, `FormWindow*` may still be the better choice.

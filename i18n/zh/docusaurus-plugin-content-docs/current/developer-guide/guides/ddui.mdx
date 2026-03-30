@@ -1,0 +1,249 @@
+---
+sidebar_position: 3
+---
+
+# DDUI 指南
+
+DDUI 是 Data-Driven UI 的缩写，是 Nukkit-MOT 基于 Bedrock 数据存储包实现的响应式界面系统。与传统的 `FormWindow*` 表单不同，DDUI 在界面保持打开期间，可以持续同步服务端状态和客户端界面内容。
+
+当前实现提供了两种内置屏幕类型：
+
+- [CustomForm](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/CustomForm.java)：可组合的响应式表单布局。
+- [MessageBox](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/MessageBox.java)：轻量级双按钮确认框。
+
+## 什么时候使用 DDUI
+
+当你需要以下能力时，优先考虑 DDUI：
+
+- 界面打开后仍然能实时更新内容
+- 组件值与服务端状态双向绑定
+- 比 JSON 表单更接近原生 Bedrock 界面交互
+
+如果你只需要一次性提交、兼容现有 `FormWindow*` 逻辑，传统表单仍然更直接。
+
+## 版本说明
+
+根据 Nukkit-MOT 当前的数据包处理器实现：
+
+- 客户端数据存储回传从协议 `v1_21_130_28` 开始处理。
+- 屏幕关闭后的服务端清理从协议 `v1_26_10` 开始处理。
+
+这说明 DDUI 面向的是较新的 Bedrock 协议范围。如果你的服务器需要兼容更早的协议版本，建议先自行验证回调和关闭行为是否符合预期。
+
+## 核心概念
+
+### `DataDrivenScreen`
+
+[DataDrivenScreen](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/DataDrivenScreen.java) 是所有 DDUI 屏幕的基类。
+
+- `show(player)`：发送初始数据并打开界面
+- `close(player)`：关闭该玩家当前的 DDUI 屏幕
+- 服务端对每个玩家只跟踪一个当前激活的 DDUI 屏幕
+
+### `Observable<T>`
+
+[Observable](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/Observable.java) 是插件状态与界面之间的绑定层。
+
+- 当玩家在客户端修改组件时，服务端绑定的 `Observable` 会被更新。
+- 当插件调用 `setValue(...)` 修改值时，Nukkit-MOT 会把变化实时推送给当前正在查看该屏幕的所有玩家。
+
+在实际使用中，可编辑组件主要绑定以下类型：
+
+- `Observable<String>`
+- `Observable<Boolean>`
+- `Observable<Long>`
+
+#### `ObservableOptions` 与 `clientWritable`
+
+默认情况下，`Observable` 对客户端是**只读**的——服务端可以向客户端推送更新，但客户端的修改不会回传。要允许客户端回写到特定的 `Observable`，需要使用 `clientWritable` 创建：
+
+```java
+Observable<String> name = new Observable<>("default", new ObservableOptions(true));
+```
+
+当 `clientWritable` 为 `true` 时，来自客户端的数据存储包会更新 `Observable` 的值并触发监听器。内置的可编辑组件（`textField`、`toggle`、`slider`、`dropdown`）会自动将选项中的 `clientWritable` 传播到绑定的 `Observable`。
+
+## CustomForm
+
+`CustomForm` 是构建交互式 DDUI 界面的主要入口。
+
+### 构建器重载
+
+除了最基础的字符串写法外，`CustomForm` 在几个关键位置还支持响应式重载：
+
+- `new CustomForm(Observable<String> title)` 和 `title(Observable<String>)`
+- `button(Observable<String> label, Consumer<Player> listener, ButtonOptions options)`
+- `label(Observable<String>)`
+- `header(Observable<String>)`
+
+这意味着当界面已经打开后，你仍然可以动态修改标题或按钮文本。
+
+### 使用示例
+
+```java title="form/DemoDDUICustomForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.CustomForm;
+import cn.nukkit.ddui.Observable;
+import cn.nukkit.ddui.element.DropdownElement;
+import cn.nukkit.ddui.element.options.ButtonOptions;
+import cn.nukkit.ddui.element.options.DropdownOptions;
+import cn.nukkit.ddui.element.options.SliderElementOptions;
+import cn.nukkit.ddui.element.options.TextFieldOptions;
+import cn.nukkit.ddui.element.options.ToggleOptions;
+
+import java.util.List;
+
+public final class DemoDDUICustomForm {
+    public static void open(Player player) {
+        Observable<String> serverName = new Observable<>("Nukkit-MOT");
+        Observable<Boolean> whitelistEnabled = new Observable<>(false);
+        Observable<Long> maxPlayers = new Observable<>(20L);
+        Observable<Long> gamemode = new Observable<>(0L);
+        Observable<Boolean> showAdvanced = new Observable<>(false);
+
+        CustomForm form = new CustomForm("服务器设置")
+                .header("基础设置")
+                .label("界面中的修改会自动同步回服务端。")
+                .textField("服务器名称", serverName, TextFieldOptions.builder()
+                        .description("显示在服务器列表中")
+                        .build())
+                .toggle("启用白名单", whitelistEnabled, ToggleOptions.builder()
+                        .description("仅允许受邀玩家加入")
+                        .build())
+                .slider("最大在线人数", 1, 100, maxPlayers, SliderElementOptions.builder()
+                        .description("服务器可见人数上限")
+                        .step(1)
+                        .build())
+                .dropdown("默认游戏模式", List.of(
+                                DropdownElement.Item.builder().label("生存").description("标准玩法").build(),
+                                DropdownElement.Item.builder().label("创造").description("无限方块").build(),
+                                DropdownElement.Item.builder().label("冒险").description("地图玩法").build()
+                        ), gamemode, DropdownOptions.builder()
+                        .description("新玩家加入时使用")
+                        .build())
+                .spacer()
+                .toggle("显示高级设置", showAdvanced)
+                .textField("MOTD", new Observable<>("Welcome to Nukkit-MOT"), TextFieldOptions.builder()
+                        .description("展示给客户端服务器列表")
+                        .visible(showAdvanced)
+                        .build())
+                .button("应用", p -> {
+                    p.sendMessage("已保存设置:");
+                    p.sendMessage("名称: " + serverName.getValue());
+                    p.sendMessage("白名单: " + whitelistEnabled.getValue());
+                    p.sendMessage("最大人数: " + maxPlayers.getValue());
+                    p.sendMessage("游戏模式索引: " + gamemode.getValue());
+                }, ButtonOptions.builder()
+                        .tooltip("保存当前表单中的值")
+                        .build())
+                .closeButton();
+
+        form.show(player);
+    }
+}
+```
+
+### 可用组件
+
+| 组件 | 作用 | 绑定值类型 |
+| --- | --- | --- |
+| `header(...)` | 分组标题 | `Observable<String>` 或普通文本 |
+| `label(...)` | 静态或响应式文本 | `Observable<String>` 或普通文本 |
+| `textField(...)` | 文本输入框 | `Observable<String>` |
+| `toggle(...)` | 布尔开关 | `Observable<Boolean>` |
+| `slider(...)` | 数值滑块 | `Observable<Long>` |
+| `dropdown(...)` | 下拉选择 | `Observable<Long>` |
+| `button(...)` | 点击操作 | 仅回调 |
+| `closeButton(...)` | 内置关闭按钮 | 仅回调 |
+| `spacer(...)` | 视觉留白 | 仅可见性 |
+| `divider(...)` | 水平分割线 | 仅可见性 |
+
+其中 `dropdown(...)` 传入的 `DropdownElement.Item` 还支持：
+
+- `label`：显示给玩家的主文本
+- `description`：选项的附加说明文本，可选
+- `value`：可选的 `Long` 值，将自定义值映射到该项（设置后，绑定到下拉框的 `Observable<Long>` 会反映该值而非原始索引）
+
+### 组件选项
+
+大多数组件都支持 `cn.nukkit.ddui.element.options` 下的构建器选项。
+
+- 通用状态通常有 `visible` 和 `disabled`
+- `textField`、`toggle`、`slider`、`dropdown` 支持 `description`
+- `slider` 额外支持 `step`
+- `button` 支持 `tooltip`
+- `closeButton` 支持自定义 `label`
+- `divider` 和 `spacer` 支持 `visible`
+
+这些选项通常既可以传普通值，也可以传 `Observable`，从而让组件自身也具备响应式能力。
+
+## MessageBox
+
+`MessageBox` 适合用于简单确认框、警告框等场景。
+
+它同样支持响应式文本来源：
+
+- `new MessageBox(Observable<String> title)` 和 `title(Observable<String>)`
+- `body(Observable<String>)`
+
+`button1` 和 `button2` 都支持可选的 tooltip 参数：
+
+- `button1(String label, String tooltip, Consumer<Player> listener)`
+- `button2(String label, String tooltip, Consumer<Player> listener)`
+
+```java title="form/DemoDDUIMessageBox.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.MessageBox;
+
+public final class DemoDDUIMessageBox {
+    public static void open(Player player) {
+        MessageBox box = new MessageBox("删除世界")
+                .body("该操作无法撤销。")
+                .button1("确认", "删除选中的世界", p -> {
+                    p.sendMessage("世界已删除。");
+                })
+                .button2("取消", p -> {
+                    p.sendMessage("操作已取消。");
+                });
+
+        box.show(player);
+    }
+}
+```
+
+## 响应式更新流程
+
+DDUI 的事件流和传统表单不同：
+
+1. 使用 `Observable` 构建并绑定屏幕状态
+2. 调用 `show(player)` 打开界面
+3. 玩家在客户端修改组件
+4. Nukkit-MOT 将回传路径解析到对应属性
+5. 你的监听器和绑定的 `Observable` 收到新值
+6. 如果插件再次修改 `Observable`，当前所有查看者都会立即收到界面更新
+
+因此，DDUI 很适合做设置面板、管理后台、需要持续同步状态的多步骤界面。
+
+## 交互模型
+
+DDUI 不遵循 `FormWindowCustom` 那种“整张表单填写完成后再一次性提交”的模式。
+
+- `textField`、`toggle`、`slider`、`dropdown` 这类可编辑组件会即时同步值
+- `button` 是独立的点击动作
+- `CustomForm` 本身没有整表单级别的 submit 回调
+
+换句话说，DDUI 更像一个响应式设置面板，而不是传统提交式表单。
+
+## 注意事项与限制
+
+- 当前公开可直接使用的 DDUI 屏幕主要是 `CustomForm` 和 `MessageBox`
+- `DropdownElement` 回传的是选中项索引（或自定义 `value`），不是选项文本
+- `SliderElement` 使用 `long` 值，并会自动限制在最小值和最大值之间。最小值、最大值和步长也支持设置为 `Observable<Long>` 进行响应式更新
+- `closeButton()` 会添加一个内置关闭按钮，并在点击时直接调用 `close(player)`
+- 给同一玩家再次展示新的 DDUI 屏幕时，服务端当前激活屏幕引用会被替换
+- 默认情况下 `Observable` 对客户端**不可写**，需要使用 `ObservableOptions(true)` 开启客户端回写
+- 如果你更看重简单兼容性，`FormWindow*` 仍然是更稳妥的选择
