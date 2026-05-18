@@ -150,3 +150,120 @@ Use `config.getRootSection().toString()` to quickly output the currently loaded 
 ```java
 getLogger().info("Current configuration state:\n" + config.getRootSection().toString());
 ```
+
+## Using `eu.okaeri.configs` (Built-in) \{#okaeri-configs}
+Nukkit-MOT ships with [`okaeri-configs`](https://github.com/OkaeriPoland/okaeri-configs) (artifact `okaeri-configs-yaml-snakeyaml`) and uses it internally to manage `nukkit-mot.yml`. Plugins can use it directly — no extra dependency is required at runtime. Compared with the traditional `Config` API it offers:
+
+- **POJO-based** — fields are the schema, no string keys scattered across the codebase.
+- **Strong typing** — values are deserialized into actual Java types (including nested objects, generic `List`/`Map`).
+- **Annotations** — `@Comment`, `@Header`, `@CustomKey` produce human-friendly YAML with comments.
+- **Orphan cleanup** — `removeOrphans(true)` automatically prunes unknown keys when the schema evolves.
+
+:::note
+
+Add `okaeri-configs-yaml-snakeyaml` to your build with `<scope>provided</scope>` (Maven) or `compileOnly` (Gradle); the server already provides it at runtime.
+
+:::
+
+### Defining a Config Class \{#okaeri-define}
+```java
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Header;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Header("########################################")
+@Header("ExamplePlugin Configuration")
+@Header("########################################")
+public class ExampleConfig extends OkaeriConfig {
+
+    @Comment("Greeting shown on join")
+    @CustomKey("welcome-message")
+    private String welcomeMessage = "Hello! Config!";
+
+    @Comment("Whether the feature is enabled")
+    private boolean enabled = true;
+
+    @Comment({"", "Nested settings block"})
+    @CustomKey("feature-settings")
+    private FeatureSettings featureSettings = new FeatureSettings();
+
+    @Comment("Worlds to apply the feature in")
+    private List<String> worlds = new ArrayList<>();
+}
+```
+
+Nested categories simply extend `OkaeriConfig` again:
+```java
+@Getter
+@Setter
+@Accessors(fluent = true)
+public class FeatureSettings extends OkaeriConfig {
+
+    @Comment("Cooldown in ticks")
+    private int cooldown = 20;
+
+    @CustomKey("max-uses")
+    private int maxUses = 10;
+}
+```
+
+### Loading and Saving \{#okaeri-load}
+```java
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+
+public class ExamplePlugin extends PluginBase {
+    private ExampleConfig config;
+
+    @Override
+    public void onEnable() {
+        java.io.File file = new java.io.File(getDataFolder(), "config.yml");
+        getDataFolder().mkdirs();
+
+        this.config = ConfigManager.create(ExampleConfig.class, it -> {
+            it.configure(opt -> {
+                opt.configurer(new YamlSnakeYamlConfigurer());
+                opt.bindFile(file);
+                opt.removeOrphans(true); // drop keys no longer defined in the class
+            });
+            it.saveDefaults();           // write file with defaults if absent
+            it.load(true);               // load + save back (normalizes comments/order)
+        });
+
+        getLogger().info(config.welcomeMessage());
+    }
+
+    public void updateAndSave() {
+        config.enabled(false);
+        config.featureSettings().cooldown(40);
+        config.save();
+    }
+}
+```
+
+### Reload \{#okaeri-reload}
+```java
+public void reload() {
+    this.config.load();   // re-read the bound file in place
+}
+```
+
+### When to Choose Which \{#okaeri-vs-config}
+- **`OkaeriConfig`** — fixed schema, comments / nested categories, infrequent runtime mutation.
+- **`Config`** — dynamic or user-defined keys, runtime-arbitrary structure, or non-YAML formats (`PROPERTIES`, `TXT`, `TOML`, `DETECT` auto-detection).
+
+:::tip
+
+Nukkit-MOT itself uses `OkaeriConfig` for `nukkit-mot.yml` and `Config` for `server.properties`. You can read [`ServerConfig.java`](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/utils/serverconfig/ServerConfig.java) as a real-world reference.
+
+:::

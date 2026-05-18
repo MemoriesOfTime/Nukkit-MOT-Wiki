@@ -160,3 +160,120 @@ public void onReload(ServerCommandEvent event) {
 ```java
 getLogger().info("当前配置状态：\n" + config.getRootSection().toString());
 ```
+
+## 使用 `eu.okaeri.configs`（内置依赖） \{#okaeri-configs}
+Nukkit-MOT 内置了 [`okaeri-configs`](https://github.com/OkaeriPoland/okaeri-configs)（坐标 `okaeri-configs-yaml-snakeyaml`），服务端内部使用它来管理 `nukkit-mot.yml`。插件可以直接使用，运行期无需额外打包依赖。相比传统 `Config` API 的优势：
+
+- **基于 POJO**：字段即 schema，避免散落各处的字符串 key。
+- **强类型**：直接反序列化为真实 Java 类型，包括嵌套对象与泛型 `List`/`Map`。
+- **注解支持**：`@Comment`、`@Header`、`@CustomKey` 可在生成的 YAML 中自动写入注释与自定义键名。
+- **孤立键清理**：`removeOrphans(true)` 在 schema 演进时自动清掉旧版本残留的无用键。
+
+:::note
+
+请在构建里以 `<scope>provided</scope>`（Maven）或 `compileOnly`（Gradle）的方式声明 `okaeri-configs-yaml-snakeyaml`，服务端运行时已经提供该依赖。
+
+:::
+
+### 定义配置类 \{#okaeri-define}
+```java
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Header;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Header("########################################")
+@Header("ExamplePlugin Configuration")
+@Header("########################################")
+public class ExampleConfig extends OkaeriConfig {
+
+    @Comment("玩家加入时显示的欢迎语")
+    @CustomKey("welcome-message")
+    private String welcomeMessage = "Hello! Config!";
+
+    @Comment("是否启用该功能")
+    private boolean enabled = true;
+
+    @Comment({"", "嵌套设置块"})
+    @CustomKey("feature-settings")
+    private FeatureSettings featureSettings = new FeatureSettings();
+
+    @Comment("生效的世界列表")
+    private List<String> worlds = new ArrayList<>();
+}
+```
+
+嵌套分类只需要再继承一次 `OkaeriConfig` 即可：
+```java
+@Getter
+@Setter
+@Accessors(fluent = true)
+public class FeatureSettings extends OkaeriConfig {
+
+    @Comment("冷却时间（tick）")
+    private int cooldown = 20;
+
+    @CustomKey("max-uses")
+    private int maxUses = 10;
+}
+```
+
+### 加载与保存 \{#okaeri-load}
+```java
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+
+public class ExamplePlugin extends PluginBase {
+    private ExampleConfig config;
+
+    @Override
+    public void onEnable() {
+        java.io.File file = new java.io.File(getDataFolder(), "config.yml");
+        getDataFolder().mkdirs();
+
+        this.config = ConfigManager.create(ExampleConfig.class, it -> {
+            it.configure(opt -> {
+                opt.configurer(new YamlSnakeYamlConfigurer());
+                opt.bindFile(file);
+                opt.removeOrphans(true); // 自动剔除类中已删除的旧 key
+            });
+            it.saveDefaults();           // 文件不存在时写入默认值
+            it.load(true);               // 加载后立即回写一次，规范化注释与顺序
+        });
+
+        getLogger().info(config.welcomeMessage());
+    }
+
+    public void updateAndSave() {
+        config.enabled(false);
+        config.featureSettings().cooldown(40);
+        config.save();
+    }
+}
+```
+
+### 热重载 \{#okaeri-reload}
+```java
+public void reload() {
+    this.config.load();   // 直接从绑定文件重新读取
+}
+```
+
+### 何时使用哪一个 \{#okaeri-vs-config}
+- **`OkaeriConfig`**：schema 固定、需要注释/嵌套分类、运行时较少动态修改。
+- **`Config`**：动态/用户自定义 key、运行期结构不固定，或需要非 YAML 格式（`PROPERTIES`、`TXT`、`TOML`、`DETECT` 自动识别）。
+
+:::tip
+
+Nukkit-MOT 自身就用 `OkaeriConfig` 管理 `nukkit-mot.yml`，用 `Config` 管理 `server.properties`。可参考源码 [`ServerConfig.java`](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/utils/serverconfig/ServerConfig.java)。
+
+:::
