@@ -35,7 +35,7 @@ note: if you need higher version features, please use [PowerNukkitX](https://git
 The documentation is now split into two main tracks:
 
 - **User Documentation**: for server owners and administrators. Start with [Start from Scratch](user-guide/starting_from_scratch.md), then continue with [Getting Started](user-guide/getting-started/preparation.md) and [Server Config](user-guide/server-config/server-properties.mdx).
-- **Developer Documentation**: for plugin and tooling developers. Start with [First Java Plugin](developer-guide/tutorial-basics/frist_java_plugin.mdx), then continue with [Guides](developer-guide/guides/world.md) and [Advanced Tutorials](developer-guide/tutorial-extras/runtime_block_state.mdx).
+- **Developer Documentation**: for plugin and tooling developers. Start with [First Java Plugin](developer-guide/tutorial-basics/frist_java_plugin.mdx), then continue with [Guides](developer-guide/guides/world.md) and [Custom Content APIs](/docs/developer-guide/tutorial-extras/custom).
 
 ## Maven {#maven}
 #### Repository: {#maven-repository}

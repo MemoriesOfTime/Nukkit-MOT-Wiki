@@ -1,0 +1,283 @@
+---
+sidebar_position: 2
+---
+
+# Command 命令系统指南
+
+Nukkit-MOT 提供的不止一种命令 API。你该选哪条路线，取决于你是只需要普通插件命令，还是已经需要类型化参数解析、多重重载与目标选择器。
+
+:::tip 基于源码编写
+本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `PluginManager`、`PluginCommand`、`PluginBase`、`SimpleCommandMap`、`Command`、`ParamTree` 和 `EntitySelectorAPI`。
+:::
+
+## 先选一条注册路线
+
+| 路线 | 适合场景 | 注册位置 |
+| --- | --- | --- |
+| `plugin.yml` + `onCommand(...)` | 普通插件命令 | `plugin.yml` |
+| `plugin.yml` + `setExecutor(...)` | 想把命令逻辑从主类里拆出去 | `plugin.yml` + `onEnable()` |
+| `registerSimpleCommands(this)` | 小型工具命令、管理命令、原始字符串命令 | `onEnable()` |
+| 自定义 `Command` + `enableParamTree()` | 类型化参数、多重重载、目标选择器 | `onEnable()` |
+
+## 1. `plugin.yml` + `onCommand(...)`
+
+插件加载时，`PluginManager.parseYamlCommands()` 会读取 `commands` 段，并为每个条目创建一个 `PluginCommand`。`PluginCommand` 的默认执行器就是插件本身，因此最常见的起点就是在 `PluginBase` 里覆写 `onCommand(...)`。
+
+```yaml title="plugin.yml"
+commands:
+  hello:
+    description: Send a hello message
+    usage: "/hello <name>"
+    aliases: ["hi"]
+    permission: example.command.hello
+    permission-message: "You need <permission> to use /hello"
+```
+
+```java title="CommandDemoPlugin.java"
+package com.example.commanddemo;
+
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.plugin.PluginBase;
+
+public final class CommandDemoPlugin extends PluginBase {
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!command.getName().equalsIgnoreCase("hello")) {
+            return false;
+        }
+
+        if (args.length != 1) {
+            return false;
+        }
+
+        sender.sendMessage("Hello, " + args[0] + "!");
+        return true;
+    }
+}
+```
+
+如果 `onCommand(...)` 返回 `false`，且该命令配置了非空 `usage`，Nukkit-MOT 会自动把用法提示发给命令发送者。
+
+## 2. 把逻辑拆到独立 `CommandExecutor`
+
+如果你的插件命令越来越多，主类就不应该继续堆业务逻辑。更清晰的做法是在 `onEnable()` 里给命令挂一个独立执行器。`PluginBase.getCommand(name)` 只会返回当前插件 `plugin.yml` 中声明过的命令。
+
+```java title="CommandDemoPlugin.java"
+package com.example.commanddemo;
+
+import cn.nukkit.command.PluginCommand;
+import cn.nukkit.plugin.PluginBase;
+
+public final class CommandDemoPlugin extends PluginBase {
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void onEnable() {
+        PluginCommand<CommandDemoPlugin> hello = (PluginCommand<CommandDemoPlugin>) this.getCommand("hello");
+        if (hello == null) {
+            throw new IllegalStateException("Command 'hello' is missing from plugin.yml");
+        }
+
+        hello.setExecutor(new HelloCommandExecutor());
+    }
+}
+```
+
+```java title="HelloCommandExecutor.java"
+package com.example.commanddemo;
+
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandExecutor;
+import cn.nukkit.command.CommandSender;
+
+public final class HelloCommandExecutor implements CommandExecutor {
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length != 1) {
+            return false;
+        }
+
+        sender.sendMessage("Hello, " + args[0] + "!");
+        return true;
+    }
+}
+```
+
+这条路线仍然依赖 `plugin.yml` 中的描述、别名、权限与用法等元数据。
+
+## 3. 注解式 Simple Command
+
+`SimpleCommandMap.registerSimpleCommands(Object object)` 会扫描对象上带 `@cn.nukkit.command.simple.Command` 注解的方法，并把它们注册成 `SimpleCommand`。这条路线不依赖 `plugin.yml`。
+
+```java title="CommandDemoPlugin.java"
+package com.example.commanddemo;
+
+import cn.nukkit.Player;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.simple.Arguments;
+import cn.nukkit.command.simple.CommandParameters;
+import cn.nukkit.command.simple.CommandPermission;
+import cn.nukkit.command.simple.ForbidConsole;
+import cn.nukkit.command.simple.Parameter;
+import cn.nukkit.command.simple.Parameters;
+import cn.nukkit.plugin.PluginBase;
+
+public final class CommandDemoPlugin extends PluginBase {
+
+    @Override
+    public void onEnable() {
+        this.getServer().getCommandMap().registerSimpleCommands(this);
+    }
+
+    @cn.nukkit.command.simple.Command(
+        name = "whereis",
+        description = "Show a player's position",
+        usageMessage = "/whereis <player>",
+        aliases = {"locateplayer"}
+    )
+    @Arguments(min = 1, max = 1)
+    @CommandPermission("example.command.whereis")
+    @ForbidConsole
+    @CommandParameters(parameters = {
+        @Parameters(name = "default", parameters = {
+            @Parameter(name = "target", type = CommandParamType.TARGET)
+        })
+    })
+    public boolean whereIsCommand(CommandSender sender, String commandLabel, String[] args) {
+        Player target = this.getServer().getPlayerExact(args[0]);
+        if (target == null) {
+            sender.sendMessage("Player not found.");
+            return true;
+        }
+
+        sender.sendMessage(
+            target.getName() + " is at "
+                + target.getFloorX() + ", "
+                + target.getFloorY() + ", "
+                + target.getFloorZ()
+        );
+        return true;
+    }
+}
+```
+
+注意几点：
+
+- 方法签名必须是 `boolean method(CommandSender sender, String commandLabel, String[] args)`
+- `@Arguments`、`@CommandPermission`、`@ForbidConsole` 会由 `SimpleCommand` 直接执行检查
+- `@CommandParameters` 只是在填充命令元数据，方法里拿到的仍然是原始 `String[] args`，它不会自动启用 `ParamTree`，也不会自动做服务端类型解析
+- 除非你明确知道自己在处理命名冲突，否则不要把同一个命令名同时写进 `plugin.yml` 和 `registerSimpleCommands(...)`
+
+## 4. 自定义 `Command` + `ParamTree`
+
+当你需要下面这些能力时，就该写真正的 `Command` 子类了：
+
+- 类型化参数
+- 多重重载
+- `@a`、`@p` 这类目标选择器
+- 基于 `CommandLogger` 的命令输出
+
+:::warning 不要把同名命令同时写进 `plugin.yml` 和手动注册的自定义 `Command`
+`plugin.yml` 里的命令会在插件加载阶段先被 `PluginManager.parseYamlCommands()` 解析成 `PluginCommand`，然后交给 `SimpleCommandMap.registerAll(...)` 注册。你在 `onEnable()` 里手动 `register(...)` 的自定义 `Command`，会继续写入同一个 `SimpleCommandMap.knownCommands`。
+
+源码里的 `SimpleCommandMap.registerAlias(...)` 不是简单的“后注册覆盖前注册”，而是分两种情况：
+
+- 如果你手动注册的主命令名，正好撞上了一个已经存在的主命令名，那么新的命令拿不到裸命令名，只会退化成 `fallbackPrefix:command`
+- 如果你手动注册的主命令名，撞上的是别人已经注册好的别名，那么裸别名入口会被 `knownCommands.put(label, command)` 直接改写；而且 `registerAlias(...)` 一开始就会写入 `fallbackPrefix:label`，所以当 `fallbackPrefix` 相同时，连带前缀的别名入口也可能被新命令占用
+
+所以问题不只是“覆盖”这么简单，更常见的是命令入口被拆成两套：主命令名撞主命令名时，裸命令通常仍然指向旧的 `PluginCommand`；主命令名撞别名时，相关别名入口则可能被新的命令对象改写。只要你准备手写 `Command`，尤其是还要启用 `ParamTree`，就不要再把同名入口写进 `plugin.yml`。
+:::
+
+这类命令要在 `onEnable()` 中手动注册：
+
+```java title="CommandDemoPlugin.java"
+package com.example.commanddemo;
+
+import cn.nukkit.plugin.PluginBase;
+
+public final class CommandDemoPlugin extends PluginBase {
+
+    @Override
+    public void onEnable() {
+        this.getServer().getCommandMap().register("commanddemo", new TargetInfoCommand());
+    }
+}
+```
+
+然后在命令类里定义 `commandParameters`，并在参数表准备好之后调用 `enableParamTree()`：
+
+```java title="TargetInfoCommand.java"
+package com.example.commanddemo;
+
+import cn.nukkit.command.Command;
+import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.command.tree.ParamList;
+import cn.nukkit.command.utils.CommandLogger;
+import cn.nukkit.entity.Entity;
+
+import java.util.List;
+import java.util.Map;
+
+public final class TargetInfoCommand extends Command {
+
+    public TargetInfoCommand() {
+        super("targetinfo", "Inspect the target selector result", "/targetinfo <target>");
+        this.setPermission("example.command.targetinfo");
+
+        this.commandParameters.clear();
+        this.commandParameters.put("default", new CommandParameter[]{
+            CommandParameter.newType("target", CommandParamType.TARGET)
+        });
+
+        this.enableParamTree();
+    }
+
+    @Override
+    public int execute(CommandSender sender, String commandLabel, Map.Entry<String, ParamList> result, CommandLogger log) {
+        List<Entity> targets = result.getValue().getResult(0);
+        if (targets.isEmpty()) {
+            log.addNoTargetMatch().output();
+            return 0;
+        }
+
+        Entity first = targets.get(0);
+        log.addSuccess(
+            "Matched " + targets.size() + " target(s). First: "
+                + first.getName() + " @ "
+                + first.getFloorX() + ", "
+                + first.getFloorY() + ", "
+                + first.getFloorZ()
+        ).output();
+        return targets.size();
+    }
+}
+```
+
+这里有三条规则必须记住：
+
+- 一定要在 `commandParameters` 全部配置完成之后再调用 `enableParamTree()`
+- 一旦命令启用了 param tree，分发流程就不再调用 `execute(CommandSender, String, String[])`，而是改走 `execute(CommandSender, String, Map.Entry<String, ParamList>, CommandLogger)`
+- 如果你启用了 param tree，却没有覆写新的 `execute(...)`，命令会执行失败，并且服务端日志会明确报错
+
+## `CommandParamType.TARGET` 支持的选择器
+
+当你的重载里使用了目标相关参数节点时，当前 `EntitySelectorAPI` 支持：
+
+- 选择器：`@a`、`@e`、`@p`、`@r`、`@s`、`@initiator`
+- 常见参数：`x`、`y`、`z`、`dx`、`dy`、`dz`、`c`、`r`、`rm`、`name`、`tag`、`l`、`lm`、`m`、`type`、`rx`、`rxm`、`ry`、`rym`、`scores`
+
+这意味着像 `/targetinfo @a[tag=builder,c=3]` 这样的输入，可以直接走和内置命令同一套目标选择器解析流程。
+
+## 常见误区
+
+- `plugin.yml` 里的 `commands:` 只会注册命令元数据和 `PluginCommand` 对象，不会自动帮你实现命令逻辑
+- `this.getCommand("name") == null` 通常意味着命令没有写进当前插件的 `plugin.yml`，或者这个命令属于别的插件
+- `plugin.yml` 命令、`registerSimpleCommands(...)` 和手动 `register(...)` 的自定义 `Command` 最终都会进入同一个 `SimpleCommandMap`；一旦主命令名或别名重名，就可能出现裸命令被占用、别名被改写，导致实际执行的不是你以为的那个命令对象
+- `return false` 不是通用的异常处理手段，它的核心语义更接近“如果有 usage，就把 usage 发出去”
+- 注解式 simple command 很方便，但它本质上仍然是原始参数命令；如果你需要真正的类型解析，就应该改用自定义 `Command` + `ParamTree`

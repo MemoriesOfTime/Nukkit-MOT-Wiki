@@ -103,16 +103,6 @@ Frequent use of the `reload` command may cause memory leaks or other issues. It'
 3. Delete the plugin's configuration folder (optional)
 4. Restart the server
 
-## Recommended Common Plugins
-
-Here are some commonly used Nukkit plugins:
-
-- **EconomyAPI** - Economy system
-- **LuckPerms** - Permission management
-- **Multiverse** - Multi-world management
-- **EssentialsNK** - Essential commands collection
-- **WorldEdit** - Creative world editing
-
 ## Next Steps
 
 After installing plugins, you can [Connect to Server](connect.md) and start playing!

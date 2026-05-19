@@ -1,0 +1,329 @@
+---
+sidebar_position: 5
+---
+
+# Scheduler 调度器与异步任务指南
+
+在 Nukkit-MOT 里，插件代码大致会落在两条执行通道中：
+
+- 主线程：负责世界、实体、玩家、背包这类游戏状态操作
+- 异步工作线程池：负责慢 I/O 和重计算
+
+这篇指南会把调度器相关 API 串起来，说明每种任务该在什么场景下使用，以及线程边界到底在哪里。
+
+:::tip 基于源码编写
+本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `ServerScheduler`、`Task`、`PluginTask`、`NukkitRunnable`、`AsyncTask`、`TaskHandler`、`AsyncPool` 和服务端主循环。
+:::
+
+## 先记住四条规则
+
+- `Level`、方块、区块、实体、背包、玩家，都应该视为主线程 API
+- 异步任务适合文件 I/O、数据库、压缩、网络请求、重计算
+- 只要要改游戏状态，就先切回主线程
+- 对插件代码来说，优先使用带 `Plugin` 参数的调度器重载；不带插件归属的旧重载大多只是兼容遗留写法，而且有些已经废弃
+
+## 主入口
+
+通常从 `Server#getScheduler()` 或 `PluginBase#getServer().getScheduler()` 拿到调度器：
+
+```java
+ServerScheduler scheduler = this.getServer().getScheduler();
+```
+
+调度器的时间单位是 tick：
+
+- `20` tick = `1` 秒
+- `1` tick = `0.05` 秒
+
+## 该选哪种任务类型
+
+| API | 适合场景 | 说明 |
+| --- | --- | --- |
+| `scheduleTask(plugin, runnable)` | 在主线程执行一次 | 最简单的同步任务 |
+| `scheduleDelayedTask(plugin, runnable, delay)` | 延迟一次执行 | `delay` 单位是 tick |
+| `scheduleRepeatingTask(plugin, runnable, period)` | 主线程循环执行 | 直到手动取消 |
+| `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | 延迟后循环执行 | 最常见的定时器接口 |
+| `scheduleTask(plugin, runnable, true)` | 无回调的异步后台任务 | 只有异步执行，没有内建完成回调 |
+| `scheduleAsyncTask(plugin, asyncTask)` | 需要 `onCompletion(...)` 的异步任务 | 最适合插件开发的异步接口 |
+| `NukkitRunnable` | 面向对象的调度器封装 | 适合自取消任务、倒计时、轮询 |
+| `PluginTask` | 旧式 `Task` 写法，带 `onRun(int currentTick)` | 适合需要 tick 值或 owner 访问的场景 |
+
+## 1. 最基础的主线程任务
+
+如果只是做一个普通的延迟逻辑，直接调度一个绑定插件的 `Runnable` 就够了。
+
+```java
+import cn.nukkit.Player;
+
+public void sendDelayedWelcome(Player player) {
+    this.getServer().getScheduler().scheduleDelayedTask(this, () -> {
+        if (!player.isOnline()) {
+            return;
+        }
+
+        player.sendMessage("Welcome back.");
+    }, 40);
+}
+```
+
+这段代码始终运行在主线程，因此可以安全访问 `Player`、`Level`、背包和方块。
+
+## 2. 循环任务与取消
+
+循环任务会返回一个 `TaskHandler`。如果你后面需要停止它，就把这个 handler 保存下来。
+
+```java
+import cn.nukkit.scheduler.TaskHandler;
+
+private TaskHandler autosaveReminderTask;
+
+public void startReminder() {
+    this.autosaveReminderTask = this.getServer().getScheduler().scheduleDelayedRepeatingTask(
+        this,
+        () -> this.getServer().broadcastMessage("Autosave runs every 5 minutes."),
+        20,
+        20 * 60 * 5
+    );
+}
+
+public void stopReminder() {
+    if (this.autosaveReminderTask != null && !this.autosaveReminderTask.isCancelled()) {
+        this.autosaveReminderTask.cancel();
+    }
+}
+```
+
+如果插件被禁用，服务器会自动取消归属于该插件、但尚在等待或循环中的任务。但不要把这理解成“已经提交到异步线程池的后台任务也一定会被中断”。
+
+## 3. 用 `NukkitRunnable` 写可自取消的定时器
+
+`NukkitRunnable` 本质上是对调度器的一个封装，适合写倒计时、重试逻辑、会在内部自己停掉的任务。
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.scheduler.NukkitRunnable;
+
+public void startCountdown(Player player) {
+    new NukkitRunnable() {
+        private int seconds = 5;
+
+        @Override
+        public void run() {
+            if (!player.isOnline()) {
+                this.cancel();
+                return;
+            }
+
+            if (seconds == 0) {
+                player.sendMessage("Go!");
+                this.cancel();
+                return;
+            }
+
+            player.sendMessage("Starting in " + seconds + "...");
+            seconds--;
+        }
+    }.runTaskTimer(this, 0, 20);
+}
+```
+
+常用方法包括：
+
+- `runTask(plugin)`
+- `runTaskLater(plugin, delay)`
+- `runTaskTimer(plugin, delay, period)`
+- `runTaskAsynchronously(plugin)`
+- `runTaskLaterAsynchronously(plugin, delay)`
+- `runTaskTimerAsynchronously(plugin, delay, period)`
+
+:::warning
+同一个 `NukkitRunnable` 实例只能被调度一次。源码里会显式检查状态，如果你重复调度同一个实例，会直接抛异常。
+:::
+
+## 4. `PluginTask` 与 `Task`
+
+`Task` / `PluginTask` 是较早期的任务类型，现在依然可用。它们在你需要 `onRun(int currentTick)` 时会比较顺手。
+
+如果你走这条路线，插件开发里应优先使用 `PluginTask`，而不是裸 `Task`。
+
+```java
+import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.scheduler.PluginTask;
+
+public final class HeartbeatTask extends PluginTask<PluginBase> {
+
+    public HeartbeatTask(PluginBase plugin) {
+        super(plugin);
+    }
+
+    @Override
+    public void onRun(int currentTick) {
+        getOwner().getLogger().info("Heartbeat tick = " + currentTick);
+    }
+}
+```
+
+```java
+this.getServer().getScheduler().scheduleRepeatingTask(new HeartbeatTask(this), 20);
+```
+
+## 5. 异步 `Runnable` 和 `AsyncTask` 的区别
+
+后台任务你可以用两种方式来写：
+
+### 异步 `Runnable`
+
+当你只需要“丢到后台跑一下”，不需要内建完成回调时，可以直接这样写：
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    // Slow file or network work here
+}, true);
+```
+
+这很简单，但它没有自动回到主线程的完成阶段。
+
+### `AsyncTask`
+
+如果你需要下面这些能力，就该用 `AsyncTask`：
+
+- 清晰区分 `onRun()` 异步阶段
+- 在 `onCompletion(Server server)` 主线程阶段收尾
+- 通过 `setResult(...)` / `getResult()` 传递结果
+
+对大多数插件功能来说，这是更完整、也更安全的异步 API。
+
+:::warning
+`AsyncTask` 的完成回调是在稍后的主线程心跳里统一回收执行的。如果异步任务在插件禁用前就已经提交到 worker 线程，那么 `onCompletion(...)` 仍然可能在插件开始关闭后被调用。对关服或卸载敏感的功能，回调里要主动检查插件状态。
+:::
+
+## 6. `AsyncTask` 标准写法：后台加载，主线程应用
+
+安全模式通常是：
+
+1. 调度前先复制纯数据
+2. 在 `onRun()` 里做慢操作
+3. 在 `onCompletion(...)` 里把结果应用回游戏状态
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.scheduler.AsyncTask;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
+
+public void loadProfile(Player player) {
+    UUID uuid = player.getUniqueId();
+    Path path = this.getDataFolder().toPath().resolve("profiles").resolve(uuid + ".json");
+
+    this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+        @Override
+        public void onRun() {
+            try {
+                String json = Files.exists(path) ? Files.readString(path) : "{}";
+                this.setResult(json);
+            } catch (IOException e) {
+                this.setResult(null);
+            }
+        }
+
+        @Override
+        public void onCompletion(Server server) {
+            Player online = server.getPlayer(uuid).orElse(null);
+            if (online == null) {
+                return;
+            }
+
+            String json = (String) this.getResult();
+            if (json == null) {
+                online.sendMessage("Failed to load profile.");
+                return;
+            }
+
+            online.sendMessage("Profile loaded: " + json.length() + " bytes");
+        }
+    });
+}
+```
+
+这段代码安全的原因是：
+
+- 切线程前先复制了 `UUID` 和 `Path`
+- 文件读取放在异步线程完成
+- 玩家查找和消息发送放在主线程 `onCompletion(...)` 中完成
+
+## 7. 手动切回主线程
+
+有时你用的是异步 `Runnable`，不是 `AsyncTask`。这时你就需要自己补一个同步回调任务。
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    String result = doSlowComputation();
+
+    this.getServer().getScheduler().scheduleTask(this, () -> {
+        this.getLogger().info("Computed value = " + result);
+    });
+}, true);
+```
+
+这也是源码里大量采用的思路：先异步做重活，再用一个同步任务回到主线程改游戏状态。
+
+## 8. 异步线程池大小
+
+异步任务运行在调度器维护的 worker pool 中。线程池大小由 `nukkit-mot.yml` 里的 `async-workers` 控制。
+
+- 默认值：`auto`
+- 当值为 `auto` 时，源码会解析为 `max(availableProcessors + 1, 4)`
+
+你也可以在运行时读取当前线程池大小：
+
+```java
+int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
+```
+
+## 9. 线程安全边界
+
+除非你已经明确验证过某条源码路径是线程安全的，否则下面这些对象都应视为主线程专用：
+
+- `Player`
+- `Entity`
+- `Level`
+- 区块与方块
+- 背包和窗口
+- 大多数会影响游戏状态的事件派发
+
+通常适合异步做的事情包括：
+
+- 读写插件数据文件
+- 数据库查询
+- 内存中的 JSON、YAML、NBT 转换
+- 压缩、哈希、图片生成、路径搜索等重计算
+
+## 常见误区
+
+### 1. 在 `onRun()` 里直接读写游戏状态
+
+不要在异步代码里直接传送玩家、设置方块、打开背包、修改实体。应改为在 `onCompletion(...)` 或后续同步任务中处理。
+
+### 2. 在长异步任务里长期持有活对象
+
+不要假设 `Player`、区块、世界引用在异步任务结束时仍然有效。更稳妥的做法是先复制 `UUID`、世界名、坐标等标识，再回主线程重新查对象。
+
+### 3. 继续使用无插件归属的旧重载
+
+优先使用 `scheduleTask(this, runnable)` 这类带插件 owner 的调用，而不是不带插件的遗留重载。插件归属是禁用时自动清理任务的基础。
+
+### 4. 误以为插件禁用一定会停止已在运行的异步任务
+
+插件禁用会取消归属任务，但不会倒退性地终止已经在线程池里运行的异步工作。若某个结果在关闭阶段应该被丢弃，就要在 `onCompletion(...)` 里自行做保护判断。
+
+### 5. 把 `onCancel()` 当成“只会在手动取消时触发”
+
+按当前源码实现，一次性 `Task` 正常执行结束后，在调度器移除阶段也会走 `TaskHandler.cancel()`，从而触发 `Task#onCancel()`。所以不要把 `onCancel()` 当成“只表示用户主动取消”的唯一信号。
+
+### 6. 复用同一个 `NukkitRunnable`
+
+每次想重新启动任务，都应该创建新的 `NukkitRunnable` 实例，而不是重复调度之前那个对象。

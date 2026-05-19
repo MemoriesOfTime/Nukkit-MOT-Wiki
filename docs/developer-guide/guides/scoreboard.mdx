@@ -1,0 +1,284 @@
+---
+sidebar_position: 12
+---
+
+# Scoreboard Guide
+
+Nukkit-MOT has a complete scoreboard API for sidebar, player list, and below-name displays. It supports fake text rows, player-bound rows, entity-bound rows, manager-level objective registration, and JSON-backed storage.
+
+:::tip Source-backed scope
+This page is written against the current Nukkit-MOT source, especially `IScoreboardManager`, `ScoreboardManager`, `IScoreboard`, `Scoreboard`, `ScoreboardLine`, `FakeScorer`, `PlayerScorer`, `EntityScorer`, and the built-in `/scoreboard` command.
+:::
+
+## Import the Right `Scoreboard` Class
+
+There are two different `Scoreboard` classes in the source tree:
+
+- current API: `cn.nukkit.scoreboard.scoreboard.Scoreboard`
+- deprecated compatibility wrapper: `cn.nukkit.scoreboard.Scoreboard`
+
+For new plugin code, use the class under `cn.nukkit.scoreboard.scoreboard`.
+
+## Core Model
+
+The main pieces are:
+
+| Type | Role |
+| --- | --- |
+| `IScoreboardManager` | Global registry, display-slot assignment, storage access |
+| `IScoreboard` / `Scoreboard` | One objective with a display name, criteria, sort order, viewers, and lines |
+| `IScoreboardLine` / `ScoreboardLine` | One scorer + one score value |
+| `IScorer` | The row owner: fake text, player, or entity |
+| `DisplaySlot` | `SIDEBAR`, `LIST`, `BELOW_NAME` |
+| `SortOrder` | `ASCENDING` or `DESCENDING` |
+
+Important entry point:
+
+```java
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+```
+
+## 1. Private Sidebar for One Player
+
+If you only want to show a sidebar to one player, you do not need the global manager display slot system. You can create a scoreboard and attach that player directly as a viewer.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.network.protocol.types.SortOrder;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+public void showProfileSidebar(Player player, int kills, int coins) {
+    IScoreboard scoreboard = new Scoreboard("profile_sidebar", "Profile", "dummy", SortOrder.DESCENDING);
+
+    FakeScorer killsLine = new FakeScorer("Kills");
+    FakeScorer coinsLine = new FakeScorer("Coins");
+
+    scoreboard.addLine(killsLine, kills);
+    scoreboard.addLine(coinsLine, coins);
+    scoreboard.addViewer(player, DisplaySlot.SIDEBAR);
+}
+```
+
+To hide it again:
+
+```java
+scoreboard.removeViewer(player, DisplaySlot.SIDEBAR);
+```
+
+This path is useful for per-player UI that does not need command integration or global objective lookup.
+
+## 2. Updating Scores
+
+Keep the scorer or line reference if you want to update a row later. `ScoreboardLine#setScore(...)` automatically sends the update to current viewers.
+
+```java
+import cn.nukkit.scoreboard.scoreboard.IScoreboardLine;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+FakeScorer killsLine = new FakeScorer("Kills");
+scoreboard.addLine(killsLine, 0);
+
+IScoreboardLine line = scoreboard.getLine(killsLine);
+if (line != null) {
+    line.setScore(12);
+}
+```
+
+You can also remove rows:
+
+```java
+scoreboard.removeLine(killsLine);
+```
+
+## 3. Bulk Rebuilds and `resend()`
+
+For many changes at once, rebuild the scoreboard in memory and resend it instead of pushing dozens of incremental updates.
+
+```java
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+scoreboard.removeAllLine(false);
+scoreboard.addLine(new FakeScorer("Kills"), kills);
+scoreboard.addLine(new FakeScorer("Coins"), coins);
+scoreboard.addLine(new FakeScorer("Rank"), rankPoints);
+scoreboard.resend();
+```
+
+There is also a shortcut for simple fake-text sidebars:
+
+```java
+scoreboard.setLines(List.of(
+    "Profile",
+    "Kills",
+    "Coins"
+));
+```
+
+`setLines(List<String>)` rebuilds all rows using `FakeScorer` and then calls `resend()`.
+
+## 4. Global Objectives Through `ScoreboardManager`
+
+Register a scoreboard in the manager when you want it to behave like a real server objective:
+
+- retrievable by objective name
+- usable by `/scoreboard`
+- visible to features that resolve score objectives by name
+- storable through the scoreboard storage
+
+```java
+import cn.nukkit.scoreboard.manager.IScoreboardManager;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+IScoreboard scoreboard = new Scoreboard("kills", "Kills", "dummy");
+
+if (!manager.containScoreboard(scoreboard.getObjectiveName())) {
+    manager.addScoreboard(scoreboard);
+}
+```
+
+If you later want to remove it:
+
+```java
+manager.removeScoreboard("kills");
+```
+
+## 5. Manager Display Slots vs Direct Viewers
+
+There are two display styles:
+
+### Direct viewers on the scoreboard object
+
+Use `scoreboard.addViewer(player, slot)` when you want precise per-player control.
+
+### Manager-controlled slot display
+
+Use `manager.setDisplay(slot, scoreboard)` when you want one scoreboard assigned to a global slot for the manager's registered viewers.
+
+```java
+import cn.nukkit.network.protocol.types.DisplaySlot;
+
+manager.setDisplay(DisplaySlot.SIDEBAR, scoreboard);
+```
+
+To clear the slot:
+
+```java
+manager.setDisplay(DisplaySlot.SIDEBAR, null);
+```
+
+If you use manager-level display in plugin code, register and unregister viewers yourself:
+
+```java
+manager.addViewer(player);
+manager.removeViewer(player);
+```
+
+## 6. Choosing a Scorer Type
+
+The scorer type decides what the row is attached to.
+
+| Scorer | Good for | Notes |
+| --- | --- | --- |
+| `FakeScorer` | Text rows such as `Kills`, `Coins`, blank separators | Equality is based on the fake name text |
+| `PlayerScorer` | Real player-bound scores | Packets are only built when the player is online |
+| `EntityScorer` | Entity-bound scores | Useful for selector-driven or entity-specific rows |
+
+### Example: Below-name Health-style Board
+
+`BELOW_NAME` is most useful with `PlayerScorer`, because the line is associated with a real player.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.PlayerScorer;
+
+IScoreboard healthBoard = new Scoreboard("health", "HP", "dummy");
+
+for (Player target : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addLine(new PlayerScorer(target), (int) target.getHealth());
+}
+
+for (Player viewer : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addViewer(viewer, DisplaySlot.BELOW_NAME);
+}
+```
+
+When a player's health changes, update that player's line:
+
+```java
+PlayerScorer scorer = new PlayerScorer(player);
+if (healthBoard.containLine(scorer)) {
+    healthBoard.getLine(scorer).setScore((int) player.getHealth());
+}
+```
+
+## 7. Sort Order and Slots
+
+The current display slots are:
+
+- `DisplaySlot.SIDEBAR`
+- `DisplaySlot.LIST`
+- `DisplaySlot.BELOW_NAME`
+
+The current sort modes are:
+
+- `SortOrder.ASCENDING`
+- `SortOrder.DESCENDING`
+
+`SortOrder` matters most for `SIDEBAR` and `LIST`. `BELOW_NAME` is typically used with one score per tracked player rather than a ranked list.
+
+## 8. Persistence and `scoreboard.json`
+
+The server creates `ScoreboardManager` with `JSONScoreboardStorage`, backed by `scoreboard.json` under the server data path.
+
+You can save and reload through the manager:
+
+```java
+manager.save();
+manager.read();
+```
+
+Important detail: scoreboard changes are not automatically persisted every time you add or edit a line. If your plugin expects scoreboard state to survive restart, explicitly call `manager.save()` at the appropriate time.
+
+## 9. Main-thread Safety
+
+Scoreboard APIs interact with `Player` packets and viewer state. Treat scoreboard creation, updates, and display changes as main-thread work.
+
+If your score comes from slow I/O or heavy computation:
+
+1. compute it asynchronously
+2. switch back to the main thread
+3. update the scoreboard there
+
+See the scheduler guide for the thread handoff pattern.
+
+## Common Pitfalls
+
+### 1. Importing the Deprecated `cn.nukkit.scoreboard.Scoreboard`
+
+That class exists only for compatibility with older plugins. Use `cn.nukkit.scoreboard.scoreboard.Scoreboard` for new work.
+
+### 2. Reusing the Same Fake Text Twice
+
+`FakeScorer` equality is based on its text. If you use the same fake name twice, the later row replaces the earlier one.
+
+For sidebar separators or multiple blank-looking rows, use distinct strings, for example different formatting codes.
+
+### 3. Assuming `addScoreboard(...)` Rejects Duplicates
+
+Current `ScoreboardManager.addScoreboard(...)` overwrites by objective name. Check `containScoreboard(name)` yourself before adding.
+
+### 4. Expecting Offline `PlayerScorer` Rows to Display Normally
+
+`PlayerScorer.toNetworkInfo(...)` returns `null` when the player is offline, so those rows are filtered out during packet send. Use `FakeScorer` if you need pure text rows or offline-safe labels.
+
+### 5. Treating Manager Display as Automatic for Every Player
+
+`manager.setDisplay(...)` only pushes to the manager's current viewers. In plugin code, add or remove viewers explicitly if you rely on manager-level display behavior.

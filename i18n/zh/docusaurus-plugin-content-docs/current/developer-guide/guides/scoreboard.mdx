@@ -1,0 +1,284 @@
+---
+sidebar_position: 12
+---
+
+# Scoreboard 计分板指南
+
+Nukkit-MOT 提供了一套完整的计分板 API，可用于侧边栏、玩家列表和名称下方显示。它同时支持纯文本行、玩家绑定行、实体绑定行、通过管理器注册 objective，以及基于 JSON 的存储。
+
+:::tip 基于源码编写
+本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `IScoreboardManager`、`ScoreboardManager`、`IScoreboard`、`Scoreboard`、`ScoreboardLine`、`FakeScorer`、`PlayerScorer`、`EntityScorer` 和内置 `/scoreboard` 命令。
+:::
+
+## 先导入正确的 `Scoreboard` 类
+
+源码里有两个不同的 `Scoreboard` 类：
+
+- 当前主 API：`cn.nukkit.scoreboard.scoreboard.Scoreboard`
+- 已废弃的兼容包装类：`cn.nukkit.scoreboard.Scoreboard`
+
+新插件开发应使用 `cn.nukkit.scoreboard.scoreboard.Scoreboard` 这个路径。
+
+## 核心对象模型
+
+计分板系统主要由下面几个部分组成：
+
+| 类型 | 作用 |
+| --- | --- |
+| `IScoreboardManager` | 全局注册表、显示槽位分配、存储入口 |
+| `IScoreboard` / `Scoreboard` | 一个 objective，包含显示名、criteria、排序方式、viewer 与多条 line |
+| `IScoreboardLine` / `ScoreboardLine` | 一条 scorer + 一个分值 |
+| `IScorer` | 这一行依附的对象，可以是假文本、玩家或实体 |
+| `DisplaySlot` | `SIDEBAR`、`LIST`、`BELOW_NAME` |
+| `SortOrder` | `ASCENDING` 或 `DESCENDING` |
+
+最常用的入口是：
+
+```java
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+```
+
+## 1. 给单个玩家显示一个私有侧边栏
+
+如果你只是想给某个玩家单独显示一个 sidebar，其实不需要走全局 manager 的显示槽位系统。直接创建计分板，然后把这个玩家作为 viewer 挂上去即可。
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.network.protocol.types.SortOrder;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+public void showProfileSidebar(Player player, int kills, int coins) {
+    IScoreboard scoreboard = new Scoreboard("profile_sidebar", "Profile", "dummy", SortOrder.DESCENDING);
+
+    FakeScorer killsLine = new FakeScorer("Kills");
+    FakeScorer coinsLine = new FakeScorer("Coins");
+
+    scoreboard.addLine(killsLine, kills);
+    scoreboard.addLine(coinsLine, coins);
+    scoreboard.addViewer(player, DisplaySlot.SIDEBAR);
+}
+```
+
+如果要隐藏：
+
+```java
+scoreboard.removeViewer(player, DisplaySlot.SIDEBAR);
+```
+
+这种方式适合私有 UI，不依赖命令系统，也不依赖全局 objective 查找。
+
+## 2. 更新分数
+
+如果你后续还要改某一行的分数，最好保留 scorer 或 line 引用。`ScoreboardLine#setScore(...)` 会自动把变化推送给当前 viewers。
+
+```java
+import cn.nukkit.scoreboard.scoreboard.IScoreboardLine;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+FakeScorer killsLine = new FakeScorer("Kills");
+scoreboard.addLine(killsLine, 0);
+
+IScoreboardLine line = scoreboard.getLine(killsLine);
+if (line != null) {
+    line.setScore(12);
+}
+```
+
+删除一行也很直接：
+
+```java
+scoreboard.removeLine(killsLine);
+```
+
+## 3. 大批量重建与 `resend()`
+
+如果你一次要改很多行，比起一条条推送增量更新，更好的做法是先在内存里重建，再整体 `resend()`。
+
+```java
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+scoreboard.removeAllLine(false);
+scoreboard.addLine(new FakeScorer("Kills"), kills);
+scoreboard.addLine(new FakeScorer("Coins"), coins);
+scoreboard.addLine(new FakeScorer("Rank"), rankPoints);
+scoreboard.resend();
+```
+
+对于最简单的纯文本侧边栏，还可以直接用快捷方法：
+
+```java
+scoreboard.setLines(List.of(
+    "Profile",
+    "Kills",
+    "Coins"
+));
+```
+
+`setLines(List<String>)` 会用 `FakeScorer` 重建所有行，然后自动调用 `resend()`。
+
+## 4. 通过 `ScoreboardManager` 注册全局 Objective
+
+当你希望这个计分板真正作为“服务器 objective”存在时，就应该把它注册进 manager。这样做的好处是：
+
+- 可以按 objective 名查找
+- 能被 `/scoreboard` 识别
+- 能被依赖 objective 名的功能访问
+- 可以走计分板存储系统保存
+
+```java
+import cn.nukkit.scoreboard.manager.IScoreboardManager;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+IScoreboard scoreboard = new Scoreboard("kills", "Kills", "dummy");
+
+if (!manager.containScoreboard(scoreboard.getObjectiveName())) {
+    manager.addScoreboard(scoreboard);
+}
+```
+
+后续如果要移除：
+
+```java
+manager.removeScoreboard("kills");
+```
+
+## 5. Manager 显示槽位 与 直接 Viewer 的区别
+
+计分板有两种常见显示方式：
+
+### 直接在 scoreboard 对象上管理 viewer
+
+当你需要精确控制“谁看到这个板子”时，使用 `scoreboard.addViewer(player, slot)`。
+
+### 通过 manager 分配显示槽位
+
+当你想让某个 objective 被挂到一个全局显示槽位上时，使用 `manager.setDisplay(slot, scoreboard)`。
+
+```java
+import cn.nukkit.network.protocol.types.DisplaySlot;
+
+manager.setDisplay(DisplaySlot.SIDEBAR, scoreboard);
+```
+
+清空槽位：
+
+```java
+manager.setDisplay(DisplaySlot.SIDEBAR, null);
+```
+
+如果你的插件使用 manager 级别的显示方式，就要自己维护 viewers：
+
+```java
+manager.addViewer(player);
+manager.removeViewer(player);
+```
+
+## 6. 如何选择 Scorer 类型
+
+scorer 类型决定了这一行到底“挂”在谁身上。
+
+| Scorer | 适合场景 | 说明 |
+| --- | --- | --- |
+| `FakeScorer` | `Kills`、`Coins`、分隔线、纯文本行 | 相等性由文本本身决定 |
+| `PlayerScorer` | 玩家绑定分数 | 只有玩家在线时才能正常构建网络包 |
+| `EntityScorer` | 实体绑定分数 | 适合目标选择器或实体类计分 |
+
+### 示例：名称下方的生命值计分板
+
+`BELOW_NAME` 最适合配合 `PlayerScorer` 使用，因为这一行本来就是绑定到某个真实玩家上的。
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.PlayerScorer;
+
+IScoreboard healthBoard = new Scoreboard("health", "HP", "dummy");
+
+for (Player target : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addLine(new PlayerScorer(target), (int) target.getHealth());
+}
+
+for (Player viewer : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addViewer(viewer, DisplaySlot.BELOW_NAME);
+}
+```
+
+当玩家血量变化时，更新对应行：
+
+```java
+PlayerScorer scorer = new PlayerScorer(player);
+if (healthBoard.containLine(scorer)) {
+    healthBoard.getLine(scorer).setScore((int) player.getHealth());
+}
+```
+
+## 7. 排序方式与显示槽位
+
+当前可用的显示槽位是：
+
+- `DisplaySlot.SIDEBAR`
+- `DisplaySlot.LIST`
+- `DisplaySlot.BELOW_NAME`
+
+当前可用的排序方式是：
+
+- `SortOrder.ASCENDING`
+- `SortOrder.DESCENDING`
+
+`SortOrder` 主要对 `SIDEBAR` 和 `LIST` 更有意义。`BELOW_NAME` 一般更像“每个玩家一个数值”，而不是排行榜。
+
+## 8. 持久化与 `scoreboard.json`
+
+服务端会用 `JSONScoreboardStorage` 创建 `ScoreboardManager`，默认存储文件是服务端数据目录下的 `scoreboard.json`。
+
+你可以通过 manager 显式保存与重读：
+
+```java
+manager.save();
+manager.read();
+```
+
+这里有个关键点：计分板内容并不是“每次改一行就自动落盘”。如果你的插件要求这些分数在重启后仍然存在，就要在合适的时机主动调用 `manager.save()`。
+
+## 9. 主线程安全
+
+计分板 API 最终会和 `Player` 发包、viewer 状态这些主线程对象交互，因此应把计分板创建、更新、显示切换都视为主线程操作。
+
+如果分数来自慢 I/O 或重计算，推荐流程是：
+
+1. 先异步计算
+2. 回到主线程
+3. 再更新 scoreboard
+
+线程切换模式可参考调度器指南。
+
+## 常见误区
+
+### 1. 导入了已废弃的 `cn.nukkit.scoreboard.Scoreboard`
+
+那个类只是为了兼容旧插件保留下来的，新代码应使用 `cn.nukkit.scoreboard.scoreboard.Scoreboard`。
+
+### 2. 同一个 Fake 文本被重复使用
+
+`FakeScorer` 的相等性取决于文本本身。如果你写了两个完全相同的 fake name，后面的那一行会覆盖前面的。
+
+如果你需要多个“看起来是空白”的分隔行，应使用不同的字符串，比如不同的格式代码。
+
+### 3. 误以为 `addScoreboard(...)` 会自动拒绝同名 objective
+
+按当前 `ScoreboardManager.addScoreboard(...)` 的实现，同名 objective 会被直接覆盖。插件应在添加前自己先做 `containScoreboard(name)` 判断。
+
+### 4. 期望离线 `PlayerScorer` 也能正常显示
+
+`PlayerScorer.toNetworkInfo(...)` 在玩家离线时会返回 `null`，发包时会被过滤掉。如果你需要纯文本行或离线也安全的标签，请改用 `FakeScorer`。
+
+### 5. 把 manager 显示当成“自动对所有玩家生效”
+
+`manager.setDisplay(...)` 只会推送给 manager 当前已注册的 viewers。插件如果依赖 manager 级别显示，应显式维护 `addViewer` / `removeViewer`。

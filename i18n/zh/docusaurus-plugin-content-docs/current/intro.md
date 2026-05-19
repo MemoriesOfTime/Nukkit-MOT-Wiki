@@ -35,7 +35,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 当前文档已拆分为两条主线：
 
 - **用户使用文档**：面向服主与管理员。建议从 [从零开始搭建服务器](user-guide/starting_from_scratch.md) 开始，再继续阅读 [快速入门](user-guide/getting-started/preparation.md) 和 [服务器配置](user-guide/server-config/server-properties.mdx)。
-- **开发文档**：面向插件和工具开发者。建议从 [第一个 Java 插件](developer-guide/tutorial-basics/frist_java_plugin.mdx) 开始，再继续阅读 [API 指南](developer-guide/guides/world.md) 和 [进阶教程](developer-guide/tutorial-extras/runtime_block_state.mdx)。
+- **开发文档**：面向插件和工具开发者。建议从 [第一个 Java 插件](developer-guide/tutorial-basics/frist_java_plugin.mdx) 开始，再继续阅读 [API 指南](developer-guide/guides/world.md) 和 [内容自定义接口](/zh/docs/developer-guide/tutorial-extras/custom)。
 
 ## Maven {#maven}
 #### 仓库： {#maven-repository}

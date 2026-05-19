@@ -2,6 +2,7 @@
   "label": "Custom Content APIs",
   "position": 2,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "slug": "/developer-guide/tutorial-extras/custom"
   }
 }

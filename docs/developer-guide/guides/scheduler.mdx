@@ -1,0 +1,329 @@
+---
+sidebar_position: 5
+---
+
+# Scheduler and Async Tasks Guide
+
+Nukkit-MOT gives plugin authors two different execution lanes:
+
+- the main server thread for world, entity, player, and inventory work
+- the async worker pool for slow I/O and expensive computation
+
+This guide shows how the scheduler APIs fit together, when to use each one, and where the thread boundary really is.
+
+:::tip Source-backed scope
+This page is written against the current Nukkit-MOT source, especially `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool`, and the server tick loop.
+:::
+
+## Core Rules First
+
+- `Level`, blocks, chunks, entities, inventories, and players should be treated as main-thread APIs.
+- Use async tasks for file I/O, database work, compression, HTTP calls, and heavy calculations.
+- Switch back to the main thread before changing game state.
+- For plugin code, prefer scheduler overloads that take a `Plugin` instance. The no-plugin overloads are mostly legacy and several are deprecated.
+
+## Main Entry Point
+
+Use `Server#getScheduler()` or `PluginBase#getServer().getScheduler()`:
+
+```java
+ServerScheduler scheduler = this.getServer().getScheduler();
+```
+
+Time is measured in ticks:
+
+- `20` ticks = `1` second
+- `1` tick = `0.05` seconds
+
+## Which Task Type Should You Use?
+
+| API | Best for | Notes |
+| --- | --- | --- |
+| `scheduleTask(plugin, runnable)` | Run once on the main thread | Simplest sync task |
+| `scheduleDelayedTask(plugin, runnable, delay)` | Run once after a delay | Delay is in ticks |
+| `scheduleRepeatingTask(plugin, runnable, period)` | Repeat on the main thread | Runs until cancelled |
+| `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | Delayed repeating sync task | Most common timer API |
+| `scheduleTask(plugin, runnable, true)` | Fire-and-forget async work | No built-in completion callback |
+| `scheduleAsyncTask(plugin, asyncTask)` | Async work that needs `onCompletion(...)` | Best async plugin API |
+| `NukkitRunnable` | Object-oriented wrapper around scheduler calls | Easy self-cancel and task id access |
+| `PluginTask` | Older `Task` style with `onRun(int currentTick)` | Useful if you want tick info or owner access |
+
+## 1. Simple Main-thread Tasks
+
+For small delayed or scheduled gameplay logic, a plugin-bound `Runnable` is usually enough.
+
+```java
+import cn.nukkit.Player;
+
+public void sendDelayedWelcome(Player player) {
+    this.getServer().getScheduler().scheduleDelayedTask(this, () -> {
+        if (!player.isOnline()) {
+            return;
+        }
+
+        player.sendMessage("Welcome back.");
+    }, 40);
+}
+```
+
+This stays on the main thread, so it is safe to talk to `Player`, `Level`, inventories, and blocks.
+
+## 2. Repeating Tasks and Cancellation
+
+Repeating tasks return a `TaskHandler`. Keep it if you need to stop the task later.
+
+```java
+import cn.nukkit.scheduler.TaskHandler;
+
+private TaskHandler autosaveReminderTask;
+
+public void startReminder() {
+    this.autosaveReminderTask = this.getServer().getScheduler().scheduleDelayedRepeatingTask(
+        this,
+        () -> this.getServer().broadcastMessage("Autosave runs every 5 minutes."),
+        20,
+        20 * 60 * 5
+    );
+}
+
+public void stopReminder() {
+    if (this.autosaveReminderTask != null && !this.autosaveReminderTask.isCancelled()) {
+        this.autosaveReminderTask.cancel();
+    }
+}
+```
+
+If the plugin is disabled, plugin-owned waiting or repeating tasks are cancelled automatically by the server. Do not assume this also aborts async work that has already been submitted to a worker thread.
+
+## 3. `NukkitRunnable` for Self-cancelling Timers
+
+`NukkitRunnable` is a wrapper around the scheduler that is convenient for countdowns, retry loops, and tasks that want to cancel themselves.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.scheduler.NukkitRunnable;
+
+public void startCountdown(Player player) {
+    new NukkitRunnable() {
+        private int seconds = 5;
+
+        @Override
+        public void run() {
+            if (!player.isOnline()) {
+                this.cancel();
+                return;
+            }
+
+            if (seconds == 0) {
+                player.sendMessage("Go!");
+                this.cancel();
+                return;
+            }
+
+            player.sendMessage("Starting in " + seconds + "...");
+            seconds--;
+        }
+    }.runTaskTimer(this, 0, 20);
+}
+```
+
+Useful methods include:
+
+- `runTask(plugin)`
+- `runTaskLater(plugin, delay)`
+- `runTaskTimer(plugin, delay, period)`
+- `runTaskAsynchronously(plugin)`
+- `runTaskLaterAsynchronously(plugin, delay)`
+- `runTaskTimerAsynchronously(plugin, delay, period)`
+
+:::warning
+A `NukkitRunnable` instance can only be scheduled once. The class explicitly throws if you try to reuse the same instance after it has already been scheduled.
+:::
+
+## 4. `PluginTask` and `Task`
+
+`Task` and `PluginTask` are the older task types. They are still valid and sometimes useful when you want the current tick in `onRun(int currentTick)`.
+
+For plugin code, prefer `PluginTask` over bare `Task` if you go this route.
+
+```java
+import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.scheduler.PluginTask;
+
+public final class HeartbeatTask extends PluginTask<PluginBase> {
+
+    public HeartbeatTask(PluginBase plugin) {
+        super(plugin);
+    }
+
+    @Override
+    public void onRun(int currentTick) {
+        getOwner().getLogger().info("Heartbeat tick = " + currentTick);
+    }
+}
+```
+
+```java
+this.getServer().getScheduler().scheduleRepeatingTask(new HeartbeatTask(this), 20);
+```
+
+## 5. Async `Runnable` vs `AsyncTask`
+
+You can run background work in two different ways:
+
+### Async `Runnable`
+
+Use `scheduleTask(plugin, runnable, true)` or the async variants of `NukkitRunnable` when you only need fire-and-forget background work.
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    // Slow file or network work here
+}, true);
+```
+
+This is simple, but it has no built-in main-thread completion hook.
+
+### `AsyncTask`
+
+Use `AsyncTask` when you need:
+
+- a clear `onRun()` async phase
+- a main-thread `onCompletion(Server server)` phase
+- a result object via `setResult(...)` / `getResult()`
+
+This is usually the best async API for plugin features.
+
+:::warning
+`AsyncTask` completion is collected later on the main thread. If the async work was already submitted before plugin shutdown, `onCompletion(...)` may still run after your plugin has started disabling. Check plugin state before applying results if shutdown races matter for your feature.
+:::
+
+## 6. `AsyncTask` Pattern: Background Load, Main-thread Apply
+
+The safe pattern is:
+
+1. copy plain data before scheduling
+2. do slow work in `onRun()`
+3. apply the result in `onCompletion(...)`
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.scheduler.AsyncTask;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
+
+public void loadProfile(Player player) {
+    UUID uuid = player.getUniqueId();
+    Path path = this.getDataFolder().toPath().resolve("profiles").resolve(uuid + ".json");
+
+    this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+        @Override
+        public void onRun() {
+            try {
+                String json = Files.exists(path) ? Files.readString(path) : "{}";
+                this.setResult(json);
+            } catch (IOException e) {
+                this.setResult(null);
+            }
+        }
+
+        @Override
+        public void onCompletion(Server server) {
+            Player online = server.getPlayer(uuid).orElse(null);
+            if (online == null) {
+                return;
+            }
+
+            String json = (String) this.getResult();
+            if (json == null) {
+                online.sendMessage("Failed to load profile.");
+                return;
+            }
+
+            online.sendMessage("Profile loaded: " + json.length() + " bytes");
+        }
+    });
+}
+```
+
+Why this is safe:
+
+- `UUID` and `Path` are copied before switching threads
+- file reading happens off the main thread
+- player lookup and messaging happen on the main thread in `onCompletion(...)`
+
+## 7. Switching Back to the Main Thread Manually
+
+Sometimes you use an async `Runnable` instead of `AsyncTask`. In that case, schedule a sync follow-up task yourself.
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    String result = doSlowComputation();
+
+    this.getServer().getScheduler().scheduleTask(this, () -> {
+        this.getLogger().info("Computed value = " + result);
+    });
+}, true);
+```
+
+This is the same pattern used throughout the server source: async work first, then a sync task for world or player changes.
+
+## 8. Worker Pool Size
+
+Async tasks run in the scheduler's worker pool. The pool size is controlled by `nukkit-mot.yml` through `async-workers`.
+
+- default: `auto`
+- `auto` resolves to `max(availableProcessors + 1, 4)`
+
+You can inspect the current pool size with:
+
+```java
+int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
+```
+
+## 9. Thread Safety Boundaries
+
+Treat these as main-thread-only unless you have verified a specific source path is explicitly safe:
+
+- `Player`
+- `Entity`
+- `Level`
+- chunks and blocks
+- inventories and windows
+- most event dispatch that changes gameplay state
+
+Safe async work usually includes:
+
+- reading or writing plugin data files
+- database queries
+- JSON, YAML, or NBT transformation in memory
+- compression, hashing, image generation, pathfinding, and other heavy computation
+
+## Common Pitfalls
+
+### 1. Reading or Mutating Gameplay State from `onRun()`
+
+Do not teleport players, set blocks, open inventories, or modify entities from async code. Use `onCompletion(...)` or schedule a sync follow-up task.
+
+### 2. Capturing Live Game Objects in Long Async Work
+
+Do not assume a `Player`, chunk, or world reference is still valid when the async task finishes. Copy identifiers such as `UUID`, world name, or positions first, then look the objects up again on the main thread.
+
+### 3. Using Legacy No-plugin Overloads
+
+Prefer plugin-bound overloads such as `scheduleTask(this, runnable)` rather than deprecated overloads without a plugin owner. Plugin ownership is how automatic cleanup works on disable.
+
+### 4. Assuming Plugin Disable Stops Already-running Async Work
+
+Disabling a plugin cancels owned scheduled tasks, but it does not retroactively stop async work that is already running in the worker pool. Guard `onCompletion(...)` if the result should be ignored during shutdown.
+
+### 5. Treating `onCancel()` as "cancel only"
+
+Current scheduler behavior removes one-shot `Task` objects by calling `TaskHandler.cancel()`, which also invokes `Task#onCancel()`. Do not rely on `onCancel()` meaning "manual cancellation only".
+
+### 6. Reusing a `NukkitRunnable`
+
+Each `NukkitRunnable` instance can only be scheduled once. Create a new instance every time you want to start the task again.

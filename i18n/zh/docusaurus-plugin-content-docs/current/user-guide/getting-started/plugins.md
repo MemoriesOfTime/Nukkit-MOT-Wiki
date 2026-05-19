@@ -103,16 +103,6 @@ reload
 3. 删除插件的配置文件夹 (可选)
 4. 重新启动服务器
 
-## 常用插件推荐
-
-以下是一些常用的 Nukkit 插件:
-
-- **EconomyAPI** - 经济系统
-- **LuckPerms** - 权限管理
-- **Multiverse** - 多世界管理
-- **EssentialsNK** - 基础命令集合
-- **WorldEdit** - 创世神(地图编辑)
-
 ## 下一步
 
 安装好插件后,你可以 [连接到服务器](connect.md) 开始游戏了!
