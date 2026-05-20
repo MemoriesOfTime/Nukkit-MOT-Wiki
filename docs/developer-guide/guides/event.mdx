@@ -90,7 +90,7 @@ public class EventListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerChat(PlayerChatEvent event) {
-        if (event.getMessage().includes("cnm")) { // Check if the message includes "cnm"
+        if (event.getMessage().contains("cnm")) { // Check if the message includes "cnm"
             event.setCancelled(true);
         }
     }
