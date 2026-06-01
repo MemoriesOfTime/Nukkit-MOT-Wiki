@@ -1,0 +1,53 @@
+.mobileLinks {
+  display: none;
+}
+
+@media (max-width: 996px) {
+  .desktopLinks {
+    display: none;
+  }
+
+  .mobileLinks {
+    display: block;
+  }
+
+  .accordion {
+    border-top: 1px solid var(--ifm-toc-border-color);
+  }
+
+  .accordion:last-child {
+    border-bottom: 1px solid var(--ifm-toc-border-color);
+  }
+
+  .accordionSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 0;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .accordionSummary::-webkit-details-marker {
+    display: none;
+  }
+
+  .accordionSummary::after {
+    content: '+';
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .accordion[open] .accordionSummary::after {
+    content: '-';
+  }
+
+  .accordionItems {
+    padding: 0 0 0.9rem;
+  }
+
+  .accordionItems :global(.footer__item) {
+    margin-top: 0.55rem;
+  }
+}

@@ -51,6 +51,16 @@ function HomepageHeader() {
               📖 Let's Go
             </Translate>
           </Link>
+
+          <Link
+            className="button button--secondary button--lg"
+            to="https://plugins.nukkit-mot.com/">
+            <Translate
+              id="homepage.visitPlugins"
+              description="The homepage message to ask the user to visit the plugin platform">
+              🧩 Plugins
+            </Translate>
+          </Link>
         </div>
       </div>
     </header>
@@ -62,7 +72,6 @@ export default function Home(): React.ReactElement {
     redirectToLanguageVersion();
   }, []);
 
-  const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
       title="Nukkit-MOT Wiki"

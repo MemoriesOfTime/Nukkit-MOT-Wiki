@@ -101,8 +101,20 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial Basics',
-              to: '/docs/category/tutorial-basics',
+              label: 'Overview',
+              to: '/docs/intro',
+            },
+            {
+              label: 'Start from Scratch',
+              to: '/docs/user-guide/starting_from_scratch',
+            },
+            {
+              label: 'Server Config',
+              to: '/docs/user-guide/server-config/server-properties',
+            },
+            {
+              label: 'Plugin Dev',
+              to: '/docs/developer-guide/tutorial-basics/frist_java_plugin',
             },
           ],
         },
@@ -127,13 +139,17 @@ const config: Config = {
               href: 'https://github.com/MemoriesOfTime/Nukkit-MOT',
             },
             {
+              label: 'Plugins',
+              href: 'https://plugins.nukkit-mot.com/',
+            },
+            {
               label: 'Forums',
               href: 'https://bbs.nukkit-mot.com/',
             },
           ],
         },
       ],
-      copyright: `<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2024044839号-17</a><br/>Copyright © ${new Date().getFullYear()} Memories Of Time`,
+      copyright: `<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">京ICP备2024044839号-17</a><br/>Copyright © ${new Date().getFullYear()} <a href="https://mot.dev/" target="_blank" rel="noopener noreferrer">Memories Of Time</a>`,
     },
     docs: {
       sidebar: {

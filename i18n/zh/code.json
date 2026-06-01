@@ -7,6 +7,10 @@
     "message": "📖 学习",
     "description": "The homepage message to ask the user to visit docs"
   },
+  "homepage.visitPlugins": {
+    "message": "🧩 插件平台",
+    "description": "The homepage message to ask the user to visit the plugin platform"
+  },
   "homepage.subtitle": {
     "message": "多版本、内置实体AI、广泛插件兼容的我的世界服务器"
   },

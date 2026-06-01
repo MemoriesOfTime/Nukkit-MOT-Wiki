@@ -11,9 +11,21 @@
     "message": "相关",
     "description": "The title of the footer links column with title=More in the footer"
   },
-  "link.item.label.Tutorial": {
-    "message": "基础教程",
-    "description": "The label of footer link with label=Tutorial linking to /docs/intro"
+  "link.item.label.Overview": {
+    "message": "总览",
+    "description": "The label of footer link with label=Overview linking to /docs/intro"
+  },
+  "link.item.label.Start from Scratch": {
+    "message": "从零开始",
+    "description": "The label of footer link with label=Start from Scratch linking to /docs/user-guide/starting_from_scratch"
+  },
+  "link.item.label.Server Config": {
+    "message": "服务器配置",
+    "description": "The label of footer link with label=Server Config linking to /docs/user-guide/server-config/server-properties"
+  },
+  "link.item.label.Plugin Dev": {
+    "message": "插件开发",
+    "description": "The label of footer link with label=Plugin Dev linking to /docs/developer-guide/tutorial-basics/frist_java_plugin"
   },
   "link.item.label.Discord": {
     "message": "Discord",
@@ -27,8 +39,12 @@
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/MemoriesOfTime/Nukkit-MOT"
   },
+  "link.item.label.Plugins": {
+    "message": "插件平台",
+    "description": "The label of footer link with label=Plugins linking to https://plugins.nukkit-mot.com/"
+  },
   "link.item.label.Forums": {
-    "message": "Forums",
+    "message": "论坛",
     "description": "Nukkit-MOT Forums"
   }
 }
