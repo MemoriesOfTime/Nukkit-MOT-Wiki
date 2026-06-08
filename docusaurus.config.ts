@@ -66,6 +66,14 @@ const config: Config = {
   },
   themes: ['@docusaurus/theme-mermaid'],
 
+  scripts: [
+    {
+      src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5055484352057693',
+      async: true,
+      crossorigin: 'anonymous',
+    },
+  ],
+
   themeConfig: {
     // Replace with your project's social card
     image: 'images/banner.png',
