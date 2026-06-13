@@ -51,6 +51,10 @@ const config: Config = {
           editLocalizedFiles: true
         },
         blog: false,
+        gtag: {
+          trackingID: 'G-R952KXK2JY',
+          anonymizeIP: true,
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
