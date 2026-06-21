@@ -256,15 +256,17 @@ Whitelisted proxy sources must send a valid PPv2 header.
 ### `proxy-protocol-whitelist`
 | Data Type    | Default Value      |
 |--------------|--------------------|
-| `List<String>` | ["127.0.0.1/32"] |
+| `List<String>` | ["127.0.0.1/32", "::1/128"] |
 
 List of trusted proxy source IPs or CIDR ranges allowed to send Proxy Protocol headers.
 
 Use proxy addresses here, not player addresses.
-Examples: `127.0.0.1/32`, `10.0.0.0/8`, `203.0.113.5/32`
+Examples: `127.0.0.1/32`, `10.0.0.0/8`, `203.0.113.5/32`, `::1/128`
 
 :::note
-This whitelist currently supports IPv4/CIDR entries.
+Both IPv4/CIDR and IPv6/CIDR entries are supported.
+
+IPv6 local addresses are trusted by default.
 
 If the list is empty, all source IPs are trusted for Proxy Protocol, which is less secure.
 
@@ -853,3 +855,16 @@ Enable NetEase client support will allow NetEase players to enter the server
 | Boolean   | off           |
 
 Only NetEase players are allowed to enter the server, and after opening, Microsoft version players will be prohibited from entering the server, and only NetEase players will be allowed to join the server
+
+## Custom Block Settings {#custom-block-settings}
+
+### `auto-download-vanilla-palette`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Automatically download vanilla block palettes (`vanilla_palette_*.nbt`) from the official mirror when missing.
+
+This is required for custom block support across multiple client protocol versions. Files are cached in the `bin/` folder and verified with SHA256.
+
+If disabled, you must manually prepare the palette files in the `bin/` folder.
