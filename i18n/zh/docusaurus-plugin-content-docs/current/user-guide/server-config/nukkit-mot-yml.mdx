@@ -576,11 +576,15 @@ worlds:
 
 玩家名称中带有空格的处理方式
 
-"disabled" - 禁止带有空格名称的玩家进入服务器
+`deny` - 禁止带有空格名称的玩家进入服务器
 
-"ignore" - 忽略空格名称 （默认）
+`ignore` - 忽略名称中的空格（默认）
 
-"replacing" - 用"_"替换玩家名称中的空格
+`replace` - 用"_"替换玩家名称中的空格
+
+:::note
+为了向后兼容，仍接受别名 `disabled`（= `deny`）和 `replacing`（= `replace`）。
+:::
 
 ### `xp-bottles-on-creative`
 | 数据类型    | 默认值 |

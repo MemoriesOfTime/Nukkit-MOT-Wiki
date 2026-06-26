@@ -332,3 +332,18 @@ Optional: `client-auth / server-auth-with-rewind / server-auth`
 | Boolean   | on            |
 
 Server authoritative block breaking
+
+## `server-authoritative-inventory`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Server authoritative inventory transactions (ItemStackRequest)
+
+only takes effect for clients on protocol [1.16.100](https://minecraft.wiki/w/Bedrock_Edition_1.16.100) and above
+
+:::note
+
+this is the inventory equivalent of server authoritative movement — the server validates item moves instead of trusting the client
+
+:::

@@ -579,11 +579,15 @@ disables a hack which is used to limit right click interaction spamming by clien
 
 Handling player names with spaces
 
-"disabled" - Players with names containing spaces are prohibited from entering the server
+`deny` - Players with names containing spaces are prohibited from entering the server
 
-"ignore" - Ignore names with spaces (default)
+`ignore` - Ignore spaces in player names (default)
 
-"replacing" - Replace spaces in player names with "_"
+`replace` - Replace spaces in player names with "_"
+
+:::note
+For backward compatibility, the aliases `disabled` (= `deny`) and `replacing` (= `replace`) are still accepted.
+:::
 
 ### `xp-bottles-on-creative`
 | Data Type | Default Value |
