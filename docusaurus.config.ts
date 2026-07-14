@@ -71,18 +71,26 @@ const config: Config = {
   themes: ['@docusaurus/theme-mermaid'],
 
   scripts: [
-    {
-      src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5055484352057693',
-      async: true,
-      crossorigin: 'anonymous',
-    },
+    // AdSense 暂时关闭（减少第三方脚本对首屏性能的影响），恢复时取消下方注释即可
+    // {
+    //   src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5055484352057693',
+    //   async: true,
+    //   crossorigin: 'anonymous',
+    // },
+  ],
+
+  // 预连接第三方域名，减少首次请求的 DNS/TLS 握手延迟
+  headTags: [
+    {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://giscus.app'}},
+    {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://www.googletagmanager.com'}},
+    {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://bstats.org'}},
   ],
 
   themeConfig: {
     // Replace with your project's social card
     image: 'images/banner.png',
     navbar: {
-      title: 'NK-MOT Wiki',
+      title: 'Nukkit-MOT',
       logo: {
         alt: 'Memories Of Time Logo',
         src: 'images/logo.png',

@@ -5,54 +5,58 @@
   },
   "sidebar.tutorialSidebar.category.User Documentation": {
     "message": "使用文档",
-    "description": "The label for category User Documentation in sidebar tutorialSidebar"
+    "description": "The label for category 'User Documentation' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.User Documentation.link.generated-index.description": {
     "message": "面向服主与管理员的部署、配置、运维和排障文档。",
-    "description": "The generated-index page description for category User Documentation in sidebar tutorialSidebar"
+    "description": "The generated-index page description for category 'User Documentation' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Developer Documentation": {
     "message": "开发文档",
-    "description": "The label for category Developer Documentation in sidebar tutorialSidebar"
+    "description": "The label for category 'Developer Documentation' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Developer Documentation.link.generated-index.description": {
     "message": "面向插件开发者的开发入门、API 指南与高级自定义教程。",
-    "description": "The generated-index page description for category Developer Documentation in sidebar tutorialSidebar"
+    "description": "The generated-index page description for category 'Developer Documentation' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "快速入门",
-    "description": "从零开始搭建 Nukkit 服务器的完整教程"
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Server Config": {
     "message": "服务器配置",
-    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+    "description": "The label for category 'Server Config' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Server Config.link.generated-index.description": {
     "message": "关于我转生成服务器这档事！",
-    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+    "description": "The generated-index page description for category 'Server Config' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Tutorial Basics": {
     "message": "基础教程",
-    "description": "The label for category Tutorial - Basics in sidebar tutorialSidebar"
+    "description": "The label for category 'Tutorial Basics' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Tutorial Basics.link.generated-index.description": {
     "message": "从 zero 开始的异世界 NK-MOT 开发之旅！",
-    "description": "The generated-index page description for category Tutorial - Basics in sidebar tutorialSidebar"
+    "description": "The generated-index page description for category 'Tutorial Basics' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Tutorial Extras": {
     "message": "拓展教程",
-    "description": "The label for category Tutorial-Extras in sidebar tutorialSidebar"
+    "description": "The label for category 'Tutorial Extras' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Custom Content APIs": {
     "message": "内容自定义接口",
-    "description": "The label for category Tutorial-Extras/custom in sidebar tutorialSidebar"
+    "description": "The label for category 'Custom Content APIs' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Guides": {
     "message": "指南",
-    "description": "The label for category Guides in sidebar tutorialSidebar"
+    "description": "The label for category 'Guides' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Guides.link.generated-index.description": {
     "message": "了解 Nukkit-MOT 的程序接口",
-    "description": "The generated-index page description for category Guides in sidebar tutorialSidebar"
+    "description": "The generated-index page description for category 'Guides' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started.link.generated-index.description": {
+    "message": "从零开始搭建 Nukkit 服务器的完整教程",
+    "description": "The generated-index page description for category 'Getting Started' in sidebar 'tutorialSidebar'"
   }
 }

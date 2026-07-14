@@ -6,15 +6,221 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
-import Translate from '@docusaurus/Translate';
-import { useEffect } from 'react';
+import Translate, {translate} from '@docusaurus/Translate';
+import {useEffect, useState} from 'react';
 import { redirectToLanguageVersion } from '../redirects';
+
+const BSTATS_CHART_BASE =
+  'https://bstats.org/api/v1/plugins/10277/charts';
+const BSTATS_MOT_PAGE_URL =
+  'https://bstats.org/plugin/server-implementation/Nukkit/10277';
+
+type BStatsPieEntry = {
+  name?: unknown;
+  y?: unknown;
+};
+
+function parseMotServerCount(data: unknown): number | null {
+  if (!Array.isArray(data)) {
+    return null;
+  }
+  const motEntry = data.find((entry: BStatsPieEntry) => entry?.name === 'MOT');
+  if (!motEntry || typeof motEntry.y !== 'number' || !Number.isFinite(motEntry.y)) {
+    return null;
+  }
+  return Math.max(0, Math.trunc(motEntry.y));
+}
+
+// players 图表为 [[timestamp, value], ...]，取最新值
+function parseLatestValue(data: unknown): number | null {
+  if (!Array.isArray(data) || data.length === 0) {
+    return null;
+  }
+  const last = data[data.length - 1];
+  if (!Array.isArray(last) || last.length < 2) {
+    return null;
+  }
+  const value = last[1];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+  return Math.max(0, Math.trunc(value));
+}
+
+// location 图表为 [{name, y}, ...]，取覆盖国家/地区数量
+function parseCountryCount(data: unknown): number | null {
+  if (!Array.isArray(data)) {
+    return null;
+  }
+  return data.length;
+}
+
+type Stats = {
+  motServers: number | null;
+  serversTotal: number | null;
+  playersTotal: number | null;
+  countries: number | null;
+};
+
+function fmt(value: number | null): string {
+  return value === null ? '—' : value.toLocaleString();
+}
+
+/** 1:1 动态 SVG：用 bStats 服务器数驱动，与特性区 SVG 同风格（浅灰卡 + 网格 + 标题） */
+function UsageSvg({stats}: {stats: Stats}) {
+  return (
+    <svg viewBox="0 0 200 200" className={styles.usageSvg} role="img" aria-label={translate({id: 'homepage.widelyUsed.ariaLabel'})}>
+      <rect width="200" height="200" rx="8" ry="8" style={{fill: 'var(--feat-card-bg)', stroke: 'var(--feat-line)'}} strokeWidth="1" />
+      <g style={{stroke: 'var(--feat-line)'}} strokeWidth="0.5" opacity="0.5">
+        <line x1="0" y1="60" x2="200" y2="60" />
+        <line x1="0" y1="140" x2="200" y2="140" />
+        <line x1="60" y1="0" x2="60" y2="200" />
+        <line x1="140" y1="0" x2="140" y2="200" />
+      </g>
+      <text x="100" y="40" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" style={{fill: 'var(--feat-title)'}}>
+        <Translate id="homepage.widelyUsed">Widely Used</Translate>
+      </text>
+      <text x="100" y="110" font-family="Arial, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#4facfe">
+        {fmt(stats.motServers)} / {fmt(stats.serversTotal)}
+      </text>
+      <text x="100" y="130" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+        <Translate id="homepage.widelyUsed.motVsTotal">MOT / Total Servers</Translate>
+      </text>
+      <text x="100" y="158" font-family="Arial, sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+        <Translate id="homepage.widelyUsed.totalPlayers" values={{count: fmt(stats.playersTotal)}}>
+          {'{count} total players'}
+        </Translate>
+      </text>
+      <text x="100" y="172" font-family="Arial, sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+        <Translate id="homepage.widelyUsed.totalCountries" values={{count: fmt(stats.countries)}}>
+          {'{count} total countries'}
+        </Translate>
+      </text>
+    </svg>
+  );
+}
+
+/** 作为第 6 个特性行：左右交叉布局，媒体为 bStats 动态 SVG，文案"Widely Used" */
+function WidelyUsedSection() {
+  const [stats, setStats] = useState<Stats>({
+    motServers: null,
+    serversTotal: null,
+    playersTotal: null,
+    countries: null,
+  });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const opts: RequestInit = {
+      headers: {Accept: 'application/json'},
+      signal: controller.signal,
+    };
+    const safe = (p: Promise<unknown>) => p.catch(() => null);
+    Promise.all([
+      safe(fetch(`${BSTATS_CHART_BASE}/nukkit_version/data`, opts).then((r) => r.json())),
+      safe(fetch(`${BSTATS_CHART_BASE}/servers/data`, opts).then((r) => r.json())),
+      safe(fetch(`${BSTATS_CHART_BASE}/players/data`, opts).then((r) => r.json())),
+      safe(fetch(`${BSTATS_CHART_BASE}/location/data`, opts).then((r) => r.json())),
+    ]).then(([ver, sv, pl, loc]) => {
+      setStats({
+        motServers: parseMotServerCount(ver),
+        serversTotal: parseLatestValue(sv),
+        playersTotal: parseLatestValue(pl),
+        countries: parseCountryCount(loc),
+      });
+    });
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, []);
+
+  return (
+    <section className={styles.usageSection}>
+      <div className="container">
+        <div className={clsx(styles.usageRow, styles.usageRowReverse)} data-reveal>
+          <div className={styles.usageMedia}>
+            <UsageSvg stats={stats} />
+          </div>
+          <div className={styles.usageContent}>
+            <Heading as="h2">
+              <Translate id="homepage.widelyUsed" description="Widely used section title">
+                Widely Used
+              </Translate>
+            </Heading>
+            <p>
+              <Translate id="homepage.widelyUsedDesc" description="Widely used section description">
+                Adopted by Minecraft server communities worldwide. Real-time adoption stats — server count, player activity and geographic reach — are powered by bStats.
+              </Translate>
+            </p>
+            <a
+              className={styles.usageLink}
+              href={BSTATS_MOT_PAGE_URL}
+              target="_blank"
+              rel="noopener noreferrer">
+              <Translate id="homepage.viewOnBstats" description="View on bStats link">
+                View on bStats →
+              </Translate>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ScrollHint() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY < 80);
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive: true});
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const handleClick = () => {
+    const target = document.getElementById('homepage-main');
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY;
+      const prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
+      window.scrollTo({
+        top,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className={clsx(styles.scrollHint, !visible && styles.scrollHintHidden)}
+      onClick={handleClick}
+      aria-label={translate({id: 'homepage.scrollHint.ariaLabel'})}>
+      <svg
+        viewBox="0 0 24 24"
+        width="30"
+        height="30"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round">
+        <path d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+  );
+}
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
+      <div className={clsx('container', styles.heroContent)}>
         <Heading as="h1" className="hero__title">
           <Translate
             id="homepage.title"
@@ -63,6 +269,7 @@ function HomepageHeader() {
           </Link>
         </div>
       </div>
+      <ScrollHint />
     </header>
   );
 }
@@ -72,13 +279,46 @@ export default function Home(): React.ReactElement {
     redirectToLanguageVersion();
   }, []);
 
+  // 特性行滚动入场：进入视口时淡入上浮，统一与 hero 的运动语言。
+  // prefers-reduced-motion 或不支持 IntersectionObserver 时立即显示。
+  useEffect(() => {
+    const main = document.getElementById('homepage-main');
+    if (!main) {
+      return;
+    }
+    const revealEls = main.querySelectorAll<HTMLElement>('[data-reveal]');
+    const prefersReduced = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+    if (prefersReduced || !('IntersectionObserver' in window)) {
+      revealEls.forEach((el) => {
+        el.dataset.reveal = 'visible';
+      });
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).dataset.reveal = 'visible';
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {rootMargin: '0px 0px -12% 0px', threshold: 0.12}
+    );
+    revealEls.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Layout
       title="Nukkit-MOT Wiki"
       description="Learn Nukkit-MOT and enjoy multi-version support and a rich plugin ecosystem.">
       <HomepageHeader />
-      <main className={clsx(styles.heroMain)}>
+      <main id="homepage-main" className={clsx(styles.heroMain)}>
         <HomepageFeatures />
+        <WidelyUsedSection />
       </main>
     </Layout>
   );

@@ -19,6 +19,22 @@
   background-color: var(--ifm-color-primary-lightest);
 }
 
+.heroContent :global(.hero__title),
+.heroContent :global(.hero__subtitle),
+.heroContent .buttons {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: hero-enter 420ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.heroContent :global(.hero__subtitle) {
+  animation-delay: 60ms;
+}
+
+.heroContent .buttons {
+  animation-delay: 120ms;
+}
+
 /* Adding before and after for wave effects */
 .heroBanner::before,
 .heroBanner::after {
@@ -64,6 +80,13 @@
   }
 }
 
+@keyframes hero-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media screen and (max-width: 996px) {
   .heroBanner {
     padding: 2rem;
@@ -79,7 +102,125 @@
   flex-wrap: wrap;
 }
 
+/* “广泛使用”特性行：与 HomepageFeatures 同款左右交叉布局，媒体为 1:1 动态 SVG */
+.usageSection {
+  padding: 0 0 4rem;
+}
+
+.usageRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.usageRowReverse {
+  flex-direction: row-reverse;
+}
+
+.usageMedia {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.usageContent {
+  flex: 1 1 0;
+}
+
+.usageContent :global(h2) {
+  margin-bottom: 0.5rem;
+}
+
+.usageContent p {
+  margin-bottom: 1rem;
+}
+
+.usageSvg {
+  width: clamp(200px, 26vw, 320px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+.usageLink {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* On narrow screens, stack image above text and drop the alternation. */
+@media screen and (max-width: 996px) {
+  .usageRow,
+  .usageRowReverse {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .usageSvg {
+    width: clamp(180px, 55vw, 260px);
+  }
+}
+
+.scrollHint {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: opacity 240ms ease, color 160ms ease;
+  animation: scroll-hint-bounce 2s ease-in-out infinite;
+}
+
+.scrollHint:hover,
+.scrollHint:focus-visible {
+  color: #ffffff;
+}
+
+.scrollHintHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes scroll-hint-bounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+
 .heroMain {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroBanner::before,
+  .heroBanner::after {
+    animation: none;
+  }
+
+  .heroContent :global(.hero__title),
+  .heroContent :global(.hero__subtitle),
+  .heroContent .buttons {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  .scrollHint {
+    animation: none;
+  }
 }

@@ -1,0 +1,26 @@
+<svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="8" ry="8" style="fill:var(--feat-card-bg);stroke:var(--feat-line)" stroke-width="1"/>
+  <g style="stroke:var(--feat-line)" stroke-width="0.5" opacity="0.5">
+    <line x1="0" y1="60" x2="200" y2="60"/>
+    <line x1="0" y1="140" x2="200" y2="140"/>
+  </g>
+  <text x="100" y="38" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" style="fill:var(--feat-title)">NetEase Client Support</text>
+  <rect x="32" y="84" width="40" height="40" rx="5" ry="5" fill="#4facfe"/>
+  <rect x="32" y="84" width="40" height="11" rx="5" ry="5" fill="#000000" opacity="0.15"/>
+  <rect x="38" y="102" width="28" height="3" rx="1" fill="#ffffff" opacity="0.85"/>
+  <rect x="38" y="109" width="20" height="3" rx="1" fill="#ffffff" opacity="0.85"/>
+  <text x="52" y="140" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" style="fill:var(--feat-muted)">Standard</text>
+  <rect x="128" y="84" width="40" height="40" rx="5" ry="5" fill="#43e97b"/>
+  <rect x="128" y="84" width="40" height="11" rx="5" ry="5" fill="#000000" opacity="0.15"/>
+  <rect x="134" y="102" width="28" height="3" rx="1" fill="#ffffff" opacity="0.85"/>
+  <rect x="134" y="109" width="20" height="3" rx="1" fill="#ffffff" opacity="0.85"/>
+  <text x="148" y="140" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" style="fill:var(--feat-muted)">NetEase</text>
+  <g style="stroke:var(--feat-muted)" stroke-width="1.5" stroke-linecap="round" fill="none">
+    <line x1="78" y1="100" x2="120" y2="100"><animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/></line>
+    <line x1="80" y1="108" x2="122" y2="108"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></line>
+  </g>
+  <polygon points="78,100 85,97 85,103" style="fill:var(--feat-muted)"/>
+  <polygon points="122,108 115,105 115,111" style="fill:var(--feat-muted)"/>
+  <circle r="2" fill="#4facfe"><animate attributeName="cx" values="82;118;82" dur="2.6s" repeatCount="indefinite"/><animate attributeName="cy" values="104;104;104" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.6s" repeatCount="indefinite"/></circle>
+  <circle r="2" fill="#43e97b"><animate attributeName="cx" values="118;82;118" dur="2.6s" begin="1.3s" repeatCount="indefinite"/><animate attributeName="cy" values="104;104;104" dur="2.6s" begin="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.6s" begin="1.3s" repeatCount="indefinite"/></circle>
+</svg>

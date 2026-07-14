@@ -45,6 +45,6 @@
   },
   "link.item.label.Forums": {
     "message": "论坛",
-    "description": "Nukkit-MOT Forums"
+    "description": "The label of footer link with label=Forums linking to https://bbs.nukkit-mot.com/"
   }
 }

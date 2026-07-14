@@ -1,7 +1,7 @@
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * work well with content-centric websites.
  */
 
 /* You can override the default Infima variables here. */
@@ -15,6 +15,12 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* HomepageFeatures SVG 主题变量（浅色） */
+  --feat-card-bg: #f5f5f5;
+  --feat-line: #dbdbdb;
+  --feat-title: #000000;
+  --feat-muted: #8c8c8c;
+  --feat-surface: #ffffff;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -27,8 +33,38 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* HomepageFeatures SVG 主题变量（深色） */
+  --feat-card-bg: #000000;
+  --feat-line: #dbdbdb;
+  --feat-title: #ffffff;
+  --feat-muted: #dbdbdb;
+  --feat-surface: #f5f5f5;
 }
 
 .footer--dark {
   --ifm-link-color: var(--ifm-footer-link-color);
+}
+
+/* 首页特性行滚动入场：进入视口时淡入上浮，与 hero 复用同一运动语言。
+   data-reveal 初始隐藏；data-reveal="visible" 由 Home 中的 IntersectionObserver 触发。
+   prefers-reduced-motion 下直接显示，无过渡。 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 460ms cubic-bezier(0.2, 0, 0, 1),
+    transform 460ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+[data-reveal='visible'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

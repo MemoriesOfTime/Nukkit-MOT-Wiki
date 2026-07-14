@@ -5,7 +5,51 @@
   width: 100%;
 }
 
+/* Each feature occupies one full row, image and text side by side. */
+.featureRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+
+.featureRow:last-child {
+  margin-bottom: 0;
+}
+
+/* Zigzag: reverse every other row so image/text alternate sides. */
+.featureRowReverse {
+  flex-direction: row-reverse;
+}
+
+.featureMedia {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.featureContent {
+  flex: 1 1 0;
+}
+
+/* 响应式正方形：桌面/手机统一 1:1，与所有 SVG 原生比例一致 */
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  width: clamp(200px, 26vw, 320px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* On narrow screens, stack image above text and drop the alternation. */
+@media screen and (max-width: 996px) {
+  .featureRow,
+  .featureRowReverse {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .featureSvg {
+    width: clamp(180px, 55vw, 260px);
+  }
 }
