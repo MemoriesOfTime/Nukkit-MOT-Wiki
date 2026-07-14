@@ -100,7 +100,7 @@ function UsageSvg({stats}: {stats: Stats}) {
   );
 }
 
-/** 作为第 6 个特性行：左右交叉布局，媒体为 bStats 动态 SVG，文案"Widely Used" */
+/** 作为第 7 个特性行：左右交叉布局，媒体为 bStats 动态 SVG，文案"Widely Used" */
 function WidelyUsedSection() {
   const [stats, setStats] = useState<Stats>({
     motServers: null,
@@ -139,7 +139,7 @@ function WidelyUsedSection() {
   return (
     <section className={styles.usageSection}>
       <div className="container">
-        <div className={clsx(styles.usageRow, styles.usageRowReverse)} data-reveal>
+        <div className={styles.usageRow} data-reveal>
           <div className={styles.usageMedia}>
             <UsageSvg stats={stats} />
           </div>

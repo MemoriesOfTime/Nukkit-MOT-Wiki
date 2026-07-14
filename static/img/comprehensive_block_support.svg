@@ -1,0 +1,114 @@
+<svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="cb-grass-top" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#65b447"/>
+      <rect width="3" height="2" fill="#7acb55"/>
+      <rect x="5" y="3" width="3" height="3" fill="#4d9638"/>
+      <rect x="1" y="6" width="2" height="2" fill="#559f3d"/>
+    </pattern>
+    <pattern id="cb-dirt-light" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#8b5c3c"/>
+      <rect x="1" y="1" width="3" height="2" fill="#a56e48"/>
+      <rect x="5" y="4" width="3" height="2" fill="#69442e"/>
+      <rect y="7" width="2" height="1" fill="#68422c"/>
+    </pattern>
+    <pattern id="cb-dirt-dark" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#70472f"/>
+      <rect x="1" y="3" width="3" height="2" fill="#825339"/>
+      <rect x="5" width="2" height="3" fill="#583725"/>
+      <rect x="4" y="6" width="4" height="2" fill="#5d3a28"/>
+    </pattern>
+    <pattern id="cb-copper-top" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#d78359"/>
+      <rect x="1" y="1" width="3" height="2" fill="#eea071"/>
+      <rect x="5" y="4" width="3" height="3" fill="#b85e46"/>
+      <rect y="6" width="2" height="2" fill="#ef9367"/>
+    </pattern>
+    <pattern id="cb-copper-light" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#bd674b"/>
+      <rect x="1" y="1" width="2" height="3" fill="#d77d58"/>
+      <rect x="5" y="2" width="3" height="2" fill="#98513e"/>
+      <rect x="3" y="6" width="3" height="2" fill="#d17a55"/>
+    </pattern>
+    <pattern id="cb-copper-dark" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#9f533f"/>
+      <rect x="1" y="4" width="3" height="2" fill="#bd674b"/>
+      <rect x="5" y="1" width="2" height="3" fill="#7f4437"/>
+      <rect x="5" y="6" width="3" height="2" fill="#884638"/>
+    </pattern>
+    <pattern id="cb-stone-top" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#9a927f"/>
+      <rect x="1" y="1" width="3" height="2" fill="#b2aa96"/>
+      <rect x="5" y="4" width="3" height="3" fill="#777162"/>
+      <rect y="6" width="2" height="2" fill="#858070"/>
+    </pattern>
+    <pattern id="cb-stone-light" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#817b6c"/>
+      <rect x="1" y="1" width="3" height="2" fill="#999282"/>
+      <rect x="5" y="4" width="3" height="2" fill="#625e54"/>
+      <rect y="7" width="2" height="1" fill="#aaa28d"/>
+    </pattern>
+    <pattern id="cb-stone-dark" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#666157"/>
+      <rect x="1" y="4" width="3" height="2" fill="#797367"/>
+      <rect x="5" y="1" width="2" height="3" fill="#4d4a43"/>
+      <rect x="5" y="6" width="3" height="2" fill="#57534b"/>
+    </pattern>
+  </defs>
+
+  <rect width="200" height="200" rx="8" ry="8" style="fill:var(--feat-card-bg);stroke:var(--feat-line)" stroke-width="1"/>
+  <g style="stroke:var(--feat-line)" stroke-width="0.5" opacity="0.5">
+    <line x1="0" y1="60" x2="200" y2="60"/>
+    <line x1="0" y1="140" x2="200" y2="140"/>
+    <line x1="60" y1="0" x2="60" y2="200"/>
+    <line x1="140" y1="0" x2="140" y2="200"/>
+  </g>
+  <text x="100" y="38" font-family="Courier New, monospace" font-size="9.5" font-weight="bold" text-anchor="middle" letter-spacing="-0.4" style="fill:var(--feat-title)">COMPREHENSIVE BLOCK SUPPORT</text>
+
+  <g transform="translate(100 105)" shape-rendering="crispEdges" stroke="#252019" stroke-width="1.5" stroke-linejoin="miter">
+    <!-- Grass block: familiar terrain support. -->
+    <g transform="translate(-43 8)">
+      <path d="M0-23 27-10 0 4-27-10Z" fill="url(#cb-grass-top)"/>
+      <path d="M-27-10 0 4V35L-27 21Z" fill="url(#cb-dirt-light)"/>
+      <path d="M27-10 0 4V35L27 21Z" fill="url(#cb-dirt-dark)"/>
+      <path d="M-26-9 0 4V11L-26-2Z" fill="#58a83e" stroke="none"/>
+      <path d="M26-9 0 4V11L26-2Z" fill="#438431" stroke="none"/>
+      <path d="M-21-5-17-3V1L-21-1ZM-10 1-6 3V7L-10 5ZM7 1 11-1V3L7 5ZM18-5 22-7V-3L18-1Z" fill="#79c653" stroke="none"/>
+    </g>
+
+    <!-- Copper block: newer variants and changing block states. -->
+    <g transform="translate(0 -7)">
+      <path d="M0-23 27-10 0 4-27-10Z" fill="url(#cb-copper-top)"/>
+      <path d="M-27-10 0 4V35L-27 21Z" fill="url(#cb-copper-light)"/>
+      <path d="M27-10 0 4V35L27 21Z" fill="url(#cb-copper-dark)"/>
+      <g fill="#49a99a" stroke="none">
+        <path d="M-20-5-13-2V4L-20 1ZM-8 3-2 6V12L-8 9ZM5-1 12-5V2L5 6ZM16 7 22 4V11L16 14Z"/>
+        <path d="M-17 13-10 16V22L-17 19ZM8 18 15 14V21L8 25Z"/>
+        <animate attributeName="opacity" values="0.2;1;0.2" dur="4.5s" repeatCount="indefinite"/>
+      </g>
+    </g>
+
+    <!-- Functional block: interaction, block entities, and redstone. -->
+    <g transform="translate(43 8)">
+      <path d="M0-23 27-10 0 4-27-10Z" fill="url(#cb-stone-top)"/>
+      <path d="M-27-10 0 4V35L-27 21Z" fill="url(#cb-stone-light)"/>
+      <path d="M27-10 0 4V35L27 21Z" fill="url(#cb-stone-dark)"/>
+      <path d="M6 8 21 1V17L6 25Z" fill="#393733" stroke="#282622" stroke-width="1"/>
+      <path d="M9 10 18 6V9L9 13ZM9 16 18 12V15L9 19Z" fill="#b3aa91" stroke="none"/>
+      <rect x="-19" y="6" width="5" height="5" transform="skewY(27)" fill="#d54735" stroke="none">
+        <animate attributeName="fill" values="#642b28;#ff5b45;#642b28" dur="2s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </g>
+
+  <g transform="translate(100 166)" shape-rendering="crispEdges">
+    <rect x="-39" y="-3" width="6" height="6" fill="#4facfe"/>
+    <path d="M-29-1H29V2H-29Z" fill="#4facfe"/>
+    <path d="M-21-1H-15V2H-21ZM-7-1H-1V2H-7ZM7-1H13V2H7ZM21-1H27V2H21Z" style="fill:var(--feat-card-bg)"/>
+    <rect x="33" y="-3" width="6" height="6" fill="#43e97b"/>
+    <rect y="-3" width="6" height="6" fill="#f9c74f">
+      <animate attributeName="x" values="-29;23;-29" dur="3s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  <text x="100" y="184" font-family="Courier New, monospace" font-size="7.5" text-anchor="middle" style="fill:var(--feat-muted)">PLACE  INTERACT  UPDATE  REDSTONE</text>
+</svg>

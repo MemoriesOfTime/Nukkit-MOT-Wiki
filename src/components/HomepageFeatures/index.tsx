@@ -55,6 +55,20 @@ const FeatureList: FeatureItem[] = [
     ),
   },
   {
+    ariaLabelId: 'homepage.feature.comprehensiveBlock.title',
+    Svg: require('@site/static/img/comprehensive_block_support.svg').default,
+    title: (
+      <Translate id="homepage.feature.comprehensiveBlock.title">
+        Comprehensive Block Support
+      </Translate>
+    ),
+    description: (
+      <Translate id="homepage.feature.comprehensiveBlock.description">
+        Built-in support for a broader range of vanilla blocks and newer-version variants, with placement, interaction, block entities, and redstone behavior continually brought closer to vanilla.
+      </Translate>
+    ),
+  },
+  {
     ariaLabelId: 'homepage.feature.neteaseClient.title',
     Svg: require('@site/static/img/netease_client_support.svg').default,
     title: (

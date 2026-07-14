@@ -114,10 +114,6 @@
   gap: 3rem;
 }
 
-.usageRowReverse {
-  flex-direction: row-reverse;
-}
-
 .usageMedia {
   flex: 1 1 0;
   display: flex;
@@ -150,8 +146,7 @@
 
 /* On narrow screens, stack image above text and drop the alternation. */
 @media screen and (max-width: 996px) {
-  .usageRow,
-  .usageRowReverse {
+  .usageRow {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;

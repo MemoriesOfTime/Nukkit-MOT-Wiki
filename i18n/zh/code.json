@@ -44,6 +44,12 @@
   "homepage.feature.vanillaCommand.description": {
     "message": "完整支持原版命令，让你可以用熟悉的命令管理和增强游戏体验。"
   },
+  "homepage.feature.comprehensiveBlock.title": {
+    "message": "更完整的方块支持"
+  },
+  "homepage.feature.comprehensiveBlock.description": {
+    "message": "内置覆盖更广的原版方块与新版本变种，并持续完善放置、交互、方块实体和红石等行为，带来更接近原版的体验。"
+  },
   "homepage.feature.neteaseClient.title": {
     "message": "网易客户端支持"
   },
