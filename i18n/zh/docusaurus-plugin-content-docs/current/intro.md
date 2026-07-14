@@ -1,5 +1,13 @@
 ---
 sidebar_position: 1
+description: Nukkit-MOT 是支持多版本、AI 实体、原版命令及丰富 Nukkit 插件生态的 Minecraft 基岩版服务器软件。
+keywords:
+  - Nukkit-MOT
+  - Nukkit 服务器
+  - 我的世界基岩版服务器
+  - Minecraft 基岩版开服
+  - 多版本基岩版服务器
+  - Nukkit 插件开发
 ---
 
 # Nukkit-MOT {#nukkit-mot}

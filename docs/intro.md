@@ -1,5 +1,13 @@
 ---
 sidebar_position: 1
+description: Nukkit-MOT is a multi-version Minecraft Bedrock Edition server with AI entities, vanilla commands, and broad Nukkit plugin compatibility.
+keywords:
+  - Nukkit-MOT
+  - Nukkit server
+  - Minecraft Bedrock server
+  - Minecraft Bedrock Edition server software
+  - multi-version Bedrock server
+  - Nukkit plugin API
 ---
 
 # Nukkit-MOT {#nukkit-mot}

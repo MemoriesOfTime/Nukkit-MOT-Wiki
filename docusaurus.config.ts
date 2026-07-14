@@ -89,6 +89,12 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'images/banner.png',
+    metadata: [
+      {
+        name: 'keywords',
+        content: 'Nukkit-MOT, Nukkit, Minecraft Bedrock server, Minecraft Bedrock Edition server, Bedrock dedicated server, Nukkit plugin development, Nukkit API, Minecraft server configuration, multi-version Minecraft server, NetEase Minecraft server, 我的世界基岩版服务器, 基岩版开服, Nukkit 插件开发, 我的世界网易版服务器',
+      },
+    ],
     navbar: {
       title: 'Nukkit-MOT',
       logo: {
