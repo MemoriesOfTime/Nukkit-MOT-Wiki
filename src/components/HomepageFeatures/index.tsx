@@ -130,18 +130,20 @@ function Feature({
 export default function HomepageFeatures(): React.ReactElement {
   const sectionRef = useRef<HTMLElement>(null);
 
-  // prefers-reduced-motion 下暂停 SVG 内 SMIL 动画（CSS 媒体查询无法控制 SMIL）
+  // SVG 内 SMIL 动画在 prefers-reduced-motion 或滚出视口时暂停（CSS 媒体查询无法控制 SMIL）
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) {
       return;
     }
-    const svgs = section.querySelectorAll('svg');
+    const svgs = Array.from(section.querySelectorAll('svg'));
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // 默认视为全部可见；支持 IntersectionObserver 时再按实际可见性收窄
+    const inView = new Set<Element>(svgs);
     const sync = () => {
       svgs.forEach((svg) => {
         const svgEl = svg as SVGSVGElement;
-        if (mq.matches) {
+        if (mq.matches || !inView.has(svg)) {
           svgEl.pauseAnimations?.();
         } else {
           svgEl.unpauseAnimations?.();
@@ -150,7 +152,26 @@ export default function HomepageFeatures(): React.ReactElement {
     };
     sync();
     mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    let observer: IntersectionObserver | undefined;
+    if ('IntersectionObserver' in window) {
+      inView.clear();
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            inView.add(entry.target);
+          } else {
+            inView.delete(entry.target);
+          }
+        });
+        sync();
+      });
+      svgs.forEach((svg) => io.observe(svg));
+      observer = io;
+    }
+    return () => {
+      mq.removeEventListener('change', sync);
+      observer?.disconnect();
+    };
   }, []);
 
   return (

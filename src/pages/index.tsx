@@ -7,7 +7,7 @@ import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 import Translate, {translate} from '@docusaurus/Translate';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { redirectToLanguageVersion } from '../redirects';
 
 const BSTATS_CHART_BASE =
@@ -66,8 +66,44 @@ function fmt(value: number | null): string {
   return value === null ? '—' : value.toLocaleString();
 }
 
-/** 1:1 动态 SVG：用 bStats 服务器数驱动，与特性区 SVG 同风格（浅灰卡 + 网格 + 标题） */
-function UsageSvg({stats}: {stats: Stats}) {
+const COUNT_UP_DURATION_MS = 600;
+
+/** 数字滚动：start 后从 0 缓动到 target；prefers-reduced-motion 直接到终值。target 为 null（加载中/失败）时返回 null。 */
+function useCountUp(target: number | null, start: boolean): number | null {
+  const [display, setDisplay] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (target === null || !start) {
+      return;
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplay(target);
+      return;
+    }
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - t0) / COUNT_UP_DURATION_MS);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(target * eased));
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, start]);
+
+  return target === null ? null : (display ?? 0);
+}
+
+/** 1:1 动态 SVG：用 bStats 服务器数驱动，与特性区 SVG 同风格（浅灰卡 + 网格 + 标题）。started 后数字滚动递增 */
+function UsageSvg({stats, started}: {stats: Stats; started: boolean}) {
+  const motServers = useCountUp(stats.motServers, started);
+  const serversTotal = useCountUp(stats.serversTotal, started);
+  const playersTotal = useCountUp(stats.playersTotal, started);
+  const countries = useCountUp(stats.countries, started);
+
   return (
     <svg viewBox="0 0 200 200" className={styles.usageSvg} role="img" aria-label={translate({id: 'homepage.widelyUsed.ariaLabel', message: 'bStats server statistics'})}>
       <rect width="200" height="200" rx="8" ry="8" style={{fill: 'var(--feat-card-bg)', stroke: 'var(--feat-line)'}} strokeWidth="1" />
@@ -80,19 +116,19 @@ function UsageSvg({stats}: {stats: Stats}) {
       <text x="100" y="40" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" font-weight="bold" text-anchor="middle" style={{fill: 'var(--feat-title)'}}>
         <Translate id="homepage.widelyUsed">Widely Used</Translate>
       </text>
-      <text x="100" y="110" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#4facfe">
-        {fmt(stats.motServers)} / {fmt(stats.serversTotal)}
+      <text x="100" y="110" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="bold" text-anchor="middle" style={{fill: '#4facfe', fontVariantNumeric: 'tabular-nums'}}>
+        {fmt(motServers)} / {fmt(serversTotal)}
       </text>
       <text x="100" y="130" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
         <Translate id="homepage.widelyUsed.motVsTotal">MOT / Total Servers</Translate>
       </text>
       <text x="100" y="158" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
-        <Translate id="homepage.widelyUsed.totalPlayers" values={{count: fmt(stats.playersTotal)}}>
+        <Translate id="homepage.widelyUsed.totalPlayers" values={{count: fmt(playersTotal)}}>
           {'{count} total players'}
         </Translate>
       </text>
       <text x="100" y="172" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
-        <Translate id="homepage.widelyUsed.totalCountries" values={{count: fmt(stats.countries)}}>
+        <Translate id="homepage.widelyUsed.totalCountries" values={{count: fmt(countries)}}>
           {'{count} total countries'}
         </Translate>
       </text>
@@ -102,6 +138,8 @@ function UsageSvg({stats}: {stats: Stats}) {
 
 /** 作为第 7 个特性行：左右交叉布局，媒体为 bStats 动态 SVG，文案"Widely Used" */
 function WidelyUsedSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(false);
   const [stats, setStats] = useState<Stats>({
     motServers: null,
     serversTotal: null,
@@ -136,12 +174,32 @@ function WidelyUsedSection() {
     };
   }, []);
 
+  // 数字滚动等区块进入视口后再触发（与 data-reveal 入场时机一致），一次性
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !('IntersectionObserver' in window)) {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      {rootMargin: '0px 0px -12% 0px', threshold: 0.12}
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className={styles.usageSection}>
+    <section ref={sectionRef} className={styles.usageSection}>
       <div className="container">
         <div className={styles.usageRow} data-reveal>
           <div className={styles.usageMedia}>
-            <UsageSvg stats={stats} />
+            <UsageSvg stats={stats} started={inView} />
           </div>
           <div className={styles.usageContent}>
             <Heading as="h2">
@@ -218,8 +276,23 @@ function ScrollHint() {
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
+  const headerRef = useRef<HTMLElement>(null);
+
+  // hero 滚出视口后暂停波浪圆盘旋转，滚回时恢复
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header || !('IntersectionObserver' in window)) {
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      header.classList.toggle(styles.heroWavesPaused, !entry.isIntersecting);
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
+    <header ref={headerRef} className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className={clsx('container', styles.heroContent)}>
         <Heading as="h1" className="hero__title">
           <Translate

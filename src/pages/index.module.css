@@ -72,6 +72,12 @@
   animation-duration: 16s;
 }
 
+/* hero 滚出视口后由 IntersectionObserver 切换，暂停波浪圆盘旋转 */
+.heroWavesPaused::before,
+.heroWavesPaused::after {
+  animation-play-state: paused;
+}
+
 /* Keyframes for the rotating animation */
 @keyframes rotate {
   0% {
@@ -191,6 +197,8 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  /* 隐藏后暂停 bounce，避免无谓的动画计时 */
+  animation-play-state: paused;
 }
 
 @keyframes scroll-hint-bounce {
