@@ -14,6 +14,14 @@
   "homepage.subtitle": {
     "message": "多版本、内置实体AI、广泛插件兼容的我的世界服务器"
   },
+  "homepage.layout.title": {
+    "message": "Nukkit-MOT Wiki",
+    "description": "The homepage meta title"
+  },
+  "homepage.layout.description": {
+    "message": "了解 Nukkit-MOT，享受多版本支持与丰富的插件生态。",
+    "description": "The homepage meta description"
+  },
   "homepage.widelyUsed": {
     "message": "广泛使用",
     "description": "Widely used section title"

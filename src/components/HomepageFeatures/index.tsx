@@ -6,6 +6,8 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   ariaLabelId: string;
+  /** 默认语言下的 aria-label 兜底文案：缺失翻译时 translate 会回退到 id 字符串 */
+  ariaLabelMessage: string;
   Svg: React.ComponentType<React.ComponentProps<'svg'>>;
   title: React.ReactNode;
   description: React.ReactNode;
@@ -14,6 +16,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     ariaLabelId: 'homepage.feature.multipleVersion.title',
+    ariaLabelMessage: 'Multiple Version Support',
     Svg: require('@site/static/img/multiple_version_support.svg').default,
     title: (
       <Translate id="homepage.feature.multipleVersion.title">
@@ -28,6 +31,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.aiEntity.title',
+    ariaLabelMessage: 'AI Entity Support',
     Svg: require('@site/static/img/ai_entity_support.svg').default,
     title: (
       <Translate id="homepage.feature.aiEntity.title">
@@ -42,6 +46,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.vanillaCommand.title',
+    ariaLabelMessage: 'Vanilla Command Support',
     Svg: require('@site/static/img/vanilla_command_support.svg').default,
     title: (
       <Translate id="homepage.feature.vanillaCommand.title">
@@ -56,6 +61,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.comprehensiveBlock.title',
+    ariaLabelMessage: 'Comprehensive Block Support',
     Svg: require('@site/static/img/comprehensive_block_support.svg').default,
     title: (
       <Translate id="homepage.feature.comprehensiveBlock.title">
@@ -70,6 +76,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.neteaseClient.title',
+    ariaLabelMessage: 'NetEase Client Support',
     Svg: require('@site/static/img/netease_client_support.svg').default,
     title: (
       <Translate id="homepage.feature.neteaseClient.title">
@@ -84,6 +91,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.pluginApi.title',
+    ariaLabelMessage: 'Rich Plugin API',
     Svg: require('@site/static/img/plugin_api_support.svg').default,
     title: (
       <Translate id="homepage.feature.pluginApi.title">
@@ -100,6 +108,7 @@ const FeatureList: FeatureItem[] = [
 
 function Feature({
   ariaLabelId,
+  ariaLabelMessage,
   Svg,
   title,
   description,
@@ -108,7 +117,7 @@ function Feature({
   return (
     <div className={clsx(styles.featureRow, reversed && styles.featureRowReverse)} data-reveal>
       <div className={styles.featureMedia}>
-        <Svg className={styles.featureSvg} role="img" aria-label={translate({id: ariaLabelId})} />
+        <Svg className={styles.featureSvg} role="img" aria-label={translate({id: ariaLabelId, message: ariaLabelMessage})} />
       </div>
       <div className={styles.featureContent}>
         <Heading as="h2">{title}</Heading>

@@ -69,7 +69,7 @@ function fmt(value: number | null): string {
 /** 1:1 动态 SVG：用 bStats 服务器数驱动，与特性区 SVG 同风格（浅灰卡 + 网格 + 标题） */
 function UsageSvg({stats}: {stats: Stats}) {
   return (
-    <svg viewBox="0 0 200 200" className={styles.usageSvg} role="img" aria-label={translate({id: 'homepage.widelyUsed.ariaLabel'})}>
+    <svg viewBox="0 0 200 200" className={styles.usageSvg} role="img" aria-label={translate({id: 'homepage.widelyUsed.ariaLabel', message: 'bStats server statistics'})}>
       <rect width="200" height="200" rx="8" ry="8" style={{fill: 'var(--feat-card-bg)', stroke: 'var(--feat-line)'}} strokeWidth="1" />
       <g style={{stroke: 'var(--feat-line)'}} strokeWidth="0.5" opacity="0.5">
         <line x1="0" y1="60" x2="200" y2="60" />
@@ -77,21 +77,21 @@ function UsageSvg({stats}: {stats: Stats}) {
         <line x1="60" y1="0" x2="60" y2="200" />
         <line x1="140" y1="0" x2="140" y2="200" />
       </g>
-      <text x="100" y="40" font-family="Arial, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" style={{fill: 'var(--feat-title)'}}>
+      <text x="100" y="40" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11" font-weight="bold" text-anchor="middle" style={{fill: 'var(--feat-title)'}}>
         <Translate id="homepage.widelyUsed">Widely Used</Translate>
       </text>
-      <text x="100" y="110" font-family="Arial, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#4facfe">
+      <text x="100" y="110" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#4facfe">
         {fmt(stats.motServers)} / {fmt(stats.serversTotal)}
       </text>
-      <text x="100" y="130" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+      <text x="100" y="130" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
         <Translate id="homepage.widelyUsed.motVsTotal">MOT / Total Servers</Translate>
       </text>
-      <text x="100" y="158" font-family="Arial, sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+      <text x="100" y="158" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
         <Translate id="homepage.widelyUsed.totalPlayers" values={{count: fmt(stats.playersTotal)}}>
           {'{count} total players'}
         </Translate>
       </text>
-      <text x="100" y="172" font-family="Arial, sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
+      <text x="100" y="172" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="9" text-anchor="middle" style={{fill: 'var(--feat-muted)'}}>
         <Translate id="homepage.widelyUsed.totalCountries" values={{count: fmt(stats.countries)}}>
           {'{count} total countries'}
         </Translate>
@@ -199,7 +199,7 @@ function ScrollHint() {
       type="button"
       className={clsx(styles.scrollHint, !visible && styles.scrollHintHidden)}
       onClick={handleClick}
-      aria-label={translate({id: 'homepage.scrollHint.ariaLabel'})}>
+      aria-label={translate({id: 'homepage.scrollHint.ariaLabel', message: 'Scroll to content'})}>
       <svg
         viewBox="0 0 24 24"
         width="30"
@@ -313,8 +313,12 @@ export default function Home(): React.ReactElement {
 
   return (
     <Layout
-      title="Nukkit-MOT Wiki"
-      description="Learn Nukkit-MOT and enjoy multi-version support and a rich plugin ecosystem.">
+      title={translate({id: 'homepage.layout.title', message: 'Nukkit-MOT Wiki'})}
+      description={translate({
+        id: 'homepage.layout.description',
+        message:
+          'Learn Nukkit-MOT and enjoy multi-version support and a rich plugin ecosystem.',
+      })}>
       <HomepageHeader />
       <main id="homepage-main" className={clsx(styles.heroMain)}>
         <HomepageFeatures />

@@ -46,9 +46,10 @@
 }
 
 /* 首页特性行滚动入场：进入视口时淡入上浮，与 hero 复用同一运动语言。
-   data-reveal 初始隐藏；data-reveal="visible" 由 Home 中的 IntersectionObserver 触发。
+   仅在 JS 可用时隐藏待入场元素：.js 由 headTags 内联脚本在首绘前加到 <html> 上，
+   避免 JS 失效/被禁时内容永久不可见；data-reveal="visible" 由 Home 中的 IntersectionObserver 触发。
    prefers-reduced-motion 下直接显示，无过渡。 */
-[data-reveal] {
+.js [data-reveal] {
   opacity: 0;
   transform: translateY(20px);
   transition:
@@ -56,13 +57,13 @@
     transform 460ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-[data-reveal='visible'] {
+.js [data-reveal='visible'] {
   opacity: 1;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
+  .js [data-reveal] {
     opacity: 1;
     transform: none;
     transition: none;

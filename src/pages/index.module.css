@@ -10,13 +10,19 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  /* Water-like background. 水波颜色 */
-  background-color: var(--ifm-color-primary-lightest);
+  /* Water-like background. 水波颜色（浅色模式用深色档主色，白字对比度 4.56:1 达 AA） */
+  background-color: var(--ifm-color-primary);
   z-index: 0;
 }
 
 [data-theme='dark'] .heroBanner {
   background-color: var(--ifm-color-primary-lightest);
+}
+
+/* 深色模式波浪：底色为亮薄荷，圆盘改用深色档主色保持可见 */
+[data-theme='dark'] .heroBanner::before,
+[data-theme='dark'] .heroBanner::after {
+  background-color: var(--ifm-color-primary);
 }
 
 .heroContent :global(.hero__title),
@@ -43,13 +49,14 @@
   left: 50%;
   min-width: 360vw;
   min-height: 360vw;
-  /* Wave circle background. 波浪圆的内部颜色 */
-  background-color: var(--ifm-hero-background-color);
+  /* Wave circle background. 波浪圆的内部颜色（浅色模式用浅色档主色，与加深后的 hero 底保持层次） */
+  background-color: var(--ifm-color-primary-lightest);
   animation-name: rotate;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
   border-radius: 47%;
-  transform: translate(-50%, -70%) rotate(0);
+  /* 与 rotate 关键帧保持一致，避免 reduced-motion 关闭动画后圆盘位置突变 */
+  transform: translateX(-50%) rotate(0);
   z-index: -1;
 }
 
@@ -170,7 +177,8 @@
   color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
   transform: translateX(-50%);
-  transition: opacity 240ms ease, color 160ms ease;
+  /* visibility 参与过渡：淡出完成后才移出 Tab 序与无障碍树 */
+  transition: opacity 240ms ease, color 160ms ease, visibility 240ms;
   animation: scroll-hint-bounce 2s ease-in-out infinite;
 }
 
@@ -181,6 +189,7 @@
 
 .scrollHintHidden {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
