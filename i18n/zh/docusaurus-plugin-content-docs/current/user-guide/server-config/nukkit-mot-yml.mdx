@@ -841,6 +841,21 @@ Hastebin 令牌，方便生成 debug 链接
 
 为管理员(OP)启用移动检查
 
+### `vanilla-armor-reduction`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | on |
+
+使用原版盔甲伤害减免公式。
+
+开启时，伤害减免遵循原版基岩版公式：基于护甲值与韧性的非线性曲线，计入「破甲」附魔效果，且保护附魔因子（EPF）为确定性数值（上限 20，无随机系数）。伤害修饰符按原版顺序生效：`ARMOR → ARMOR_ENCHANTMENTS → RESISTANCE → ABSORPTION`。
+
+关闭时，改用旧的线性公式：护甲减免为 `伤害 × 护甲值 × 4%`，EPF 乘以 `50%–100%` 的随机系数，且忽略韧性与破甲。
+
+:::note
+除非需要向前兼容 1.21 之前的战斗行为，否则建议保持开启。
+:::
+
 ## netease-settings（网易设置） {#netease-settings}
 
 ### `client-support`

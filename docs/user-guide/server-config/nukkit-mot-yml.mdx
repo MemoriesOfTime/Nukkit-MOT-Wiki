@@ -844,6 +844,21 @@ Strong IP bans
 
 enable movement checking for operators
 
+### `vanilla-armor-reduction`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Use the vanilla armor damage reduction formula.
+
+When enabled, damage reduction follows the vanilla Bedrock formula: a non-linear armor/toughness curve that accounts for the `Breach` enchantment, and a deterministic Enchantment Protection Factor (EPF) capped at 20 (no random multiplier). Damage modifiers are applied in the vanilla order: `ARMOR → ARMOR_ENCHANTMENTS → RESISTANCE → ABSORPTION`.
+
+When disabled, the legacy linear formula is used instead: armor reduces `damage × armorPoints × 4%`, EPF is scaled by a random `50%–100%` multiplier, and `toughness`/`breach` are ignored.
+
+:::note
+Keep this enabled unless you need to preserve pre-1.21 combat behavior for backwards compatibility.
+:::
+
 ## netease-settings (NetEase Settings) {#netease-settings}
 
 ### `client-support`
