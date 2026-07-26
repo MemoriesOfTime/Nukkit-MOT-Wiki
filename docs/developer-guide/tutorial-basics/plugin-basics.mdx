@@ -79,6 +79,8 @@ These fields are not required for a minimal HelloWorld plugin, but you will use 
 | `depend` | Hard dependencies; missing ones block plugin loading |
 | `softdepend` | Optional dependencies; plugin still loads without them |
 | `loadbefore` | Hint that your plugin should load before another plugin |
+| `libraries` | **Optional.** External Maven coordinates (`groupId:artifactId:version`) that Nukkit-MOT downloads and isolates per plugin. Only list libraries your plugin code actually imports. See [Auto-Resolve Maven Libraries](#auto-resolve-maven-libraries-pluginyml). |
+| `repositories` | **Optional.** Extra repository URLs tried before the built-in defaults when resolving `libraries`. Each URL should end with `/`. Only needed for private Nexus/Artifactory or non-Maven-Central hosts; public coordinates resolve without it. |
 | `commands` | Command metadata registered from `plugin.yml` |
 | `permissions` | Permission nodes registered from `plugin.yml` |
 
@@ -100,6 +102,9 @@ prefix: HelloWorld
 load: POSTWORLD
 softdepend:
   - SomeOptionalPlugin
+libraries:
+  - "com.squareup.okhttp3:okhttp:4.12.0"
+  - "org.xerial:sqlite-jdbc:3.45.1.0"
 commands:
   helloworld:
     description: Send a hello message
@@ -159,7 +164,72 @@ plugins/HelloWorldPlugin/
 
 Files inside `src/main/resources/` are bundled into the jar. That is why `plugin.yml` belongs there, and later your default `config.yml` will belong there too.
 
+## Auto-Resolve Maven Libraries (`plugin.yml`)
+
+Instead of shading large third-party libraries into your plugin jar (and inflating its size), you can declare their Maven coordinates directly in `plugin.yml`. Nukkit-MOT downloads each library into a shared `libraries/` folder under the server data path and attaches them to your plugin's own `ClassLoader` at load time.
+
+:::warning Only list what your code actually uses
+`libraries` is optional. Every declared coordinate is downloaded and resolved (including transitive dependencies) on plugin load, slowing startup and consuming disk whether your code uses the library or not. Do **not** copy-paste a build file's full dependency list — add a coordinate only when your plugin code imports that library.
+:::
+
+```yaml title="plugin.yml — declarative libraries"
+libraries:
+  - "com.squareup.okhttp3:okhttp:4.12.0"
+  - "org.xerial:sqlite-jdbc:3.45.1.0"
+repositories:
+  - "https://maven.my-company.com/repository/public/"
+  - "https://jitpack.io"
+```
+
+### How resolution works
+
+For each `groupId:artifactId:version` entry, the server:
+
+1. Validates the coordinate and refuses anything that could escape the `libraries/` folder (path traversal, leading/trailing dots, backslashes, control characters).
+2. Tries each `repositories` URL in order, then the built-in fallback repositories (Maven Central and `repo.lanink.cn`). The first hit wins.
+3. Downloads the `.jar` to `libraries/<group path>/<artifact>/<version>/<artifact>-<version>.jar`, writing to a `.tmp` file first and atomically moving it into place.
+4. Reads the matching `.pom` and recursively resolves **transitive** dependencies with a `nearest-wins` strategy (the first version seen for a given `groupId:artifactId` wins; conflicts are skipped, not promoted).
+
+Already-downloaded artifacts are reused across plugins, so the cost is paid once per version.
+
+### ClassLoader isolation
+
+Each plugin gets its own `PluginClassLoader`. When your plugin loads a class:
+
+1. The plugin's own URLs are checked first — this includes the main jar and every `libraries` jar.
+2. If the class is not found there, the loader falls back to the global scan so the existing `depend` / `softdepend` mechanism still works.
+
+This means the version you declared in `libraries` keeps priority over a same-named class shaded inside another plugin. It is **version-preference isolation, not access control** — plugins can still see each other's classes through the global fallback.
+
+### What is and isn't supported
+
+Supported:
+
+- Root `<dependencies>` with literal versions, scope `compile` or `runtime`, and `optional != true`.
+- Transitive resolution through those supported dependencies.
+- Custom repositories declared via `repositories`.
+
+Not supported (the POM parser is intentionally minimal):
+
+- `parent` inheritance, `dependencyManagement`, BOM imports, `exclusions`, `relocations`.
+- Version ranges, classifiers, and `${...}` property placeholders in POM `<version>`.
+- `provided`, `test`, `system`, and `import` scopes — these are filtered out.
+
+If a library needs any of the above, declare the extra coordinates explicitly in `libraries`, or keep shading that dependency into your jar.
+
+### Failure modes
+
+- A malformed coordinate (not exactly three `:`-separated parts, or containing illegal characters) throws `LibraryLoadException` and the plugin does not load.
+- If none of the repositories can serve the jar, the plugin does not load.
+- A `.pom` that fails to parse is **not** fatal: the jar is still usable, only its transitive dependencies are dropped (a warning is logged).
+- The XML parser is hardened against XXE (external entities, DTD, schema) — malicious POMs cannot reach the network or read local files through the parser.
+
+:::tip Avoid shading for small, well-published libraries
+For popular libraries on Maven Central, prefer `libraries` over shading. Keep `repositories` for private Nexus/Artifactory URLs — public coordinates should resolve without it.
+:::
+
 ## Before You Continue
 
 - The most common load failures are a missing `plugin.yml` and a wrong `main` class name
+- When `libraries` fail to resolve, the server log prints the offending coordinate and the repositories it tried — check the URL and your network before falling back to shading
 - If your structure and metadata look correct, continue to [Run and Debug Your Plugin](./debug_plugin)
