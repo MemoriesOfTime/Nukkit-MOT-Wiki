@@ -6,6 +6,8 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   ariaLabelId: string;
+  /** 默认语言下的 aria-label 兜底文案：缺失翻译时 translate 会回退到 id 字符串 */
+  ariaLabelMessage: string;
   Svg: React.ComponentType<React.ComponentProps<'svg'>>;
   title: React.ReactNode;
   description: React.ReactNode;
@@ -14,6 +16,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     ariaLabelId: 'homepage.feature.multipleVersion.title',
+    ariaLabelMessage: 'Multiple Version Support',
     Svg: require('@site/static/img/multiple_version_support.svg').default,
     title: (
       <Translate id="homepage.feature.multipleVersion.title">
@@ -28,6 +31,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.aiEntity.title',
+    ariaLabelMessage: 'AI Entity Support',
     Svg: require('@site/static/img/ai_entity_support.svg').default,
     title: (
       <Translate id="homepage.feature.aiEntity.title">
@@ -42,6 +46,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.vanillaCommand.title',
+    ariaLabelMessage: 'Vanilla Command Support',
     Svg: require('@site/static/img/vanilla_command_support.svg').default,
     title: (
       <Translate id="homepage.feature.vanillaCommand.title">
@@ -56,6 +61,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.comprehensiveBlock.title',
+    ariaLabelMessage: 'Comprehensive Block Support',
     Svg: require('@site/static/img/comprehensive_block_support.svg').default,
     title: (
       <Translate id="homepage.feature.comprehensiveBlock.title">
@@ -70,6 +76,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.neteaseClient.title',
+    ariaLabelMessage: 'NetEase Client Support',
     Svg: require('@site/static/img/netease_client_support.svg').default,
     title: (
       <Translate id="homepage.feature.neteaseClient.title">
@@ -84,6 +91,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     ariaLabelId: 'homepage.feature.pluginApi.title',
+    ariaLabelMessage: 'Rich Plugin API',
     Svg: require('@site/static/img/plugin_api_support.svg').default,
     title: (
       <Translate id="homepage.feature.pluginApi.title">
@@ -100,6 +108,7 @@ const FeatureList: FeatureItem[] = [
 
 function Feature({
   ariaLabelId,
+  ariaLabelMessage,
   Svg,
   title,
   description,
@@ -108,7 +117,7 @@ function Feature({
   return (
     <div className={clsx(styles.featureRow, reversed && styles.featureRowReverse)} data-reveal>
       <div className={styles.featureMedia}>
-        <Svg className={styles.featureSvg} role="img" aria-label={translate({id: ariaLabelId})} />
+        <Svg className={styles.featureSvg} role="img" aria-label={translate({id: ariaLabelId, message: ariaLabelMessage})} />
       </div>
       <div className={styles.featureContent}>
         <Heading as="h2">{title}</Heading>
@@ -121,18 +130,20 @@ function Feature({
 export default function HomepageFeatures(): React.ReactElement {
   const sectionRef = useRef<HTMLElement>(null);
 
-  // prefers-reduced-motion 下暂停 SVG 内 SMIL 动画（CSS 媒体查询无法控制 SMIL）
+  // SVG 内 SMIL 动画在 prefers-reduced-motion 或滚出视口时暂停（CSS 媒体查询无法控制 SMIL）
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) {
       return;
     }
-    const svgs = section.querySelectorAll('svg');
+    const svgs = Array.from(section.querySelectorAll('svg'));
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // 默认视为全部可见；支持 IntersectionObserver 时再按实际可见性收窄
+    const inView = new Set<Element>(svgs);
     const sync = () => {
       svgs.forEach((svg) => {
         const svgEl = svg as SVGSVGElement;
-        if (mq.matches) {
+        if (mq.matches || !inView.has(svg)) {
           svgEl.pauseAnimations?.();
         } else {
           svgEl.unpauseAnimations?.();
@@ -141,7 +152,26 @@ export default function HomepageFeatures(): React.ReactElement {
     };
     sync();
     mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    let observer: IntersectionObserver | undefined;
+    if ('IntersectionObserver' in window) {
+      inView.clear();
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            inView.add(entry.target);
+          } else {
+            inView.delete(entry.target);
+          }
+        });
+        sync();
+      });
+      svgs.forEach((svg) => io.observe(svg));
+      observer = io;
+    }
+    return () => {
+      mq.removeEventListener('change', sync);
+      observer?.disconnect();
+    };
   }, []);
 
   return (

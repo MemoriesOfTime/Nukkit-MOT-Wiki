@@ -79,6 +79,8 @@ hello-world-plugin/
 | `depend` | 硬依赖，缺失时插件无法加载 |
 | `softdepend` | 软依赖，缺失时插件仍可继续加载 |
 | `loadbefore` | 提示当前插件应先于其他插件加载 |
+| `libraries` | **可选。** 外部 Maven 坐标（`groupId:artifactId:version`），Nukkit-MOT 会自动下载并按插件隔离加载。只应列出你的插件代码实际 import 的库。详见[自动解析 Maven 库](#自动解析-maven-库)。 |
+| `repositories` | **可选。** 解析 `libraries` 时优先于内置默认仓库尝试的额外仓库 URL，建议每个以 `/` 结尾。仅在用私有 Nexus/Artifactory 或非 Maven Central 的源时才需要；公共坐标无需配置即可解析。 |
 | `commands` | 通过 `plugin.yml` 注册命令元数据 |
 | `permissions` | 通过 `plugin.yml` 注册权限节点 |
 
@@ -100,6 +102,9 @@ prefix: HelloWorld
 load: POSTWORLD
 softdepend:
   - SomeOptionalPlugin
+libraries:
+  - "com.squareup.okhttp3:okhttp:4.12.0"
+  - "org.xerial:sqlite-jdbc:3.45.1.0"
 commands:
   helloworld:
     description: Send a hello message
@@ -159,7 +164,72 @@ plugins/HelloWorldPlugin/
 
 `src/main/resources/` 里的文件会被一起打进 jar，所以 `plugin.yml` 要放这里。后续如果你要加入默认 `config.yml`，也应该放在这里。
 
+## 自动解析 Maven 库 {#自动解析-maven-库}
+
+与其把大型第三方库 shade（打进）插件 jar 里让体积膨胀，不如直接在 `plugin.yml` 里声明它们的 Maven 坐标。Nukkit-MOT 会把每个库下载到服务端数据目录下的共享 `libraries/` 目录，并在加载时挂到你插件自己的 `ClassLoader` 上。
+
+:::warning 只声明代码实际用到的库
+`libraries` 是可选字段。每个声明的坐标（连同传递依赖）都会在插件加载时被下载和解析，无论你的代码是否用到都会拖慢启动、占用磁盘。**不要**把构建文件里的整个依赖列表直接复制过来 —— 只有当你的插件代码 import 了某个库时，才把它的坐标加进来。
+:::
+
+```yaml title="plugin.yml — 声明式库"
+libraries:
+  - "com.squareup.okhttp3:okhttp:4.12.0"
+  - "org.xerial:sqlite-jdbc:3.45.1.0"
+repositories:
+  - "https://maven.my-company.com/repository/public/"
+  - "https://jitpack.io"
+```
+
+### 解析流程
+
+对每个 `groupId:artifactId:version` 条目，服务端会：
+
+1. 校验坐标，拒绝任何可能逃出 `libraries/` 目录的写法（路径穿越、首尾点、反斜杠、控制字符）。
+2. 按 `repositories` 顺序依次尝试，全部失败再用内置兜底仓库（Maven Central 和 `repo.lanink.cn`），命中即停止。
+3. 把 `.jar` 下载到 `libraries/<group 路径>/<artifact>/<version>/<artifact>-<version>.jar`，先写到 `.tmp` 临时文件再原子移动到位，避免半成品文件。
+4. 读取对应的 `.pom` 并递归解析**传递依赖**，采用 `nearest-wins`（最近优先）策略：同一个 `groupId:artifactId` 以第一次见到的版本为准，冲突版本直接跳过而非升级。
+
+已下载的 artifact 会在插件之间复用，所以每个版本的成本只会付出一次。
+
+### ClassLoader 隔离
+
+每个插件都有自己独立的 `PluginClassLoader`。当你的插件加载一个类时：
+
+1. 先查插件自己的 URL —— 包括主 jar 和所有 `libraries` 声明的 jar。
+2. 自己的 URL 找不到时，再回退到全局扫描，因此原有的 `depend` / `softdepend` 机制依然有效。
+
+也就是说，你在 `libraries` 里声明的版本会优先于其他插件 shade 进来的同名类。**这是版本优先的隔离，不是访问控制** —— 插件之间仍能通过全局回退互相看到对方的类。
+
+### 支持与不支持的范围
+
+支持：
+
+- 根 `<dependencies>` 中字面量 version、scope 为 `compile` 或 `runtime`、且 `optional != true` 的条目。
+- 通过这些受支持依赖进行的传递解析。
+- 通过 `repositories` 声明的自定义仓库。
+
+不支持（POM 解析器刻意保持最小化）：
+
+- `parent` 继承、`dependencyManagement`、BOM 导入、`exclusions`、`relocations`。
+- 版本区间、classifier、以及 POM `<version>` 里的 `${...}` 属性占位符。
+- `provided`、`test`、`system`、`import` 这些 scope —— 一律被过滤掉。
+
+如果某个库需要上述任意一项，请在 `libraries` 里显式补充坐标，或继续把那个依赖 shade 进你的 jar。
+
+### 失败行为
+
+- 坐标格式不合法（不是恰好三段以 `:` 分隔，或包含非法字符）会抛出 `LibraryLoadException`，插件不会加载。
+- 所有仓库都无法提供 jar 时，插件不会加载。
+- `.pom` 解析失败**不是致命错误**：jar 仍然可用，只是丢掉它的传递依赖（会打印一条 warning）。
+- XML 解析器针对 XXE（外部实体、DTD、schema）做了加固 —— 恶意 POM 无法通过解析器访问网络或读取本地文件。
+
+:::tip 小而知名的库优先用声明而非 shade
+对于 Maven Central 上的热门库，优先用 `libraries` 而非 shade。`repositories` 留给私有的 Nexus/Artifactory 地址即可，公共坐标通常无需配置即可解析。
+:::
+
 ## 继续之前
 
 - 初学者最常见的加载失败原因就是 `plugin.yml` 缺失，或者 `main` 类名写错
+- 当 `libraries` 解析失败时，服务端日志会打印出错的坐标以及尝试过的仓库 —— 在改回 shade 方案之前，先检查 URL 和网络
 - 如果结构和元数据都已经确认无误，就继续阅读[运行并调试你的插件](./debug_plugin)

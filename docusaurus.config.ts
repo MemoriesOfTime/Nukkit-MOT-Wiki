@@ -81,6 +81,8 @@ const config: Config = {
 
   // 预连接第三方域名，减少首次请求的 DNS/TLS 握手延迟
   headTags: [
+    // JS 可用标记：首绘前给 <html> 加 .js，供 CSS 做 JS 门控（如首页滚动入场）
+    {tagName: 'script', attributes: {}, innerHTML: `document.documentElement.classList.add('js');`},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://giscus.app'}},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://www.googletagmanager.com'}},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://bstats.org'}},
