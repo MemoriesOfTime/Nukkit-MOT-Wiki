@@ -79,13 +79,15 @@ Nukkit server supports the following Bedrock Edition clients:
 - Minecraft (Nintendo Switch)
 - Minecraft (Xbox)
 - Minecraft (PlayStation)
-- **NetEase Minecraft** (requires `netease-client-support` configuration enabled)
+- **NetEase Minecraft** (requires `client-support` configuration enabled)
 
 :::info NetEase Client Support
-If using NetEase Minecraft client, make sure to enable in `server.properties`:
-```properties
-netease-client-support=true
+If using NetEase Minecraft client, make sure to enable in `nukkit-mot.yml`:
+```yaml
+netease-settings:
+  client-support: true
 ```
+The legacy `netease-client-support` key in `server.properties` is automatically migrated to `nukkit-mot.yml` on startup.
 :::
 
 ## Verify Connection

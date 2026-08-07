@@ -64,16 +64,28 @@ Nukkit-MOT is only responsible for passing the key to the client and does not pa
 :::
 
 ## 🔑 Configure the Encryption Key \{#configure-key}
-1. In the server's `resource_packs` folder,
-2. Create a `.key` file with the same name as the encrypted pack.
-3. Paste the 32-bit encryption key in the .key file.
+Encryption keys are configured in the `packs.yml` file inside the server's `resource_packs` folder (the old `<pack name>.mcpack.key` sidecar files are no longer read). The file is generated automatically on first startup and is keyed by the pack's UUID, which you can find in the pack's `manifest.json` under `header.uuid`.
 
 <FolderView
   paths={[
     'resource_packs/ExampleResourcePack.mcpack',
-    'resource_packs/ExampleResourcePack.mcpack.key'
+    'resource_packs/packs.yml'
   ]}
 />
+
+```yaml
+# resource_packs/packs.yml
+"12c2b614-796a-3d8e-9364-cb39c86cebfa":
+  key: "0123456789abcdefGHIJKLMNOPQRSTUV" # 32-bit encryption key
+  cdn: "https://cdn.example.com/packs/ExampleResourcePack.mcpack" # optional
+```
+
+- `key`: the 32-bit encryption key for this pack. Leave empty for no encryption.
+- `cdn` (optional): a CDN download URL for this pack. The client tries downloading the pack from this URL first, automatically falling back to normal server chunk transfer if the CDN download fails.
+
+:::tip NetEase Packs
+Files named `*.netease*` are only sent to players using the NetEase client.
+:::
 
 ## 🔄 Restart the Server \{#restart-server}
 After modifying the configuration, you must restart the server for the encryption to take effect (Nukkit-MOT only loads resource pack configurations at startup).
@@ -83,7 +95,7 @@ After modifying the configuration, you must restart the server for the encryptio
 |------|------|
 | Can the encrypted resource pack be cracked? | It may be cracked by professional methods, but it is much more secure than an unencrypted resource pack. |
 | Does encryption affect game performance? | It does not affect client or server performance at all. |
-| Are multiple encrypted packs supported? | Yes, you can deploy multiple encrypted packs simultaneously, each requiring a corresponding .key file. |
+| Are multiple encrypted packs supported? | Yes, you can deploy multiple encrypted packs simultaneously — just add a section keyed by each pack's UUID in `packs.yml`. |
 
 :::success Done!
 Now, when your players load the resource pack, the client will automatically use the configured key to decrypt and load it.

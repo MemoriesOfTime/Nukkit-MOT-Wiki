@@ -179,7 +179,7 @@ Use Snappy compression for packets
 ### `rak-packet-limit`
 | Data Type | Default Value |
 |-----------|---------------|
-| Integer   | 120           |
+| Integer   | 2000          |
 
 A number of datagram packets each address can send within one RakNet tick (10ms)
 
@@ -198,7 +198,8 @@ RakNet cookie mode for connection security. Available values:
 | `offloaded` | Key is unknown. Ignores `ID_OPEN_CONNECTION_REQUEST_1`. On `ID_OPEN_CONNECTION_REQUEST_2`, verifies timestamp is recent. Signature is ignored |
 | `offloaded_psk` | Key is known. Ignores `ID_OPEN_CONNECTION_REQUEST_1`. On `ID_OPEN_CONNECTION_REQUEST_2`, verifies timestamp is recent and checks cookie signature |
 | `off` | Accepts any cookie at `ID_OPEN_CONNECTION_REQUEST_2` |
-| `invalid` | Client is invalid if it sends a cookie |
+| `none` | No cookie is sent or expected. The RakNet protocol version cannot be recovered in this mode |
+| `stateless` | Handles the full cookie handshake and recovers the RakNet protocol version from the cookie, but does not validate the signature |
 
 :::note
 If you cannot join the server (especially when using a proxy), try setting this to `offloaded`.
@@ -350,6 +351,13 @@ enable asynchronous chunk sending
 this can improve the performance a lot when lots of chunks are being sent to players on different versions
 
 it's recommended to keep this enabled
+
+### `max-pending-chunk-writes`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 128           |
+
+maximum number of pending chunk writes per world before chunk unloading pauses (backpressure)
 
 ## entity-settings (Entity Settings) {#entity-settings}
 

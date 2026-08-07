@@ -1,0 +1,114 @@
+---
+sidebar_position: 5.5
+---
+
+# 广播 API 指南
+
+`Server` 提供了一组广播辅助方法，覆盖聊天消息、标题（Title）、提示（Tip）和动作栏（Action Bar）。所有方法都返回一个 `int`：表示内容实际送达的接收者数量（对 Title、Tip 和 Action Bar 来说，只有在线的 `Player` 接收者才计数）。
+
+:::tip 基于源码编写
+本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `Server#broadcastMessage(...)`、`Server#broadcastTitle(...)`、`Server#broadcastTip(...)`、`Server#broadcastActionBar(...)` 和 `Server#broadcast(...)`。
+:::
+
+## 接收者如何确定
+
+每个广播方法最多有三种接收者变体：
+
+- **默认** —— 不传接收者参数：发送到内置的用户频道 `Server.BROADCAST_CHANNEL_USERS`（`nukkit.broadcast.user`）。
+- **按权限频道** —— 传入 `String permissions` 参数：发送给订阅了指定权限频道、且至少拥有其中一个权限的 `CommandSender`。多个频道用 `;` 分隔（例如 `"myplugin.alerts;nukkit.broadcast.admin"`）。内置的管理员频道是 `Server.BROADCAST_CHANNEL_ADMINISTRATIVE`（`nukkit.broadcast.admin`），控制台默认订阅了该频道。
+- **接收者集合** —— 传入 `Collection<? extends CommandSender>` 参数：精确发送给集合中的接收者。
+
+对 Title、Tip 和 Action Bar 而言，解析出的接收者集合中非 `Player` 的成员会被静默跳过，因此返回值可能小于集合大小。
+
+## `broadcastMessage`
+
+发送聊天消息。按权限频道的变体位于更底层的 `broadcast(...)` 方法上。
+
+```java
+public int broadcastMessage(String message)
+public int broadcastMessage(TextContainer message)
+public int broadcastMessage(String message, CommandSender[] recipients)
+public int broadcastMessage(String message, Collection<? extends CommandSender> recipients)
+public int broadcastMessage(TextContainer message, Collection<? extends CommandSender> recipients)
+
+public int broadcast(String message, String permissions)
+public int broadcast(TextContainer message, String permissions)
+```
+
+与下面几种可视化广播不同，聊天消息也会发送给控制台这类非玩家发送者。
+
+## `broadcastTitle`
+
+显示标题和副标题。时间参数为 `fadeIn` / `stay` / `fadeOut`，单位是 tick（20 tick = 1 秒）；不带时间参数的重载默认使用 `20/20/5`。
+
+```java
+public int broadcastTitle(String title, String subtitle)
+public int broadcastTitle(String title, String subtitle, String permissions)
+public int broadcastTitle(String title, String subtitle, Collection<? extends CommandSender> recipients)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, String permissions)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, Collection<? extends CommandSender> recipients)
+```
+
+## `broadcastTip`
+
+在快捷栏上方显示 Tip 提示。
+
+```java
+public int broadcastTip(String message)
+public int broadcastTip(String message, String permissions)
+public int broadcastTip(String message, Collection<? extends CommandSender> recipients)
+```
+
+## `broadcastActionBar`
+
+显示动作栏消息。时间参数为 `fadeIn` / `duration` / `fadeOut`，单位是 tick；不带时间参数的重载默认使用 `1/0/1`。
+
+```java
+public int broadcastActionBar(String message)
+public int broadcastActionBar(String message, String permissions)
+public int broadcastActionBar(String message, Collection<? extends CommandSender> recipients)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut, String permissions)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut, Collection<? extends CommandSender> recipients)
+```
+
+## 示例
+
+通过默认用户频道向全体在线玩家广播一个标题：
+
+```java
+import cn.nukkit.Server;
+
+Server server = this.getServer();
+
+int shown = server.broadcastTitle("§6活动开始", "§e快前往出生点！", 10, 60, 10);
+this.getLogger().info("标题已显示给 " + shown + " 名玩家");
+```
+
+只向管理员发送按权限频道过滤的动作栏，并向手动筛选的接收者集合发送 Tip：
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
+
+import java.util.Collection;
+
+Server server = this.getServer();
+
+// 只有订阅了该权限频道且持有权限的发送者才能看到
+server.broadcastActionBar("§c服务器将在 60 秒后重启", Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+
+// 显式指定接收者列表，例如某个世界里的所有玩家
+Collection<? extends CommandSender> lobbyPlayers = server.getOnlinePlayers().values().stream()
+        .filter(player -> player.getLevel().getName().equals("lobby"))
+        .toList();
+server.broadcastTip("§a欢迎来到大厅！", lobbyPlayers);
+```
+
+## 注意事项
+
+- 所有时间参数的单位都是 **tick**。
+- 权限频道使用 `;` 作为分隔符；即使某个接收者同时匹配多个频道，也只会收到一次广播（接收者会先去重）。
+- 返回值只统计实际显示了 Title、Tip 或 Action Bar 的玩家数量；而 `broadcastMessage` / `broadcast` 统计的是消息实际发送到的所有接收者数量。

@@ -49,6 +49,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 #### 仓库： {#maven-repository}
 ```xml title="pom.xml"
 <repositories>
+    <!-- 正式版来自 Maven Central；SNAPSHOT 构建需要 repo.lanink.cn 仓库 -->
     <repository>
         <id>repo-lanink-cn</id>
         <url>https://repo.lanink.cn/repository/maven-public/</url>
@@ -58,6 +59,17 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 
 #### 依赖： {#maven-dependencies}
 ```xml title="pom.xml"
+<!-- 正式版 -->
+<dependencies>
+    <dependency>
+        <groupId>com.nukkit-mot</groupId>
+        <artifactId>nukkit-mot</artifactId>
+        <version>1.26.30-R1</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+<!-- 开发版（SNAPSHOT） -->
 <dependencies>
     <dependency>
         <groupId>cn.nukkit</groupId>
@@ -68,16 +80,23 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 </dependencies>
 ```
 ## Gradle {#gradle}
-#### Repository: {#gradle-repository}
+#### 仓库： {#gradle-repository}
 ```kts
 repositories {
     mavenCentral()
+    // SNAPSHOT 构建需要 repo.lanink.cn 仓库
     maven("https://repo.lanink.cn/repository/maven-public/")
 } 
 ```
 
-#### Dependencies: {#gradle-dependencies}
+#### 依赖： {#gradle-dependencies}
 ```kts
+// 正式版
+dependencies {
+    compileOnly("com.nukkit-mot:nukkit-mot:1.26.30-R1")
+}
+
+// 开发版（SNAPSHOT）
 dependencies {
     compileOnly("cn.nukkit:Nukkit:MOT-SNAPSHOT")
 }

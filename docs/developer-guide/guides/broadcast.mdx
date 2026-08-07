@@ -1,0 +1,114 @@
+---
+sidebar_position: 5.5
+---
+
+# Broadcast API Guide
+
+`Server` exposes broadcast helpers for chat messages, titles, tips, and action bars. Every method returns an `int`: the number of recipients the content was actually delivered to (for titles, tips, and action bars, only online `Player` recipients count).
+
+:::tip Source-backed scope
+This page is written against the current Nukkit-MOT source, especially `Server#broadcastMessage(...)`, `Server#broadcastTitle(...)`, `Server#broadcastTip(...)`, `Server#broadcastActionBar(...)`, and `Server#broadcast(...)`.
+:::
+
+## How Recipients Are Resolved
+
+Each broadcast method comes in up to three recipient variants:
+
+- **Default** — no recipient argument: sends to the built-in user channel `Server.BROADCAST_CHANNEL_USERS` (`nukkit.broadcast.user`).
+- **Permission-scoped** — a `String permissions` argument: sends to subscribed `CommandSender`s that have at least one of the given permission channels. Multiple channels are separated by `;` (for example `"myplugin.alerts;nukkit.broadcast.admin"`). The built-in admin channel is `Server.BROADCAST_CHANNEL_ADMINISTRATIVE` (`nukkit.broadcast.admin`), which the console subscribes to.
+- **Recipient collection** — a `Collection<? extends CommandSender>` argument: sends to exactly the given recipients.
+
+For titles, tips, and action bars, non-`Player` recipients in the resolved set are silently skipped, so the return value can be lower than the collection size.
+
+## `broadcastMessage`
+
+Sends a chat message. The permission-scoped variant lives on the lower-level `broadcast(...)` method.
+
+```java
+public int broadcastMessage(String message)
+public int broadcastMessage(TextContainer message)
+public int broadcastMessage(String message, CommandSender[] recipients)
+public int broadcastMessage(String message, Collection<? extends CommandSender> recipients)
+public int broadcastMessage(TextContainer message, Collection<? extends CommandSender> recipients)
+
+public int broadcast(String message, String permissions)
+public int broadcast(TextContainer message, String permissions)
+```
+
+Unlike the visual broadcasts below, chat messages are also delivered to non-player senders such as the console.
+
+## `broadcastTitle`
+
+Shows a title with a subtitle. Timings are `fadeIn` / `stay` / `fadeOut` in ticks (20 ticks = 1 second); the overloads without timings default to `20/20/5`.
+
+```java
+public int broadcastTitle(String title, String subtitle)
+public int broadcastTitle(String title, String subtitle, String permissions)
+public int broadcastTitle(String title, String subtitle, Collection<? extends CommandSender> recipients)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, String permissions)
+public int broadcastTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut, Collection<? extends CommandSender> recipients)
+```
+
+## `broadcastTip`
+
+Shows a tip popup above the hotbar.
+
+```java
+public int broadcastTip(String message)
+public int broadcastTip(String message, String permissions)
+public int broadcastTip(String message, Collection<? extends CommandSender> recipients)
+```
+
+## `broadcastActionBar`
+
+Shows an action bar message. Timings are `fadeIn` / `duration` / `fadeOut` in ticks; the overloads without timings default to `1/0/1`.
+
+```java
+public int broadcastActionBar(String message)
+public int broadcastActionBar(String message, String permissions)
+public int broadcastActionBar(String message, Collection<? extends CommandSender> recipients)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut, String permissions)
+public int broadcastActionBar(String message, int fadeIn, int duration, int fadeOut, Collection<? extends CommandSender> recipients)
+```
+
+## Examples
+
+Broadcast a title to every online player via the default user channel:
+
+```java
+import cn.nukkit.Server;
+
+Server server = this.getServer();
+
+int shown = server.broadcastTitle("§6Event Starting", "§eHead to spawn!", 10, 60, 10);
+this.getLogger().info("Title shown to " + shown + " players");
+```
+
+Send a permission-scoped action bar to admins only, plus a tip to a hand-picked recipient set:
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.command.CommandSender;
+
+import java.util.Collection;
+
+Server server = this.getServer();
+
+// Only senders subscribed to and holding the permission see this
+server.broadcastActionBar("§cRestart in 60 seconds", Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+
+// Explicit recipient list, e.g. everyone in one world
+Collection<? extends CommandSender> lobbyPlayers = server.getOnlinePlayers().values().stream()
+        .filter(player -> player.getLevel().getName().equals("lobby"))
+        .toList();
+server.broadcastTip("§aWelcome to the lobby!", lobbyPlayers);
+```
+
+## Notes
+
+- All timing parameters are in **ticks**.
+- Permission channels use `;` as the separator; a recipient matching several channels still receives the broadcast only once (recipients are de-duplicated).
+- The return value counts only players that actually displayed a title, tip, or action bar; for `broadcastMessage`/`broadcast` it counts all recipients the message was sent to.

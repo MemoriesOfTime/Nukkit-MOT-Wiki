@@ -105,10 +105,12 @@ Address already in use
 使用网易我的世界客户端无法连接。
 
 **解决方案:**
-在 `server.properties` 中启用网易客户端支持:
-```properties
-netease-client-support=true
+在 `nukkit-mot.yml` 中启用网易客户端支持:
+```yaml
+netease-settings:
+  client-support: true
 ```
+旧的 `server.properties` 中的 `netease-client-support` 会在启动时自动迁移到 `nukkit-mot.yml`。
 
 ## 插件问题
 

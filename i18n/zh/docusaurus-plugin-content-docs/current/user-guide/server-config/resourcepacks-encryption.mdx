@@ -66,16 +66,28 @@ Nukkit-MOT 仅负责向客户端传递密钥，不参与实际的加密/解密�
 :::
 
 ## 🔑 配置加密密钥 \{#configure-key}
-1. 在服务端 `resource_packs` 文件夹中
-2. 创建与加密包同名的 `.key` 文件
-3. 在.key文件中粘贴32位加密密钥
+加密密钥在服务端 `resource_packs` 文件夹中的 `packs.yml` 文件里配置（旧的 `<包名>.mcpack.key` 同名文件已不再被读取）。该文件会在首次启动时自动生成，以资源包 UUID 为键，UUID 可在资源包 `manifest.json` 的 `header.uuid` 中找到。
 
 <FolderView
   paths={[
     'resource_packs/示例资源包.mcpack',
-    'resource_packs/示例资源包.mcpack.key'
+    'resource_packs/packs.yml'
   ]}
 />
+
+```yaml
+# resource_packs/packs.yml
+"12c2b614-796a-3d8e-9364-cb39c86cebfa":
+  key: "0123456789abcdefGHIJKLMNOPQRSTUV" # 32 位加密密钥
+  cdn: "https://cdn.example.com/packs/示例资源包.mcpack" # 可选
+```
+
+- `key`：该资源包的 32 位加密密钥，留空表示不加密
+- `cdn`（可选）：该资源包的 CDN 下载地址。客户端会优先从该地址下载资源包，失败时自动降级为服务器分块传输
+
+:::tip 网易版资源包
+文件名包含 `netease` 的资源包仅会发送给使用网易版客户端的玩家
+:::
 
 ## 🔄 重启服务端 \{#restart-server}
 修改配置后必须重启服务器才能使加密生效（Nukkit-MOT 仅在启动时加载资源包配置）
@@ -85,7 +97,7 @@ Nukkit-MOT 仅负责向客户端传递密钥，不参与实际的加密/解密�
 |------|------|
 | 加密后资源包能被破解吗？ | 可能会遭受专业手段破解，但比未加密资源包安全得多 |
 | 加密是否影响游戏性能？ | 完全不会影响客户端和服务端性能 |
-| 支持多个加密包吗？ | 可以同时部署多个加密包，每个都需要对应.key文件 |
+| 支持多个加密包吗？ | 可以同时部署多个加密包，只需在 `packs.yml` 中为每个资源包的 UUID 添加对应配置 |
 
 :::success 完成！
 现在您的玩家加载资源包时，客户端会自动使用配置的密钥进行解密加载

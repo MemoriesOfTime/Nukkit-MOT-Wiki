@@ -105,10 +105,12 @@ Address already in use
 Cannot connect using NetEase Minecraft client.
 
 **Solution:**
-Enable NetEase client support in `server.properties`:
-```properties
-netease-client-support=true
+Enable NetEase client support in `nukkit-mot.yml`:
+```yaml
+netease-settings:
+  client-support: true
 ```
+The legacy `netease-client-support` key in `server.properties` is automatically migrated to `nukkit-mot.yml` on startup.
 
 ## Plugin Issues
 

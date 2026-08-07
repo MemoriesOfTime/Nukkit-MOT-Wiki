@@ -50,6 +50,7 @@ sidebar_position: 1
   </properties>
 
   <repositories>
+    <!-- 只有 SNAPSHOT 构建需要此仓库；正式版来自 Maven Central -->
     <repository>
       <id>repo-lanink-cn</id>
       <url>https://repo.lanink.cn/repository/maven-public/</url>
@@ -57,12 +58,21 @@ sidebar_position: 1
   </repositories>
 
   <dependencies>
+    <!-- 正式版（推荐） -->
+    <dependency>
+      <groupId>com.nukkit-mot</groupId>
+      <artifactId>nukkit-mot</artifactId>
+      <version>1.26.30-R1</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- 开发版（SNAPSHOT，需要上面的仓库）
     <dependency>
       <groupId>cn.nukkit</groupId>
       <artifactId>Nukkit</artifactId>
       <version>MOT-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    -->
   </dependencies>
 </project>
 ```
@@ -144,5 +154,5 @@ target/hello-world-plugin-1.0.0.jar
 
 ## 继续之前
 
-- 如果 Maven 无法解析 `cn.nukkit:Nukkit:MOT-SNAPSHOT`，先检查仓库地址和网络连接
+- 如果 Maven 无法解析 `com.nukkit-mot:nukkit-mot:1.26.30-R1`，先检查网络连接；如果无法解析 `cn.nukkit:Nukkit:MOT-SNAPSHOT`，再检查仓库地址
 - 如果工程已经能成功构建，继续阅读[插件基础结构](./plugin-basics)

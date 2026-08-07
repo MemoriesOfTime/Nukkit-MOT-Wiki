@@ -79,13 +79,15 @@ Nukkit 服务器支持以下基岩版客户端:
 - Minecraft (Nintendo Switch)
 - Minecraft (Xbox)
 - Minecraft (PlayStation)
-- **网易我的世界** (需开启 `netease-client-support` 配置)
+- **网易我的世界** (需开启 `client-support` 配置)
 
 :::info 网易客户端支持
-如果使用网易我的世界客户端,请确保在 `server.properties` 中启用:
-```properties
-netease-client-support=true
+如果使用网易我的世界客户端,请确保在 `nukkit-mot.yml` 中启用:
+```yaml
+netease-settings:
+  client-support: true
 ```
+旧的 `server.properties` 中的 `netease-client-support` 会在启动时自动迁移到 `nukkit-mot.yml`。
 :::
 
 ## 验证连接

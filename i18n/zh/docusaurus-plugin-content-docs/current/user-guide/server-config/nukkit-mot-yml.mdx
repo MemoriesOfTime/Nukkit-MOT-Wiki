@@ -174,9 +174,9 @@ LevelDB 自动压缩任务运行的频率
 使用 Snappy 压缩数据包
 
 ### `rak-packet-limit`
-| 数据类型    | 默认值 |
-|---------|-----|
-| Integer | 120 |
+| 数据类型    | 默认值  |
+|---------|------|
+| Integer | 2000 |
 
 每个 IP 可以在一个 RakNet 周期（10ms）内发送的数据包数量
 
@@ -195,7 +195,8 @@ RakNet Cookie 模式，用于连接安全验证。可用值：
 | `offloaded` | 密钥未知。忽略 `ID_OPEN_CONNECTION_REQUEST_1`。在 `ID_OPEN_CONNECTION_REQUEST_2` 时，仅验证时间戳是否为最近的，忽略签名 |
 | `offloaded_psk` | 密钥已知。忽略 `ID_OPEN_CONNECTION_REQUEST_1`。在 `ID_OPEN_CONNECTION_REQUEST_2` 时，验证时间戳是否为最近的并检查 Cookie 签名 |
 | `off` | 在 `ID_OPEN_CONNECTION_REQUEST_2` 时接受任何 Cookie |
-| `invalid` | 如果客户端发送了 Cookie 则视为无效 |
+| `none` | 不发送也不校验 Cookie。此模式下无法恢复 RakNet 协议版本 |
+| `stateless` | 执行完整的 Cookie 握手并从 Cookie 中恢复 RakNet 协议版本，但不校验签名 |
 
 :::note
 如果您无法进入服务器（尤其是使用代理时），可以尝试将此项设置为 `offloaded`。
@@ -347,6 +348,13 @@ IPv6 本地地址默认可信。
 当向不同版本的玩家发送大量区块时，这可以极大地提高性能
 
 建议保持此选项开启
+
+### `max-pending-chunk-writes`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 128 |
+
+每个世界在暂停区块卸载前允许的最大待写入区块数量（背压机制）
 
 ## entity-settings（实体设置） {#entity-settings}
 

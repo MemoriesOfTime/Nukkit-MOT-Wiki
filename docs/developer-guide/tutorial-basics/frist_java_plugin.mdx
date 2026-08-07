@@ -50,6 +50,7 @@ After the project is created, replace `pom.xml` with this example. The repositor
   </properties>
 
   <repositories>
+    <!-- Only needed for SNAPSHOT builds; release builds come from Maven Central -->
     <repository>
       <id>repo-lanink-cn</id>
       <url>https://repo.lanink.cn/repository/maven-public/</url>
@@ -57,12 +58,21 @@ After the project is created, replace `pom.xml` with this example. The repositor
   </repositories>
 
   <dependencies>
+    <!-- Release (recommended) -->
+    <dependency>
+      <groupId>com.nukkit-mot</groupId>
+      <artifactId>nukkit-mot</artifactId>
+      <version>1.26.30-R1</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- SNAPSHOT (development builds; requires the repository above)
     <dependency>
       <groupId>cn.nukkit</groupId>
       <artifactId>Nukkit</artifactId>
       <version>MOT-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    -->
   </dependencies>
 </project>
 ```
@@ -144,5 +154,5 @@ Because `plugin.yml` is under `src/main/resources/`, Maven copies it into the ja
 
 ## Before You Continue
 
-- If Maven cannot resolve `cn.nukkit:Nukkit:MOT-SNAPSHOT`, re-check the repository URL and your network connection.
+- If Maven cannot resolve `com.nukkit-mot:nukkit-mot:1.26.30-R1`, check your network connection. If it cannot resolve `cn.nukkit:Nukkit:MOT-SNAPSHOT`, also re-check the repository URL.
 - If the project builds successfully, continue to [Plugin Basics](./plugin-basics).

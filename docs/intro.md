@@ -49,6 +49,7 @@ The documentation is now split into two main tracks:
 #### Repository: {#maven-repository}
 ```xml
 <repositories>
+    <!-- Release builds come from Maven Central; SNAPSHOT builds require the repo.lanink.cn repo -->
     <repository>
         <id>repo-lanink-cn</id>
         <url>https://repo.lanink.cn/repository/maven-public/</url>
@@ -58,6 +59,17 @@ The documentation is now split into two main tracks:
 
 #### Dependencies: {#maven-dependencies}
 ```xml
+<!-- Release -->
+<dependencies>
+    <dependency>
+        <groupId>com.nukkit-mot</groupId>
+        <artifactId>nukkit-mot</artifactId>
+        <version>1.26.30-R1</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+<!-- SNAPSHOT -->
 <dependencies>
     <dependency>
         <groupId>cn.nukkit</groupId>
@@ -73,12 +85,19 @@ The documentation is now split into two main tracks:
 ```kts
 repositories {
     mavenCentral()
+    // SNAPSHOT builds require the repo.lanink.cn repo
     maven("https://repo.lanink.cn/repository/maven-public/")
 } 
 ```
 
 #### Dependencies: {#gradle-dependencies}
 ```kts
+// Release
+dependencies {
+    compileOnly("com.nukkit-mot:nukkit-mot:1.26.30-R1")
+}
+
+// SNAPSHOT
 dependencies {
     compileOnly("cn.nukkit:Nukkit:MOT-SNAPSHOT")
 }
