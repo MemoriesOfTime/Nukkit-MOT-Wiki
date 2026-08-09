@@ -70,6 +70,30 @@ motd 的第二行
 
 :::
 
+## `server-ipv6-port`
+| 数据类型    | 默认值  |
+|---------|------|
+| Integer | -1   |
+
+可选 IPv6 监听器的端口
+
+:::note
+
+当此值为 `0` 或更低时（默认 `-1`），IPv6 监听器处于禁用状态
+
+要启用它，请设置一个与 `server-port` 不同的有效端口
+
+:::
+
+## `server-ipv6`
+| 数据类型   | 默认值  |
+|--------|------|
+| String | ::   |
+
+可选 IPv6 监听器绑定的 IPv6 地址
+
+必须是有效的 IPv6 地址；留空则禁用 IPv6 监听器
+
 ## `view-distance`
 | 数据类型    | 默认值 |
 |---------|-----|
@@ -105,7 +129,7 @@ Nukkit 使用的默认语言
 ## `shutdown-message`
 | 数据类型   | 默认值           |
 |--------|---------------|
-| String | Server closed |
+| String | §cServer closed |
 
 当您停止服务器时向玩家显示的消息
 
@@ -197,7 +221,7 @@ Nukkit 使用的默认语言
 ## `whitelist-reason`
 | 数据类型   | 默认值                    |
 |--------|------------------------|
-| String | Server is white-listed |
+| String | §cServer is white-listed |
 
 启用白名单的原因，显示给被阻挡在外的玩家
 

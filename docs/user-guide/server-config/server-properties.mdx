@@ -70,6 +70,30 @@ bedrock edition uses UDP
 
 :::
 
+## `server-ipv6-port`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | -1            |
+
+port for the optional IPv6 listener
+
+:::note
+
+the IPv6 listener is disabled when this is `0` or lower (default `-1`)
+
+to enable it, set a valid port that differs from `server-port`
+
+:::
+
+## `server-ipv6`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | ::            |
+
+IPv6 address the optional IPv6 listener binds to
+
+must be a valid IPv6 address; leave blank to disable the IPv6 listener
+
 ## `view-distance`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -105,7 +129,7 @@ enable only if you have a plugin to implement those
 ## `shutdown-message`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | Server closed |
+| String    | §cServer closed |
 
 message that shows for players when you stop the server
 
@@ -197,7 +221,7 @@ use `/whitelist` command or modify `white-list.txt` to add players to whitelist
 ## `whitelist-reason`
 | Data Type | Default Value |
 |-----------|---------------|
-| String    | Server is white-listed |
+| String    | §cServer is white-listed |
 
 Reason for enabling the whitelist, displayed to players when they are denied access
 

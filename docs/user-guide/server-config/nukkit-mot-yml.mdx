@@ -216,6 +216,10 @@ how long should the server wait before kicking player if no response from the cl
 
 in milliseconds, 1000 milliseconds = 1 second
 
+:::note
+This option is currently reserved and not yet applied by the server.
+:::
+
 ### `query-plugins`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -895,3 +899,18 @@ Automatically download vanilla block palettes (`vanilla_palette_*.nbt`) from the
 This is required for custom block support across multiple client protocol versions. Files are cached in the `bin/` folder and verified with SHA256.
 
 If disabled, you must manually prepare the palette files in the `bin/` folder.
+
+### `use-hashed-block-network-ids`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Send hashed block network IDs (`blockNetworkIdsHashed`) to 1.19.80+ clients, including NetEase clients, instead of legacy runtime IDs.
+
+Enabled by default even without custom blocks; hashed IDs are persistent across versions.
+
+:::note
+No effect on protocol versions below 1.19.80.
+
+Always forced on when custom blocks are registered.
+:::
