@@ -1,0 +1,125 @@
+.demo {
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    background: var(--ifm-background-surface-color);
+}
+
+/* threshold slider */
+.sliderRow {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 4px 0 8px;
+}
+
+.sliderRow input[type='range'] {
+    width: 260px;
+    accent-color: var(--ifm-color-primary);
+}
+
+.tickLabels {
+    display: flex;
+    justify-content: space-between;
+    width: 268px;
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 11px;
+    color: var(--ifm-color-emphasis-600);
+}
+
+.caption {
+    font-size: 12.5px;
+    color: var(--ifm-color-emphasis-700);
+    margin: 0 0 4px;
+}
+
+.stage {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 8px;
+}
+
+/* diagram */
+.box {
+    fill: var(--ifm-color-emphasis-100);
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 1.5;
+}
+
+.boxAsync {
+    fill: var(--ifm-color-success-lightest);
+    stroke: var(--ifm-color-success);
+    transition: fill 0.4s, stroke 0.4s;
+}
+
+.boxDisabled {
+    fill: var(--ifm-color-emphasis-200);
+    stroke: var(--ifm-color-emphasis-400);
+    transition: fill 0.4s, stroke 0.4s;
+}
+
+.label {
+    font-family: var(--ifm-font-family-base);
+    font-size: 13px;
+    fill: var(--ifm-font-color-base);
+}
+
+.labelDisabled {
+    fill: var(--ifm-color-emphasis-600);
+    transition: fill 0.4s;
+}
+
+.mono {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-emphasis-600);
+}
+
+.statusOn {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-success);
+}
+
+.statusOff {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-emphasis-600);
+}
+
+.flow {
+    fill: none;
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+    transition: opacity 0.4s, stroke 0.4s;
+}
+
+.flowAsync {
+    stroke: var(--ifm-color-success);
+}
+
+.flowDisabled {
+    stroke: var(--ifm-color-emphasis-400);
+}
+
+.cross {
+    transition: opacity 0.3s;
+}
+
+.cross line {
+    stroke: var(--ifm-color-danger);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.packet {
+    fill: var(--ifm-color-primary);
+    transition: opacity 0.3s;
+}
+
+.gone {
+    opacity: 0;
+}

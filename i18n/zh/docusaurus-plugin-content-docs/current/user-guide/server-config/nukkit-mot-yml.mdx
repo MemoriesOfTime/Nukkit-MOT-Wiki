@@ -3,6 +3,11 @@ sidebar_position: 2
 ---
 
 import Image from '@theme/IdealImage';
+import AsyncChunksDemo from '@site/src/components/AsyncChunksDemo';
+import ZlibProviderDemo from '@site/src/components/ZlibProviderDemo';
+import CompressionThresholdDemo from '@site/src/components/CompressionThresholdDemo';
+import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
+import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
 
 # nukkit-mot.yml
 
@@ -27,6 +32,14 @@ Nukkit-MOT 服务器高级配置。设置按类别分组排序。
 | Boolean | on  |
 
 允许服务器自动调整世界游戏刻以维持每秒 20 个游戏刻
+
+<AutoTickRateDemo
+    labelTickTime="模拟 tick 耗时"
+    labelTps="服务器 TPS"
+    labelWorldTicks="世界 tick 速度"
+    descOn="TPS 保持 20 —— 过载的世界改为降低自身 tick 频率（tickRate 上升）。"
+    descOff="世界仍在每个服务器 tick 都运行，因此整个服务器的 TPS 会降到 20 以下。"
+/>
 
 ### `auto-tick-rate-limit`
 | 数据类型    | 默认值 |
@@ -141,6 +154,16 @@ LevelDB 自动压缩任务运行的频率
 使用其他提供程序可能会对服务器的性能产生负面影响
 :::
 
+<ZlibProviderDemo
+    labelThread1="线程 1"
+    labelThread2="线程 2"
+    labelPlayers="玩家"
+    labelSharedDeflater="共享 Deflater"
+    desc0="每次调用都新建一个 Deflater —— 带来额外的对象分配与 GC 压力。"
+    desc1="全局共享一个 synchronized 实例 —— 省内存，但所有线程需要排队、逐个压缩。"
+    desc2="每个线程持有自己的 Deflater —— 无重复分配，也无锁竞争。"
+/>
+
 ### `compression-level`
 | 数据类型    | 默认值 |
 |---------|-----|
@@ -165,6 +188,16 @@ LevelDB 自动压缩任务运行的频率
 | Integer | 256 |
 
 不要压缩小于此值的批处理数据包（仅限Zlib）
+
+<CompressionThresholdDemo
+    labelSmall="小数据包"
+    labelMedium="批量数据包"
+    labelLarge="区块数据包"
+    labelPlayers="玩家"
+    labelCompressed="已压缩"
+    labelRaw="未压缩"
+    caption="小于阈值的数据包会以压缩级别 0 发送，即不压缩。"
+/>
 
 ### `use-snappy-compression`
 | 数据类型    | 默认值 |
@@ -353,12 +386,31 @@ IPv6 本地地址默认可信。
 
 建议保持此选项开启
 
+<AsyncChunksDemo
+    labelStorage="区块存储"
+    labelMainThread="主线程"
+    labelAsyncChunk="异步区块线程"
+    labelAsyncChunkSub="序列化 / 编码"
+    labelAsyncIo="异步 IO 线程"
+    labelAsyncIoSub="读取 / 解码 / 保存"
+    labelPlayers="玩家"
+    labelLoad="负载"
+/>
+
 ### `max-pending-chunk-writes`
 | 数据类型    | 默认值 |
 |---------|-----|
 | Integer | 128 |
 
 每个世界在暂停区块卸载前允许的最大待写入区块数量（背压机制）
+
+<PendingWritesDemo
+    labelUnload="区块卸载"
+    labelQueue="待写队列"
+    labelPressure="写入压力"
+    labelPaused="卸载已暂停（背压）"
+    caption="当队列达到上限时，区块卸载会暂停，直到磁盘写入赶上（背压）。把写入压力拉高到磁盘消化速度（12/s）以上即可看到效果。"
+/>
 
 ## entity-settings（实体设置） {#entity-settings}
 

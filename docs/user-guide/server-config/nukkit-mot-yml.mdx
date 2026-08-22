@@ -3,6 +3,11 @@ sidebar_position: 2
 ---
 
 import Image from '@theme/IdealImage';
+import AsyncChunksDemo from '@site/src/components/AsyncChunksDemo';
+import ZlibProviderDemo from '@site/src/components/ZlibProviderDemo';
+import CompressionThresholdDemo from '@site/src/components/CompressionThresholdDemo';
+import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
+import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
 
 # nukkit-mot.yml
 
@@ -27,6 +32,8 @@ if set to auto, it will try to automatically detect the number of cores and use 
 | Boolean   | on            |
 
 allow the server to automatically change level tick rate to maintain 20 ticks per second
+
+<AutoTickRateDemo />
 
 ### `auto-tick-rate-limit`
 | Data Type | Default Value |
@@ -144,6 +151,8 @@ default: 2
 Using other providers may negatively impact server performance.
 :::
 
+<ZlibProviderDemo />
+
 ### `compression-level`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -168,6 +177,8 @@ higher = more cpu usage but smaller chunk packets
 | Integer   | 256           |
 
 don't compress batch packets smaller than this (Zlib only)
+
+<CompressionThresholdDemo />
 
 ### `use-snappy-compression`
 | Data Type | Default Value |
@@ -356,12 +367,16 @@ this can improve the performance a lot when lots of chunks are being sent to pla
 
 it's recommended to keep this enabled
 
+<AsyncChunksDemo />
+
 ### `max-pending-chunk-writes`
 | Data Type | Default Value |
 |-----------|---------------|
 | Integer   | 128           |
 
 maximum number of pending chunk writes per world before chunk unloading pauses (backpressure)
+
+<PendingWritesDemo caption="When the queue reaches the limit, chunk unloading pauses until the disk catches up (backpressure). Raise the write pressure above the drain rate (12/s) to see it in action." />
 
 ## entity-settings (Entity Settings) {#entity-settings}
 

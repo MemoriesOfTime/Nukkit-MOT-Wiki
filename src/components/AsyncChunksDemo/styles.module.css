@@ -1,0 +1,208 @@
+.demo {
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    background: var(--ifm-background-surface-color);
+}
+
+.toggleRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: var(--ifm-color-emphasis-400);
+    transition: background 0.3s;
+}
+
+.slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s;
+}
+
+.switch input:checked + .slider {
+    background: var(--ifm-color-success);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.stateOn {
+    font-family: var(--ifm-font-family-monospace);
+    color: var(--ifm-color-success);
+    font-weight: 600;
+}
+
+.stateOff {
+    font-family: var(--ifm-font-family-monospace);
+    color: var(--ifm-color-danger);
+    font-weight: 600;
+}
+
+.stage {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 8px;
+}
+
+/* diagram */
+.box {
+    fill: var(--ifm-color-emphasis-100);
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 1.5;
+}
+
+.boxMain {
+    fill: var(--ifm-color-primary-lightest);
+}
+
+.boxAsync {
+    fill: var(--ifm-color-success-lightest);
+    stroke: var(--ifm-color-success);
+    transition: fill 0.4s, stroke 0.4s;
+}
+
+.label {
+    font-family: var(--ifm-font-family-base);
+    font-size: 13px;
+    fill: var(--ifm-font-color-base);
+}
+
+.flow {
+    fill: none;
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+    transition: opacity 0.4s, stroke 0.4s;
+}
+
+.flowAsync {
+    stroke: var(--ifm-color-success);
+}
+
+.flowDisabled {
+    stroke: var(--ifm-color-emphasis-400);
+}
+
+/* sync fallback paths when disabled: blocking IO on the main thread */
+.flowBlocked {
+    stroke: var(--ifm-color-danger);
+}
+
+/* save-direction packets */
+.packetSave {
+    fill: var(--ifm-color-warning);
+}
+
+/* sub-labels inside thread boxes */
+.mono {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-emphasis-600);
+    transition: fill 0.4s;
+}
+
+/* sync fallback group fade-in */
+.modeGroup {
+    animation: fadeIn 0.45s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.cross {
+    transition: opacity 0.3s;
+}
+
+.cross line {
+    stroke: var(--ifm-color-danger);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.packet {
+    fill: var(--ifm-color-primary);
+    transition: opacity 0.3s;
+}
+
+.gone {
+    opacity: 0;
+}
+
+.node {
+    transition: opacity 0.4s;
+}
+
+.asyncBoxDisabled {
+    opacity: 0.55;
+}
+
+.boxDisabled {
+    fill: var(--ifm-color-emphasis-200);
+    stroke: var(--ifm-color-emphasis-400);
+    transition: fill 0.4s, stroke 0.4s;
+}
+
+.labelDisabled {
+    fill: var(--ifm-color-emphasis-600);
+    transition: fill 0.4s;
+}
+
+.loadTrack {
+    fill: var(--ifm-color-emphasis-300);
+}
+
+.loadFill {
+    transition: width 0.5s, fill 0.5s;
+}
+
+.loadLow {
+    fill: var(--ifm-color-success);
+}
+
+.loadHigh {
+    fill: var(--ifm-color-danger);
+}
+
+.loadLabel {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-emphasis-600);
+}

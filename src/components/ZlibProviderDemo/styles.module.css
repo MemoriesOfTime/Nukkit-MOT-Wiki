@@ -1,0 +1,154 @@
+.demo {
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    background: var(--ifm-background-surface-color);
+}
+
+/* segmented provider selector */
+.selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 8px;
+}
+
+.segBtn {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--ifm-color-emphasis-400);
+    background: transparent;
+    color: var(--ifm-font-color-base);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.segBtn:hover {
+    border-color: var(--ifm-color-primary);
+}
+
+.segBtnActive,
+.segBtnActive:hover {
+    background: var(--ifm-color-primary);
+    border-color: var(--ifm-color-primary);
+    color: #fff;
+}
+
+.caption {
+    font-size: 12.5px;
+    color: var(--ifm-color-emphasis-700);
+    margin: 0 0 4px;
+}
+
+.stage {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 8px;
+}
+
+/* diagram */
+.box {
+    fill: var(--ifm-color-emphasis-100);
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 1.5;
+}
+
+.boxGreen {
+    fill: var(--ifm-color-success-lightest);
+    stroke: var(--ifm-color-success);
+}
+
+.boxOrange {
+    fill: var(--ifm-color-warning-lightest);
+    stroke: var(--ifm-color-warning);
+    stroke-dasharray: 6 4;
+}
+
+.boxRed {
+    fill: var(--ifm-color-danger-lightest);
+    stroke: var(--ifm-color-danger);
+}
+
+.label {
+    font-family: var(--ifm-font-family-base);
+    font-size: 13px;
+    fill: var(--ifm-font-color-base);
+}
+
+.mono {
+    font-family: var(--ifm-font-family-monospace);
+    font-size: 10px;
+    fill: var(--ifm-color-emphasis-600);
+}
+
+.flow {
+    fill: none;
+    stroke: var(--ifm-color-emphasis-400);
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+}
+
+.flowGreen {
+    stroke: var(--ifm-color-success);
+}
+
+.flowOrange {
+    stroke: var(--ifm-color-warning);
+}
+
+.flowRed {
+    stroke: var(--ifm-color-danger);
+}
+
+.packet {
+    fill: var(--ifm-color-primary);
+}
+
+/* per-mode crossfade */
+.modeGroup {
+    animation: fadeIn 0.45s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* allocation churn hint for ZlibOriginal */
+.blink {
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.1;
+    }
+}
+
+/* queued threads for the synchronized provider */
+.queueDot {
+    fill: var(--ifm-color-danger);
+    animation: queuePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes queuePulse {
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+    50% {
+        opacity: 1;
+    }
+}
