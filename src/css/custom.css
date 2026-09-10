@@ -69,3 +69,194 @@
     transition: none;
   }
 }
+
+/* ===== 国庆主题（每年 10 月 1 日，仅中文页面由 NationalDayTheme 组件启用） =====
+   通过 :has(.national-day-banner) 检测横幅是否存在来决定整站配色，
+   不依赖 JS 给 <html> 加类，SSR 首绘即生效。 */
+html:has(.national-day-banner) {
+  --ifm-color-primary: #cf1322;
+  --ifm-color-primary-dark: #b11120;
+  --ifm-color-primary-darker: #a50f1e;
+  --ifm-color-primary-darkest: #870c18;
+  --ifm-color-primary-light: #d92837;
+  --ifm-color-primary-lighter: #dd3a48;
+  --ifm-color-primary-lightest: #e45f6a;
+  /* 页面整体暖红基调 */
+  --ifm-background-color: #fff7f0;
+}
+
+html[data-theme='dark']:has(.national-day-banner) {
+  --ifm-color-primary: #ff4d4f;
+  --ifm-color-primary-dark: #e63638;
+  --ifm-color-primary-darker: #d92b2d;
+  --ifm-color-primary-darkest: #b31d1f;
+  --ifm-color-primary-light: #ff6c6e;
+  --ifm-color-primary-lighter: #ff7d7f;
+  --ifm-color-primary-lightest: #ffa2a3;
+  --ifm-background-color: #1b1210;
+}
+
+html:has(.national-day-banner) .footer--dark {
+  background-color: #4a0d14;
+}
+
+.national-day-banner {
+  position: relative;
+  z-index: calc(var(--ifm-z-index-fixed) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(90deg, #a8071a 0%, #cf1322 50%, #a8071a 100%);
+  color: #ffe58f;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.national-day-banner-star {
+  color: #ffd666;
+}
+
+/* --- 灯笼挂饰：垂在导航栏下方（横幅 + 导航栏高度），轻微摆动 --- */
+.national-day-lantern {
+  position: absolute;
+  top: calc(100% + var(--ifm-navbar-height));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: national-day-lantern-sway 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.national-day-lantern--left {
+  left: 2.5rem;
+}
+
+.national-day-lantern--right {
+  right: 2.5rem;
+  animation-delay: -1.8s;
+}
+
+.national-day-lantern-string {
+  width: 2px;
+  height: 14px;
+  background: #ffd666;
+}
+
+.national-day-lantern-body {
+  position: relative;
+  width: 44px;
+  height: 36px;
+  border-radius: 50% / 46%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9px, rgba(255, 214, 102, 0.35) 9px 10px),
+    radial-gradient(ellipse at 35% 30%, #ff5a4d, #cf1322 65%, #a8071a);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(135, 12, 24, 0.4);
+}
+
+.national-day-lantern-body::before,
+.national-day-lantern-body::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 5px;
+  background: #ffd666;
+  border-radius: 2px;
+}
+
+.national-day-lantern-body::before {
+  top: -3px;
+}
+
+.national-day-lantern-body::after {
+  bottom: -3px;
+}
+
+.national-day-lantern-tassel {
+  width: 2px;
+  height: 14px;
+  margin-top: 3px;
+  background: linear-gradient(#ffd666, #cf1322);
+}
+
+.national-day-lantern-tassel::after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin-left: -2px;
+  margin-top: 12px;
+  border-radius: 50%;
+  background: #cf1322;
+}
+
+@keyframes national-day-lantern-sway {
+  0%,
+  100% {
+    transform: rotate(2.5deg);
+  }
+  50% {
+    transform: rotate(-2.5deg);
+  }
+}
+
+/* --- 金星飘落：全屏固定层，不响应鼠标，不遮挡交互 --- */
+.national-day-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.national-day-stars span {
+  position: absolute;
+  top: -5vh;
+  color: #ffd666;
+  text-shadow: 0 0 6px rgba(255, 214, 102, 0.8);
+  opacity: 0;
+  animation-name: national-day-star-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes national-day-star-fall {
+  0% {
+    transform: translate3d(0, -6vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.55;
+  }
+  92% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(4vw, 110vh, 0) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* 小屏隐藏灯笼，避免遮挡标题 */
+@media (max-width: 996px) {
+  .national-day-lantern {
+    display: none;
+  }
+}
+
+/* 减少动态：关掉全部国庆动画，星星直接隐藏 */
+@media (prefers-reduced-motion: reduce) {
+  .national-day-stars {
+    display: none;
+  }
+
+  .national-day-lantern {
+    animation: none;
+  }
+}
