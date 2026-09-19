@@ -118,6 +118,23 @@ NukkitServer/
 If you're not using any plugins that require custom blocks, you can skip this step.
 :::
 
+## Optional: Run with Docker
+
+As an alternative to the manual setup above, you can run Nukkit-MOT with Docker:
+
+```bash
+docker run -d --name nukkit-mot \
+  -p 19132:19132/udp \
+  -v $(pwd)/data:/data \
+  -e JAVA_OPTS="-Xms2G -Xmx2G" \
+  --restart unless-stopped \
+  memoriesoftime/nukkit-mot:latest
+```
+
+- `:latest` and `:<short-sha>` are development snapshots built from the master branch.
+- `:1.26.30-R1` style tags are stable releases mirroring Maven Central.
+- All worlds, plugins, players and `server.properties` live under the `/data` volume.
+
 ## Next Steps
 
 After server installation is complete, you can proceed to [Configure Server](configuration.md) to customize your server settings.

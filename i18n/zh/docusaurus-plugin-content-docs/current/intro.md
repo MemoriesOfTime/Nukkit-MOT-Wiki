@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-description: Nukkit-MOT 是支持多版本、AI 实体、原版命令及丰富 Nukkit 插件生态的 Minecraft 基岩版服务器软件。
+description: Nukkit-MOT 是基于 Nukkit 的多版本 Minecraft 基岩版服务器软件，支持网易客户端兼容、AI 实体、原版命令及良好的插件生态。
 keywords:
   - Nukkit-MOT
   - Nukkit 服务器
@@ -15,10 +15,9 @@ keywords:
 ![Nukkit-MOT](/images/banner.png)
 
 ## 前言 {#introduction}
-Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedrock Edition 服务器软件的特殊版本。
-它是基于 [NukkitPetteriM1Edition](https://github.com/PetteriM1/NukkitPetteriM1Edition) 的最后一个开源版本开发的。
+Nukkit-MOT 是基于 [Nukkit](https://github.com/CloudburstMC/Nukkit) 的分支项目，具备多版本支持、网易客户端兼容以及良好的插件生态兼容性。
 
-注意：如果你需要更高版本的功能，请使用 [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)。
+只想玩新版本？不妨试试 [Lumi](https://github.com/KoshakMineDEV/Lumi) 或 [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX)。
 
 ### Nukkit-MOT 有什么新功能？ {#whats-new}
 1. 支持 1.2 – 1.26.50 版本（你可以在配置中设置最小协议）
@@ -26,11 +25,25 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
 3. 支持下界和末地
 4. 生成地牢和洞穴
 5. 支持原版命令
+6. 支持网易客户端
 
 ## 如何安装？ {#how-to-install}
 1. 安装 Java 17 或更高版本
 2. 从下面的链接下载 .jar 文件
 3. 运行命令：`java -jar Nukkit-MOT-SNAPSHOT.jar`（将 `Nukkit-MOT-SNAPSHOT.jar` 替换为你下载的文件名）
+
+### 使用 Docker 运行 {#run-with-docker}
+```bash
+docker run -d --name nukkit-mot \
+  -p 19132:19132/udp \
+  -v $(pwd)/data:/data \
+  -e JAVA_OPTS="-Xms2G -Xmx2G" \
+  --restart unless-stopped \
+  memoriesoftime/nukkit-mot:latest
+```
+- `:latest` 和 `:<短SHA>` 是基于 master 分支构建的开发快照。
+- `:1.26.30-R1` 这种 tag 是与 Maven Central 对应的稳定发布版。
+- 所有 worlds、plugins、players、`server.properties` 都存放在 `/data` 卷下。
 
 ## 链接 {#links}
 - __🌐 下载地址: [Jenkins](https://motci.cn/job/Nukkit-MOT/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
@@ -64,7 +77,7 @@ Nukkit-MOT 是 [Nukkit](https://github.com/CloudburstMC/Nukkit) Minecraft Bedroc
     <dependency>
         <groupId>com.nukkit-mot</groupId>
         <artifactId>nukkit-mot</artifactId>
-        <version>1.26.30-R1</version>
+        <version>1.26.40-R1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -93,7 +106,7 @@ repositories {
 ```kts
 // 正式版
 dependencies {
-    compileOnly("com.nukkit-mot:nukkit-mot:1.26.30-R1")
+    compileOnly("com.nukkit-mot:nukkit-mot:1.26.40-R1")
 }
 
 // 开发版（SNAPSHOT）

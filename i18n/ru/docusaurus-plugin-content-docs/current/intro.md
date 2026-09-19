@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-description: Nukkit-MOT — многоверсионный сервер Minecraft Bedrock Edition с ИИ-сущностями, ванильными командами и широкой совместимостью с плагинами Nukkit.
+description: Nukkit-MOT — многоверсионный сервер Minecraft Bedrock Edition с поддержкой клиентов NetEase, ИИ-сущностями, ванильными командами и развитой экосистемой плагинов.
 keywords:
   - Nukkit-MOT
   - Сервер Nukkit
@@ -15,10 +15,9 @@ keywords:
 ![Nukkit-MOT](/images/banner.png)
 
 ## Введение {#introduction}
-Nukkit-MOT — это особая версия серверного программного обеспечения [Nukkit](https://github.com/CloudburstMC/Nukkit) для Minecraft Bedrock Edition.  
-Она разработана на основе последней открытой версии [NukkitPetteriM1Edition](https://github.com/PetteriM1/NukkitPetteriM1Edition)
+Nukkit-MOT — это форк [Nukkit](https://github.com/CloudburstMC/Nukkit), обеспечивающий поддержку множества версий игры, совместимость с клиентами NetEase и хорошо развитую экосистему плагинов.
 
-примечание: если вам нужны возможности более поздних версий, используйте [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX).
+Интересуют только новые версии? Возможно, вам подойдут [Lumi](https://github.com/KoshakMineDEV/Lumi) или [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX).
 
 ### Что нового в Nukkit-MOT? {#whats-new}
 1. Поддержка версий с 1.2 по 1.26.50 (минимальный протокол можно задать в конфигурации)
@@ -26,11 +25,25 @@ Nukkit-MOT — это особая версия серверного прогр�
 3. Поддержка Нижнего мира (Nether) и Энда (The End)
 4. Генерация подземелий и пещер
 5. Поддержка ванильных команд
+6. Поддержка клиентов NetEase
 
 ## Как установить? {#how-to-install}
 1. Установите Java 17 или новее
 2. Скачайте .jar-файл по ссылкам ниже
 3. Введите команду для запуска: `java -jar Nukkit-MOT-SNAPSHOT.jar` (замените `Nukkit-MOT-SNAPSHOT.jar` на имя скачанного вами файла)
+
+### Запуск через Docker {#run-with-docker}
+```bash
+docker run -d --name nukkit-mot \
+  -p 19132:19132/udp \
+  -v $(pwd)/data:/data \
+  -e JAVA_OPTS="-Xms2G -Xmx2G" \
+  --restart unless-stopped \
+  memoriesoftime/nukkit-mot:latest
+```
+- Теги `:latest` и `:<короткий-SHA>` — снимки разработки (snapshot), собранные из ветки master.
+- Теги вида `:1.26.30-R1` — стабильные релизы, соответствующие Maven Central.
+- Все миры, плагины, данные игроков и `server.properties` хранятся в томе `/data`.
 
 ## Ссылки {#links}
 - __🌐 Скачать: [Jenkins](https://motci.cn/job/Nukkit-MOT/) / [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster)__
@@ -64,7 +77,7 @@ Nukkit-MOT — это особая версия серверного прогр�
     <dependency>
         <groupId>com.nukkit-mot</groupId>
         <artifactId>nukkit-mot</artifactId>
-        <version>1.26.30-R1</version>
+        <version>1.26.40-R1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -94,7 +107,7 @@ repositories {
 ```kts
 // Release
 dependencies {
-    compileOnly("com.nukkit-mot:nukkit-mot:1.26.30-R1")
+    compileOnly("com.nukkit-mot:nukkit-mot:1.26.40-R1")
 }
 
 // SNAPSHOT

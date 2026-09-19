@@ -118,6 +118,23 @@ NukkitServer/
 如果你不使用任何需要自定义方块的插件，可以跳过此步骤。
 :::
 
+## 可选：使用 Docker 运行
+
+作为上述手动搭建的替代方案，你也可以使用 Docker 运行 Nukkit-MOT：
+
+```bash
+docker run -d --name nukkit-mot \
+  -p 19132:19132/udp \
+  -v $(pwd)/data:/data \
+  -e JAVA_OPTS="-Xms2G -Xmx2G" \
+  --restart unless-stopped \
+  memoriesoftime/nukkit-mot:latest
+```
+
+- `:latest` 和 `:<短SHA>` 是基于 master 分支构建的开发快照。
+- `:1.26.30-R1` 这种 tag 是与 Maven Central 对应的稳定发布版。
+- 所有 worlds、plugins、players、`server.properties` 都存放在 `/data` 卷下。
+
 ## 下一步
 
 服务器安装完成后，你可以继续 [配置服务器](configuration.md) 来自定义你的服务器设置。

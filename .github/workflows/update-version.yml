@@ -1,4 +1,4 @@
-name: Update Supported Version
+name: Update Version Info
 
 on:
   schedule:
@@ -9,71 +9,170 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: update-version-info
+  cancel-in-progress: false
+
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Wiki
         uses: actions/checkout@v4
 
-      - name: Fetch version from Nukkit-MOT README
+      # 数据源说明：上游 README 的支持版本范围随 Multiversion PR 更新，
+      # Maven 发布版本由上游 maven-central.yml 的 bump-readme job 在发布后自动更新，
+      # 因此直接解析上游 README 即可同时获得两个值
+      - name: Fetch version info from Nukkit-MOT README
         id: fetch
         run: |
-          # 从 Nukkit-MOT 仓库的 README 中提取支持版本范围
+          set -euo pipefail
+
           README=$(curl -sf https://raw.githubusercontent.com/MemoriesOfTime/Nukkit-MOT/master/README.md)
-          if [ $? -ne 0 ]; then
-            echo "::error::Failed to fetch Nukkit-MOT README"
+
+          # 提取支持版本范围，匹配 "Support for X.X – X.X.X version" 格式（容忍 – 或 -）
+          NEW_RANGE=$(echo "$README" | grep -oP 'Support for \K[0-9.]+ [–-] [0-9.]+' | head -1)
+          if ! echo "$NEW_RANGE" | grep -qP '^[0-9.]+ [–-] [0-9.]+$'; then
+            echo "::error::Failed to parse supported version range from README"
             exit 1
           fi
 
-          # 提取版本范围，匹配 "Support for X.X – X.X.X version" 格式
-          NEW_VERSION=$(echo "$README" | grep -oP 'Support for \K[\d.]+ [–-] [\d.]+' | head -1)
-          if [ -z "$NEW_VERSION" ]; then
-            echo "::error::Failed to parse version from README"
+          # 提取 Maven Central 发布版本（com.nukkit-mot:nukkit-mot:1.26.40-R1）
+          NEW_MAVEN=$(echo "$README" | grep -oP 'com\.nukkit-mot:nukkit-mot:\K[0-9.]+-R[0-9.]+' | head -1)
+          if ! echo "$NEW_MAVEN" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+-R[0-9]+(\.[0-9]+)?$'; then
+            echo "::error::Failed to parse Maven release version from README"
             exit 1
           fi
 
-          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Detected version: $NEW_VERSION"
+          NEW_MIN=${NEW_RANGE%% *}
+          NEW_MAX=${NEW_RANGE##* }
 
-      - name: Check current version in Wiki
+          {
+            echo "range=$NEW_RANGE"
+            echo "min=$NEW_MIN"
+            echo "max=$NEW_MAX"
+            echo "maven=$NEW_MAVEN"
+          } >> "$GITHUB_OUTPUT"
+          echo "Detected supported range: $NEW_RANGE, maven release: $NEW_MAVEN"
+
+      - name: Check current versions in Wiki
         id: check
-        run: |
-          # 从英文文档中读取当前版本
-          CURRENT_VERSION=$(grep -oP 'Support for \K[\d.]+ [–-] [\d.]+' docs/intro.md | head -1)
-          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Current version: $CURRENT_VERSION"
-
-          if [ "$CURRENT_VERSION" = "${{ steps.fetch.outputs.new_version }}" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Version unchanged, skipping update"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Version changed: $CURRENT_VERSION -> ${{ steps.fetch.outputs.new_version }}"
-          fi
-
-      - name: Update version in docs
-        if: steps.check.outputs.changed == 'true'
         env:
-          NEW_VERSION: ${{ steps.fetch.outputs.new_version }}
-          OLD_VERSION: ${{ steps.check.outputs.current_version }}
+          NEW_RANGE: ${{ steps.fetch.outputs.range }}
+          NEW_MAVEN: ${{ steps.fetch.outputs.maven }}
         run: |
-          # 更新英文文档
-          sed -i "s|$OLD_VERSION|$NEW_VERSION|g" docs/intro.md
+          set -euo pipefail
 
-          # 更新中文文档
-          ZH_INTRO="i18n/zh/docusaurus-plugin-content-docs/current/intro.md"
-          if [ -f "$ZH_INTRO" ]; then
-            sed -i "s|$OLD_VERSION|$NEW_VERSION|g" "$ZH_INTRO"
+          # 以英文文档为基准判断是否有变化
+          CURRENT_RANGE=$(grep -oP 'Support for \K[0-9.]+ [–-] [0-9.]+' docs/intro.md | head -1)
+          CURRENT_MAVEN=$(grep -oP 'com\.nukkit-mot:nukkit-mot:\K[0-9.]+-R[0-9.]+' docs/intro.md | head -1)
+
+          if [ "$CURRENT_RANGE" = "$NEW_RANGE" ]; then
+            echo "range_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "range_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Range changed: $CURRENT_RANGE -> $NEW_RANGE"
           fi
 
-          echo "Updated version: $OLD_VERSION -> $NEW_VERSION"
+          if [ "$CURRENT_MAVEN" = "$NEW_MAVEN" ]; then
+            echo "maven_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "maven_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Maven changed: $CURRENT_MAVEN -> $NEW_MAVEN"
+          fi
+
+      - name: Update versions in docs
+        if: steps.check.outputs.range_changed == 'true' || steps.check.outputs.maven_changed == 'true'
+        env:
+          NEW_RANGE: ${{ steps.fetch.outputs.range }}
+          NEW_MIN: ${{ steps.fetch.outputs.min }}
+          NEW_MAX: ${{ steps.fetch.outputs.max }}
+          NEW_MAVEN: ${{ steps.fetch.outputs.maven }}
+        run: |
+          set -euo pipefail
+
+          ZH_INTRO="i18n/zh/docusaurus-plugin-content-docs/current/intro.md"
+          RU_INTRO="i18n/ru/docusaurus-plugin-content-docs/current/intro.md"
+          EN_PLUGIN="docs/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+          ZH_PLUGIN="i18n/zh/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+          RU_PLUGIN="i18n/ru/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+
+          # 支持版本范围：各语言句式不同，按各自固定句式做锚定替换
+          sed -i -E "s|Support for [0-9.]+ [–-] [0-9.]+ version|Support for $NEW_RANGE version|" docs/intro.md
+          sed -i -E "s|支持 [0-9.]+ [–-] [0-9.]+ 版本|支持 $NEW_RANGE 版本|" "$ZH_INTRO"
+          sed -i -E "s|Поддержка версий с [0-9.]+ по [0-9.]+|Поддержка версий с $NEW_MIN по $NEW_MAX|" "$RU_INTRO"
+
+          # Maven 发布版本：只锚定 pom <version> 标签和 com.nukkit-mot:nukkit-mot: 坐标，
+          # 不碰 MOT-SNAPSHOT、插件自身版本号，以及 Docker tag 示例（:1.26.30-R1 style）
+          MAVEN_FILES=(docs/intro.md "$ZH_INTRO" "$RU_INTRO" "$EN_PLUGIN" "$ZH_PLUGIN" "$RU_PLUGIN")
+          sed -i -E "s|<version>[0-9.]+-R[0-9.]+</version>|<version>$NEW_MAVEN</version>|g" "${MAVEN_FILES[@]}"
+          sed -i -E "s|com\.nukkit-mot:nukkit-mot:[0-9.]+-R[0-9.]+|com.nukkit-mot:nukkit-mot:$NEW_MAVEN|g" "${MAVEN_FILES[@]}"
+
+      # 防止文档句式调整后 sed 静默失配：替换后必须能在目标文件中找到新值
+      - name: Verify updates applied
+        if: steps.check.outputs.range_changed == 'true' || steps.check.outputs.maven_changed == 'true'
+        env:
+          NEW_RANGE: ${{ steps.fetch.outputs.range }}
+          NEW_MAX: ${{ steps.fetch.outputs.max }}
+          NEW_MAVEN: ${{ steps.fetch.outputs.maven }}
+        run: |
+          set -euo pipefail
+
+          ZH_INTRO="i18n/zh/docusaurus-plugin-content-docs/current/intro.md"
+          RU_INTRO="i18n/ru/docusaurus-plugin-content-docs/current/intro.md"
+          EN_PLUGIN="docs/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+          ZH_PLUGIN="i18n/zh/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+          RU_PLUGIN="i18n/ru/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx"
+
+          for f in docs/intro.md "$ZH_INTRO"; do
+            grep -qF "$NEW_RANGE" "$f" || { echo "::error::$f does not contain range '$NEW_RANGE' after update"; exit 1; }
+          done
+          grep -qF "$NEW_MAX" "$RU_INTRO" || { echo "::error::$RU_INTRO does not contain '$NEW_MAX' after update"; exit 1; }
+
+          for f in docs/intro.md "$ZH_INTRO" "$RU_INTRO" "$EN_PLUGIN" "$ZH_PLUGIN" "$RU_PLUGIN"; do
+            grep -qF "nukkit-mot:$NEW_MAVEN" "$f" || { echo "::error::$f does not contain maven '$NEW_MAVEN' after update"; exit 1; }
+          done
+
+          echo "All version references verified."
 
       - name: Commit and push
-        if: steps.check.outputs.changed == 'true'
+        if: steps.check.outputs.range_changed == 'true' || steps.check.outputs.maven_changed == 'true'
+        env:
+          RANGE_CHANGED: ${{ steps.check.outputs.range_changed }}
+          MAVEN_CHANGED: ${{ steps.check.outputs.maven_changed }}
+          NEW_RANGE: ${{ steps.fetch.outputs.range }}
+          NEW_MAVEN: ${{ steps.fetch.outputs.maven }}
         run: |
+          set -euo pipefail
+
+          PARTS=()
+          if [ "$RANGE_CHANGED" = true ]; then
+            PARTS+=("supported version to $NEW_RANGE")
+          fi
+          if [ "$MAVEN_CHANGED" = true ]; then
+            PARTS+=("maven release to $NEW_MAVEN")
+          fi
+
+          if [ ${#PARTS[@]} -eq 2 ]; then
+            MSG="chore: update ${PARTS[0]} and ${PARTS[1]}"
+          else
+            MSG="chore: update ${PARTS[0]}"
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/intro.md i18n/zh/docusaurus-plugin-content-docs/current/intro.md
-          git commit -m "chore: update supported version to ${{ steps.fetch.outputs.new_version }}"
+          git add docs/intro.md \
+            i18n/zh/docusaurus-plugin-content-docs/current/intro.md \
+            i18n/ru/docusaurus-plugin-content-docs/current/intro.md \
+            docs/developer-guide/tutorial-basics/frist_java_plugin.mdx \
+            i18n/zh/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx \
+            i18n/ru/docusaurus-plugin-content-docs/current/developer-guide/tutorial-basics/frist_java_plugin.mdx
+
+          if git diff --cached --quiet; then
+            echo "No actual file changes, skipping commit."
+            exit 0
+          fi
+
+          git commit -m "$MSG"
           git push
