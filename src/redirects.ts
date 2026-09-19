@@ -19,7 +19,8 @@
  * @see https://github.com/facebook/docusaurus/discussions/5839
  */
 export const languageRedirects = {
-    'zh': '/zh/'
+    'zh': '/zh/',
+    'ru': '/ru/'
   };
   
   /**

@@ -1,0 +1,249 @@
+---
+sidebar_position: 11
+---
+
+# Руководство по DDUI
+
+DDUI (сокращение от Data-Driven UI) — реактивная система интерфейсов Nukkit-MOT, построенная на пакетах хранилища данных (data store) Bedrock. В отличие от классических форм `FormWindow*`, экраны DDUI могут поддерживать состояние сервера и интерфейс клиента синхронизированными, пока экран остаётся открытым.
+
+Текущая реализация предоставляет два встроенных типа экранов:
+
+- [CustomForm](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/CustomForm.java): компонуемый макет формы с реактивными компонентами.
+- [MessageBox](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/MessageBox.java): лёгкий диалог подтверждения с двумя кнопками.
+
+## Когда использовать DDUI
+
+Используйте DDUI, если вам требуется одна или несколько из следующих возможностей:
+
+- Обновление данных в реальном времени, пока экран открыт
+- Состояние, привязанное к значениям на стороне сервера
+- Более нативный поток экранов Bedrock, чем у JSON-форм
+
+Используйте классические формы, если вам достаточно однократной отправки данных и широкой совместимости с существующим кодом `FormWindow*`.
+
+## Примечания о версиях
+
+С учётом текущих обработчиков пакетов в Nukkit-MOT:
+
+- Обновления хранилища данных от клиента обрабатываются начиная с протокола `v1_21_130_28` и выше.
+- Пакеты очистки при закрытии экрана обрабатываются начиная с протокола `v1_26_10` и выше.
+
+Это означает, что DDUI предназначен для поддержки современных протоколов Bedrock. Если вы ориентируетесь на более старые диапазоны протоколов, проверьте точное поведение, прежде чем полагаться на реактивные обратные вызовы.
+
+## Основные концепции
+
+### `DataDrivenScreen`
+
+[DataDrivenScreen](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/DataDrivenScreen.java) — базовый класс экранов DDUI.
+
+- `show(player)` отправляет начальное хранилище данных и открывает экран.
+- `close(player)` закрывает активный экран DDUI для данного игрока.
+- Сервер отслеживает один активный экран DDUI на каждого игрока.
+
+### `Observable<T>`
+
+[Observable](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/ddui/Observable.java) — слой привязки между состоянием вашего плагина и интерфейсом.
+
+- Когда клиент изменяет привязанное поле, обновляется серверный `Observable`.
+- Когда ваш плагин вызывает `setValue(...)`, Nukkit-MOT отправляет новое значение каждому игроку, у которого открыт этот экран.
+
+На практике редактируемые элементы управления DDUI привязываются к следующим типам:
+
+- `Observable<String>`
+- `Observable<Boolean>`
+- `Observable<Long>`
+
+#### `ObservableOptions` and `clientWritable`
+
+По умолчанию `Observable` **доступен клиенту только для чтения** — сервер может отправлять обновления клиенту, но изменения клиента обратно не передаются. Чтобы разрешить клиенту записывать значения в конкретный `Observable`, создайте его с включённым `clientWritable`:
+
+```java
+Observable<String> name = new Observable<>("default", new ObservableOptions(true));
+```
+
+Когда `clientWritable` равно `true`, входящие пакеты хранилища данных от клиента будут обновлять значение `Observable` и запускать его слушателей. Встроенные редактируемые компоненты (`textField`, `toggle`, `slider`, `dropdown`) автоматически передают `clientWritable` из своих параметров в привязанный `Observable`.
+
+## CustomForm
+
+`CustomForm` — основная точка входа DDUI для построения интерактивных макетов.
+
+### Перегрузки построителя
+
+Помимо базовых примеров на основе строк, `CustomForm` также поддерживает реактивные перегрузки в нескольких местах:
+
+- `new CustomForm(Observable<String> title)` and `title(Observable<String>)`
+- `button(Observable<String> label, Consumer<Player> listener, ButtonOptions options)`
+- `label(Observable<String>)`
+- `header(Observable<String>)`
+
+Это полезно, когда заголовок экрана или текст кнопки должны меняться, пока интерфейс уже открыт.
+
+### Пример
+
+```java title="form/DemoDDUICustomForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.CustomForm;
+import cn.nukkit.ddui.Observable;
+import cn.nukkit.ddui.element.DropdownElement;
+import cn.nukkit.ddui.element.options.ButtonOptions;
+import cn.nukkit.ddui.element.options.DropdownOptions;
+import cn.nukkit.ddui.element.options.SliderElementOptions;
+import cn.nukkit.ddui.element.options.TextFieldOptions;
+import cn.nukkit.ddui.element.options.ToggleOptions;
+
+import java.util.List;
+
+public final class DemoDDUICustomForm {
+    public static void open(Player player) {
+        Observable<String> serverName = new Observable<>("Nukkit-MOT");
+        Observable<Boolean> whitelistEnabled = new Observable<>(false);
+        Observable<Long> maxPlayers = new Observable<>(20L);
+        Observable<Long> gamemode = new Observable<>(0L);
+        Observable<Boolean> showAdvanced = new Observable<>(false);
+
+        CustomForm form = new CustomForm("Server Settings")
+                .header("General")
+                .label("Changes made in the screen are synchronized back to the server.")
+                .textField("Server Name", serverName, TextFieldOptions.builder()
+                        .description("Displayed in the server list")
+                        .build())
+                .toggle("Enable Whitelist", whitelistEnabled, ToggleOptions.builder()
+                        .description("Only invited players can join")
+                        .build())
+                .slider("Max Players", 1, 100, maxPlayers, SliderElementOptions.builder()
+                        .description("Visible player capacity")
+                        .step(1)
+                        .build())
+                .dropdown("Default Gamemode", List.of(
+                                DropdownElement.Item.builder().label("Survival").description("Standard gameplay").build(),
+                                DropdownElement.Item.builder().label("Creative").description("Unlimited blocks").build(),
+                                DropdownElement.Item.builder().label("Adventure").description("Map-based gameplay").build()
+                        ), gamemode, DropdownOptions.builder()
+                        .description("Used for newly joined players")
+                        .build())
+                .spacer()
+                .toggle("Show Advanced Settings", showAdvanced)
+                .textField("MOTD", new Observable<>("Welcome to Nukkit-MOT"), TextFieldOptions.builder()
+                        .description("Shown to players in the server list")
+                        .visible(showAdvanced)
+                        .build())
+                .button("Apply", p -> {
+                    p.sendMessage("Saved settings:");
+                    p.sendMessage("Name: " + serverName.getValue());
+                    p.sendMessage("Whitelist: " + whitelistEnabled.getValue());
+                    p.sendMessage("Max Players: " + maxPlayers.getValue());
+                    p.sendMessage("Gamemode Index: " + gamemode.getValue());
+                }, ButtonOptions.builder()
+                        .tooltip("Persist the current values")
+                        .build())
+                .closeButton();
+
+        form.show(player);
+    }
+}
+```
+
+### Доступные компоненты
+
+| Компонент | Назначение | Тип привязываемого значения |
+| --- | --- | --- |
+| `header(...)` | Заголовок раздела | `Observable<String>` или обычный текст |
+| `label(...)` | Статический или реактивный текст | `Observable<String>` или обычный текст |
+| `textField(...)` | Поле ввода текста | `Observable<String>` |
+| `toggle(...)` | Логический переключатель | `Observable<Boolean>` |
+| `slider(...)` | Ввод числового диапазона | `Observable<Long>` |
+| `dropdown(...)` | Выбор варианта | `Observable<Long>` |
+| `button(...)` | Действие по нажатию | только обратный вызов |
+| `closeButton(...)` | Встроенное действие закрытия | только обратный вызов |
+| `spacer(...)` | Визуальный отступ | только состояние видимости |
+| `divider(...)` | Горизонтальная разделительная линия | только состояние видимости |
+
+Для `dropdown(...)` каждый `DropdownElement.Item` поддерживает:
+
+- `label`: текст, отображаемый игроку
+- `description`: необязательный дополнительный текст для варианта
+- `value`: необязательный `Long` для сопоставления пользовательского значения с этим элементом (если задан, привязанный к выпадающему списку `Observable<Long>` отражает это значение, а не исходный индекс)
+
+### Параметры компонентов
+
+Большинство элементов управления принимают построитель параметров из `cn.nukkit.ddui.element.options`.
+
+- Общими флагами состояния обычно являются `visible` и `disabled`.
+- `textField`, `toggle`, `slider` и `dropdown` поддерживают `description`.
+- `slider` также поддерживает `step`.
+- `button` поддерживает `tooltip`.
+- `closeButton` поддерживает пользовательский `label`.
+- `divider` и `spacer` поддерживают `visible`.
+
+Каждому параметру обычно можно передать либо обычное значение, либо `Observable`, что делает сам интерфейс реактивным.
+
+## MessageBox
+
+`MessageBox` подходит для простых подтверждений и предупреждающих сообщений.
+
+Он также поддерживает реактивные источники текста с помощью:
+
+- `new MessageBox(Observable<String> title)` and `title(Observable<String>)`
+- `body(Observable<String>)`
+
+Как `button1`, так и `button2` принимают необязательную строку подсказки вторым аргументом:
+
+- `button1(String label, String tooltip, Consumer<Player> listener)`
+- `button2(String label, String tooltip, Consumer<Player> listener)`
+
+```java title="form/DemoDDUIMessageBox.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.ddui.MessageBox;
+
+public final class DemoDDUIMessageBox {
+    public static void open(Player player) {
+        MessageBox box = new MessageBox("Delete World")
+                .body("This action cannot be undone.")
+                .button1("Confirm", "Delete the selected world", p -> {
+                    p.sendMessage("World deleted.");
+                })
+                .button2("Cancel", p -> {
+                    p.sendMessage("Operation cancelled.");
+                });
+
+        box.show(player);
+    }
+}
+```
+
+## Поток реактивных обновлений
+
+Поток событий DDUI отличается от классических форм:
+
+1. Создайте экран с привязанными значениями `Observable`.
+2. Вызовите `show(player)`.
+3. Клиент изменяет элемент управления.
+4. Nukkit-MOT сопоставляет входящий путь с соответствующим свойством.
+5. Ваши слушатели и привязанный `Observable` получают обновлённое значение.
+6. Если ваш плагин изменяет `Observable`, все игроки с открытым экраном получают обновление интерфейса в реальном времени.
+
+Благодаря этому DDUI хорошо подходит для панелей настроек, административных консолей и многошаговых экранов, где значения должны оставаться синхронизированными.
+
+## Модель взаимодействия
+
+DDUI не следует паттерну «заполнить всю форму, а затем однократно отправить», характерному для `FormWindowCustom`.
+
+- Редактируемые элементы управления, такие как `textField`, `toggle`, `slider` и `dropdown`, синхронизируют значения немедленно.
+- Кнопки представляют собой независимые действия по нажатию.
+- В `CustomForm` нет обратного вызова отправки для всей формы.
+
+Другими словами, DDUI ведёт себя скорее как реактивная панель настроек, чем как традиционная форма для отправки.
+
+## Примечания и ограничения
+
+- В настоящее время DDUI предоставляет `CustomForm` и `MessageBox` как основные публичные типы экранов.
+- `DropdownElement` возвращает выбранный индекс (или пользовательский `value`, если он задан), а не текст варианта.
+- `SliderElement` использует значения `long` и ограничивает ввод настроенным диапазоном min/max. Значения min, max и step также можно задать как `Observable<Long>` для реактивных обновлений.
+- `closeButton()` добавляет встроенный элемент закрытия и вызывает `close(player)` при нажатии.
+- Показ другого экрана DDUI тому же игроку заменяет ссылку на активный экран на стороне сервера.
+- По умолчанию значения `Observable` **не** доступны клиенту для записи. Используйте `ObservableOptions(true)`, чтобы изменения клиента передавались обратно.
+- Если вам нужны простые меню с приоритетом совместимости, `FormWindow*` может по-прежнему быть лучшим выбором.

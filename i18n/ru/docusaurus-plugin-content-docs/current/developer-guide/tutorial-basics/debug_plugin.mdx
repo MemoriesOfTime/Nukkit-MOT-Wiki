@@ -1,0 +1,174 @@
+---
+sidebar_position: 3
+---
+
+import Image from '@theme/IdealImage';
+
+# Запуск и отладка плагина
+
+Прежде чем ставить точки останова, убедитесь, что плагин вообще может загрузиться на локальном сервере.
+
+:::tip Где вы находитесь
+Шаг 3 из 4: поместите jar на сервер, убедитесь, что он загружается, и затем подключите отладчик.
+
+Предыдущий шаг: [Основы плагинов](./plugin-basics)
+
+Следующий шаг: [Публикация первого плагина](./publish_first_plugin)
+:::
+
+## 1. Подготовка локальной папки сервера
+
+Создайте чистую папку для тестового сервера и поместите в неё jar сервера Nukkit-MOT.
+
+Запустите сервер один раз:
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+После первого запуска сервер обычно создаёт папки вроде `plugins/`, `worlds/` и файлы конфигурации. После этого остановите сервер.
+
+## 2. Помещение плагина в `plugins/`
+
+Скопируйте jar, собранный на предыдущей странице, в папку `plugins/` сервера:
+
+```text
+target/hello-world-plugin-1.0.0.jar -> <your-server>/plugins/
+```
+
+Если вы переименовали артефакт сборки, скопируйте именно этот файл.
+
+## 3. Запуск сервера и проверка загрузки плагина
+
+Снова запустите сервер:
+
+```bash
+java -jar Nukkit-MOT-SNAPSHOT.jar
+```
+
+Следует искать два вида подтверждения:
+
+- Строка лога сервера, в которой упоминается `HelloWorldPlugin v1.0.0`
+- Строка лога из вашего метода `onEnable()`, например `Hello from my first Nukkit-MOT plugin!`
+
+Когда сервер запущен, используйте одну из этих команд:
+
+```text
+plugins
+```
+
+или:
+
+```text
+pl
+```
+
+Если плагин загружается корректно, он должен появиться в списке плагинов. Во многих консолях имя успешно загрузившегося плагина отображается зелёным.
+
+## 4. Что проверить в первую очередь, если загрузка не удалась
+
+Большинство неудач с первым плагином вызвано одной из этих проблем:
+
+- В корне jar отсутствует `plugin.yml`
+- Поле `main` не совпадает с реальным именем пакета и класса
+- jar скопирован в корень сервера вместо `plugins/`
+- Отсутствует обязательная зависимость из `depend`
+- Вы изменили код, но забыли пересобрать jar
+
+Если имя плагина отображается красным или сервер выводит трассировку стека, начните с проверки этих пунктов, прежде чем отлаживать Java-код.
+
+## 5. Необязательно: копирование jar в `plugins/` после каждой сборки
+
+Когда плагин уже может загрузиться вручную, можно ускорить рабочий процесс, записывая собранный jar прямо в папку `plugins/` сервера.
+
+Добавьте свойство в `pom.xml`:
+
+```xml title="pom.xml"
+<properties>
+  <maven.compiler.release>17</maven.compiler.release>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <nukkitPluginsPath>D:\BedrockServer\MOT\plugins</nukkitPluginsPath>
+</properties>
+```
+
+Затем добавьте секцию сборки:
+
+```xml title="pom.xml"
+<build>
+  <defaultGoal>clean package</defaultGoal>
+
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.2</version>
+      <configuration>
+        <outputDirectory>${nukkitPluginsPath}</outputDirectory>
+      </configuration>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-clean-plugin</artifactId>
+      <version>3.5.0</version>
+      <configuration>
+        <filesets>
+          <fileset>
+            <directory>${nukkitPluginsPath}</directory>
+            <includes>
+              <include>${artifactId}*.jar</include>
+            </includes>
+          </fileset>
+        </filesets>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>pre-clean</phase>
+          <goals>
+            <goal>clean</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
+
+Теперь `mvn clean package` записывает самый свежий jar прямо в папку плагинов вашего сервера.
+
+## 6. Подключение отладчика IntelliJ IDEA
+
+После того как плагин загружается нормально, настройте IntelliJ IDEA для отладки процесса сервера.
+
+1. Откройте ваш проект в IntelliJ IDEA.
+
+<Image img={require('./images/debug_config_edit_menu.png')} alt="Меню редактирования конфигураций отладки" />
+
+2. Откройте окно `Run/Debug Configurations` на верхней панели.
+3. Выберите шаблон `JAR Application`.
+
+<Image img={require('./images/add_jarapp_debug_config.png')} alt="Добавление конфигурации отладки JAR Application" />
+
+4. Используйте примерно такие настройки:
+
+| Поле | Описание |
+| --- | --- |
+| Name | `Nukkit-MOT` |
+| JAR Path | Полный путь к `Nukkit-MOT-SNAPSHOT.jar` |
+| Working Directory | Ваша локальная папка сервера Nukkit-MOT |
+| JRE | Среда выполнения Java 17 |
+
+Наконец, нажмите `OK`.
+
+<Image img={require('./images/edit_debug_config_window.png')} alt="Окно редактирования конфигурации отладки" />
+
+Поставьте точку останова в `onEnable()` и запустите отладку с помощью `Shift + F9`.
+
+:::tip Держите jar актуальным
+Точки останова соответствуют только тому коду, который вы собрали. Если сервер всё ещё выполняет старый jar, результаты срабатывания точек останова будут запутанными.
+:::
+
+## Прежде чем продолжить
+
+- Ручная загрузка — ваш первый шаг проверки
+- Отладка с точками останова — второй шаг, а не первый
+- Когда плагин загружается и вы можете воспроизводить изменения локально, переходите к разделу [Публикация первого плагина](./publish_first_plugin)

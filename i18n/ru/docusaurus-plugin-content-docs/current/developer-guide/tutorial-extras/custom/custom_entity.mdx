@@ -1,0 +1,269 @@
+---
+sidebar_position: 2
+---
+
+import FolderView from '@site/src/components/FolderView';
+import Image from '@theme/IdealImage';
+
+# Кастомная сущность
+
+Чтобы создать кастомную сущность, необходимо предусмотреть два основных компонента:
+
+1. Успешно зарегистрировать сущность внутри плагина в Nukkit-MOT.
+2. Определить текстуры сущности в ресурс-паке, отправляемом клиенту.
+
+Далее возьмём **marker** в качестве примера, чтобы продемонстрировать шаги по созданию кастомной сущности.
+
+## Программирование
+
+### Создание класса для новой сущности \{#create-new-item-class}
+
+```java title="entity/MarkerEntity.java"
+package cn.nukkitmot.exampleplugin.custom.entity;
+
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.custom.CustomEntity;
+import cn.nukkit.entity.custom.EntityDefinition;
+import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public class MarkerEntity extends Entity implements CustomEntity {
+    public static final EntityDefinition DEF =
+            EntityDefinition
+                    .builder()
+                    .identifier("example:marker")
+                    //.summonable(true)
+                    .spawnEgg(true)
+                    .implementation(MarkerEntity.class)
+                    .build();
+    private static final String MARKER_INDEX_KEY = "MarkerIndex";
+
+    public MarkerEntity(FullChunk chunk, CompoundTag nbt) {
+        super(chunk, nbt);
+    }
+
+    @Override
+    public int getNetworkId() {
+        return this.getEntityDefinition().getRuntimeId();
+    }
+
+    @Override
+    public EntityDefinition getEntityDefinition() {
+        return DEF;
+    }
+
+    @Override
+    public float getHeight() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getWidth() {
+        return 0.5F;
+    }
+
+    @Override
+    public float getLength() {
+        return 0.5F;
+    }
+
+    //@Override
+    public String getOriginalName() {
+        return "Marker";
+    }
+
+    public int getMarkerIndex() {
+        return namedTag.getInt(MARKER_INDEX_KEY);
+    }
+
+    public void setMarkerIndex(int index) {
+        namedTag.putInt(MARKER_INDEX_KEY, index);
+        setNameTag("§a" + index);
+    }
+}
+```
+
+### Регистрация сущности в плагине \{#register-entity-in-plugin}
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.entity.custom.EntityManager;
+import cn.powernukkitx.replaynk.entity.MarkerEntity;
+
+public class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        //register the custom entity of server
+        registerEntities();
+    }
+
+    private void registerEntities() {
+        // highlight-start
+        EntityManager.get().registerDefinition(MarkerEntity.DEF);
+        // highlight-end
+    }
+}
+```
+
+## Ресурс-пак \{#rp}
+
+<FolderView
+    paths={[
+    'Resource Pack/entity/marker.entity.json',
+    'Resource Pack/models/entity/marker.geo.json',
+    'Resource Pack/render_controllers/marker.json',
+    'Resource Pack/textures/entity/marker.png',
+]}
+>
+</FolderView>
+
+:::note
+
+Прежде чем продолжить работу с материалом ниже, необходимо изучить основы **компьютерной графики**.
+
+<details>
+<summary>
+Базовые знания
+</summary>
+Текстура — это **изображение**, используемое для имитации деталей и поверхности объекта. Она может включать информацию о цвете, детализированные узоры и тонкие детали поверхности. Наложение текстуры на поверхность модели придаёт модели более реалистичный внешний вид и детализацию.
+
+Материал — это совокупность свойств, описывающих внешний вид и оптические характеристики объекта. Он включает цвет объекта, отражающие свойства (например, диффузное и зеркальное отражение), прозрачность, показатель преломления и т. д. Материал определяет, как объект взаимодействует со светом, задавая его внешний вид при отрисовке.
+</details>
+
+:::
+
+### Определение сущности
+
+Этот файл имеет решающее значение.
+
+```json title="RP/entity/marker.entity.json"
+{
+	"format_version": "1.10.0",
+	"minecraft:client_entity": {
+		"description": {
+			"identifier": "example:marker",
+			"materials": {
+				"default": "entity_alphatest",
+				"invisible": ""
+			},
+			"textures": {
+				"default": "textures/entity/marker"
+			},
+			"geometry": {
+				"default": "geometry.marker"
+			},
+			"render_controllers": [
+				"controller.render.marker"
+			],
+			"spawn_egg": {
+				"base_color": "#000000",
+				"overlay_color": "#FFFFFF"
+			}
+		}
+	}
+}
+```
+
+Здесь определяются все атрибуты сущности; уникальный идентификатор сущности `"identifier": "example:marker",` соответствует `.identifier("example:marker")` в коде.
+
+`materials` — `.json`-файл материала
+
+`textures` — `.png`-файл изображения текстуры
+
+`geometry` — `.geo.json`-файл геометрической модели
+
+`render_controllers` — `.json`-файл контроллеров отрисовки
+
+Для углублённого изучения можно прочитать [Введение в сущности в ресурс-паке](https://wiki.bedrock.dev/entities/entity-intro-rp.html).
+
+### Материалы \{#rp-material}
+
+Материалы описывают, как текстуры отрисовываются.
+
+Например, у скелетов есть материал, позволяющий текстуре быть прозрачной; у эндерменов есть материал, благодаря которому их глаза светятся.
+
+Вы можете использовать множество готовых материалов, не создавая собственные.
+
+```json title="RP/entity/spider.entity.json#minecraft:client_entity/description"
+"materials": {
+    "default": "spider",
+    "invisible": "spider_invisible"
+},
+```
+
+Здесь материалами являются `spider` и `spider_invisible`, а их короткие имена — default и invisible соответственно.
+
+Помните: этот ключ лишь определяет, какой материал привязан к короткому имени. Наша сущность всё ещё не знает, когда использовать каждый из материалов.
+
+Список готовых материалов можно посмотреть [здесь](https://wiki.bedrock.dev/documentation/materials.html).
+
+Руководство по созданию собственного материала находится на этой [странице](https://wiki.bedrock.dev/visuals/materials.html). Учтите, что это довольно продвинутая тема.
+
+### Текстуры \{#rp-texture}
+
+Текстура — это изображение, накладываемое на геометрию.
+
+У каждой сущности своя текстура.
+
+Как и в случае с материалами, этот ключ также задаёт определение короткого имени, но здесь ссылкой является путь к текстуре.
+
+```json title="RP/entity/bee.entity.json#minecraft:client_entity/description"
+"textures": {
+    "default": "textures/entity/bee/bee",
+    "angry": "textures/entity/bee/bee_angry",
+    "nectar": "textures/entity/bee/bee_nectar",
+    "angry_nectar": "textures/entity/bee/bee_angry_nectar"
+}
+```
+
+Как упоминалось ранее, мы можем определить несколько текстур.
+
+Это может быть полезно, если нужны разные варианты одной сущности — как у пчелы выше.
+
+Кроме того, несколько текстур позволяют накладывать разные слои на разные основы — так же, как у жителей деревни есть разные основы в зависимости от биома и разные слои профессий.
+
+Больше подробностей о послойном наложении текстур можно найти на нашей странице о [контроллерах отрисовки](https://wiki.bedrock.dev/entities/render-controllers.html).
+
+### Геометрия \{#rp-geometry}
+
+Геометрия определяет набор костей, составляющих форму нашей сущности; проще говоря, это и есть моделирование.
+
+Этот файл можно легко создать с помощью приложений вроде Blockbench.
+
+Больше подробностей о создании собственных моделей — в материале [Blockbench: моделирование, текстурирование и анимация](https://wiki.bedrock.dev/guide/blockbench.html).
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+"geometry": {
+    "default": "geometry.creeper",
+    "charged": "geometry.creeper.charged"
+}
+```
+
+Здесь короткие имена ссылаются на идентификаторы наших геометрических моделей.
+
+```json title="RP/entity/creeper.entity.json#minecraft:client_entity/description"
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry" : [
+		{
+			"description" : {
+				"identifier" : "geometry.creeper",
+                ...
+            }
+        }
+    ]
+}
+```
+
+Аналогично, у нас может быть несколько геометрий — например, у крипера есть обычная и заряженная модели.
+
+:::note
+
+Обычно, если вы сталкиваетесь с проблемами визуализации, причиной может быть опечатка в коротком имени сущности. Обязательно перепроверьте.
+
+:::
+
+## Конец \{#end}
+
+После загрузки плагина и ресурс-пака вы можете создать сущность с помощью команды `/summon example:marker`.
+
+<Image img={require('@site/static/images/tutorial-extras/example_marker_entity.png')} alt="Пример сущности-маркера" />

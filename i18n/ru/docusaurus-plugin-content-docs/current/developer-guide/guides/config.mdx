@@ -1,0 +1,269 @@
+---
+sidebar_position: 3
+---
+
+import FolderView from '@site/src/components/FolderView';
+
+# Руководство по конфигурации
+Этот документ поможет вам создать стандартизированную систему управления конфигурацией на основе правил разработки фреймворка Nukkit-MOT, охватывающую такие ключевые функции, как базовое чтение конфигурации, обработка вложенных объектов и динамическое сохранение.
+
+## Структура файла конфигурации \{#file-structure}
+Рекомендуется организовывать файлы конфигурации в формате YAML. Типичная структура выглядит следующим образом:
+```yml title="config.yml"
+this-is-a-key: Hello! Config!  # String type configuration
+another-key: true             # Boolean type configuration
+object-key:                   # Object type configuration
+  enabled: false
+  subKey1: nukkit
+  subKey2: 2023
+array-key:                    # Array type configuration
+  - first element
+  - second element
+  - third element
+```
+
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/config.yml',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
+
+## Реализация класса конфигурации \{#class-imple}
+### Базовый класс конфигурации \{#base-class-imple}
+```java
+public class ExampleConfig {
+    private final Config config;
+    // Use Lombok to automatically generate Getters
+    @Getter private String aKey;
+    @Getter private boolean anotherKey;
+    @Getter private ArrayList<String> arrayKey;
+    public ExampleConfig() {
+        // Ensure the configuration file exists (automatically creates an empty configuration)
+        ExamplePlugin.getInstance().saveResource("config.yml");
+        // Initialize the configuration object (with default values)
+        config = new Config(
+            new File(ExamplePlugin.getInstance().getDataFolder(), "config.yml"),
+            Config.YAML,
+            new ConfigSection(new LinkedHashMap<>() {{
+                // Default value configuration section
+                put("this-is-a-key", "Hello! Config!");
+                put("another-key", true);
+                // Nested object default values
+                put("object-key", new LinkedHashMap<String, Object>() {{
+                    put("enabled", false);
+                    put("subKey1", "nukkit");
+                    put("subKey2", 2023);
+                }});
+                // Array default values
+                put("array-key", Arrays.asList(
+                    "first element",
+                    "second element",
+                    "third element"
+                ));
+            }})
+        );
+        // Load configuration into memory
+        setAKey(config.getString("this-is-a-key"));
+        setAnotherKey(config.getBoolean("another-key"));
+        setArrayKey((ArrayList<String>) config.getStringList("array-key"));
+    }
+}
+```
+
+### Обработка вложенных объектов \{#nested-object-handle}
+```java
+// Define nested configuration objects in the ExampleConfig class
+public class KeyObject {
+    private final ConfigSection configSection;
+    @Getter private boolean enabled;
+    @Getter private String subKey1;
+    @Getter private Integer subKey2;
+    public KeyObject() {
+        // Get the object configuration section
+        this.configSection = config.getSection("object-key");
+        // Read with default values
+        this.enabled = configSection.getBoolean("enabled", false);
+        this.subKey1 = configSection.getString("subKey1", "nukkit");
+        this.subKey2 = configSection.getInt("subKey2", 2023);
+    }
+    // Support chainable set methods
+    public KeyObject setEnabled(boolean value) {
+        enabled = value;
+        configSection.set("enabled", enabled);
+        return this;// Method Chaining
+    }
+}
+```
+
+### Динамическое сохранение конфигурации \{#dynamic-save}
+```java
+// Main configuration save method
+public void save() {
+    config.set("this-is-a-key", aKey);
+    config.set("another-key", anotherKey);
+    config.set("array-key", arrayKey);
+    config.save();
+}
+// Nested object save method
+public ExampleConfig save() {
+    configSection.set("enabled", enabled);
+    configSection.set("subKey1", subKey1);
+    configSection.set("subKey2", subKey2);
+    config.save();
+    return parent;
+}
+```
+
+## Лучшие практики \{#best-practices}
+1. **Гарантия значений по умолчанию**: всегда указывайте значения по умолчанию в конструкторе, чтобы предотвратить повреждение файла конфигурации.
+2. **Типобезопасность**: используйте типизированные методы вроде `getBoolean()`/`getInt()` вместо универсального `get()`.
+3. **Изоляция конфигурации**: используйте отдельные классы конфигурации для управления вложенными объектами.
+4. **Кэширование в памяти**: сохраняйте конфигурацию в поля памяти при первой загрузке, чтобы избежать частого чтения файлов.
+5. **Упорядоченное хранение**: используйте `LinkedHashMap` для сохранения порядка элементов конфигурации.
+6. **Цепочки вызовов**: методы-сеттеры должны возвращать 'this' для поддержки текучего интерфейса (fluent interface).
+
+## Горячая перезагрузка конфигурации \{#config-hotreload}
+Реализуйте горячее обновление конфигурации, прослушивая команды перезагрузки сервера:
+```java
+// Register the event in the plugin main class
+@EventHandler
+public void onReload(ServerCommandEvent event) {
+    if (event.getCommand().equals("reload example")) {
+        this.config = new ExampleConfig();// Re-instantiate to reload
+        getLogger().info("Configuration reloaded!");
+    }
+}
+```
+
+:::note
+
+Горячая перезагрузка может повлиять на выполняющуюся бизнес-логику.
+
+:::
+
+## Советы по отладке \{#debug-tips}
+Используйте `config.getRootSection().toString()` для быстрого вывода всей загруженной на данный момент конфигурации:
+```java
+getLogger().info("Current configuration state:\n" + config.getRootSection().toString());
+```
+
+## Использование `eu.okaeri.configs` (встроено) \{#okaeri-configs}
+Nukkit-MOT поставляется с библиотекой [`okaeri-configs`](https://github.com/OkaeriPoland/okaeri-configs) (артефакт `okaeri-configs-yaml-snakeyaml`) и использует её внутри для управления `nukkit-mot.yml`. Плагины могут использовать её напрямую — во время выполнения дополнительные зависимости не требуются. По сравнению с традиционным API `Config` она предоставляет:
+
+- **Основано на POJO** — поля являются схемой, строковые ключи не разбросаны по всей кодовой базе.
+- **Строгая типизация** — значения десериализуются в реальные типы Java (включая вложенные объекты и обобщённые `List`/`Map`).
+- **Аннотации** — `@Comment`, `@Header`, `@CustomKey` создают удобный для человека YAML с комментариями.
+- **Очистка «осиротевших» ключей** — `removeOrphans(true)` автоматически удаляет неизвестные ключи при развитии схемы.
+
+:::note
+
+Добавьте `okaeri-configs-yaml-snakeyaml` в сборку с `<scope>provided</scope>` (Maven) или `compileOnly` (Gradle); сервер уже предоставляет её во время выполнения.
+
+:::
+
+### Определение класса конфигурации \{#okaeri-define}
+```java
+import eu.okaeri.configs.OkaeriConfig;
+import eu.okaeri.configs.annotation.Comment;
+import eu.okaeri.configs.annotation.CustomKey;
+import eu.okaeri.configs.annotation.Header;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Header("########################################")
+@Header("ExamplePlugin Configuration")
+@Header("########################################")
+public class ExampleConfig extends OkaeriConfig {
+
+    @Comment("Greeting shown on join")
+    @CustomKey("welcome-message")
+    private String welcomeMessage = "Hello! Config!";
+
+    @Comment("Whether the feature is enabled")
+    private boolean enabled = true;
+
+    @Comment({"", "Nested settings block"})
+    @CustomKey("feature-settings")
+    private FeatureSettings featureSettings = new FeatureSettings();
+
+    @Comment("Worlds to apply the feature in")
+    private List<String> worlds = new ArrayList<>();
+}
+```
+
+Вложенные категории просто снова наследуются от `OkaeriConfig`:
+```java
+@Getter
+@Setter
+@Accessors(fluent = true)
+public class FeatureSettings extends OkaeriConfig {
+
+    @Comment("Cooldown in ticks")
+    private int cooldown = 20;
+
+    @CustomKey("max-uses")
+    private int maxUses = 10;
+}
+```
+
+### Загрузка и сохранение \{#okaeri-load}
+```java
+import eu.okaeri.configs.ConfigManager;
+import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
+
+public class ExamplePlugin extends PluginBase {
+    private ExampleConfig config;
+
+    @Override
+    public void onEnable() {
+        java.io.File file = new java.io.File(getDataFolder(), "config.yml");
+        getDataFolder().mkdirs();
+
+        this.config = ConfigManager.create(ExampleConfig.class, it -> {
+            it.configure(opt -> {
+                opt.configurer(new YamlSnakeYamlConfigurer());
+                opt.bindFile(file);
+                opt.removeOrphans(true); // drop keys no longer defined in the class
+            });
+            it.saveDefaults();           // write file with defaults if absent
+            it.load(true);               // load + save back (normalizes comments/order)
+        });
+
+        getLogger().info(config.welcomeMessage());
+    }
+
+    public void updateAndSave() {
+        config.enabled(false);
+        config.featureSettings().cooldown(40);
+        config.save();
+    }
+}
+```
+
+### Перезагрузка \{#okaeri-reload}
+```java
+public void reload() {
+    this.config.load();   // re-read the bound file in place
+}
+```
+
+### Какой вариант выбрать \{#okaeri-vs-config}
+- **`OkaeriConfig`** — фиксированная схема, комментарии / вложенные категории, нечастые изменения во время выполнения.
+- **`Config`** — динамические или определяемые пользователем ключи, произвольная структура во время выполнения или форматы, отличные от YAML (`PROPERTIES`, `TXT`, `TOML`, автодетект `DETECT`).
+
+:::tip
+
+Сам Nukkit-MOT использует `OkaeriConfig` для `nukkit-mot.yml` и `Config` для `server.properties`. Вы можете изучить [`ServerConfig.java`](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/utils/serverconfig/ServerConfig.java) как реальный пример.
+
+:::

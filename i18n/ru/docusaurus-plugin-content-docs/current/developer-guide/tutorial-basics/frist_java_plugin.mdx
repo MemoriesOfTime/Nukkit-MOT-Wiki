@@ -1,0 +1,158 @@
+---
+sidebar_position: 1
+---
+
+# Первый плагин на Java
+
+Создайте минимальный плагин HelloWorld с нуля. В конце этой страницы у вас будет файл `.jar`, который Nukkit-MOT сможет загрузить.
+
+:::tip Где вы находитесь
+Шаг 1 из 4: создайте проект, добавьте зависимость и соберите первый jar плагина.
+
+Следующий шаг: [Основы плагинов](./plugin-basics)
+:::
+
+## Что вам понадобится
+
+- Java 17 или новее
+- IntelliJ IDEA Community или другая среда разработки для Java
+- Maven
+- Локальная папка с сервером Nukkit-MOT для следующей страницы
+
+## Создание проекта Maven
+
+Создайте стандартный проект Maven и используйте примерно такие значения:
+
+| Параметр | Значение |
+| --- | --- |
+| GroupId | `com.example` |
+| ArtifactId | `hello-world-plugin` |
+| Name | `HelloWorldPlugin` |
+| Package | `com.example.helloworld` |
+| JDK | `17` |
+
+После создания проекта замените `pom.xml` этим примером. URL репозитория и координаты зависимости соответствуют текущему README `Nukkit-MOT`:
+
+```xml title="pom.xml"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>hello-world-plugin</artifactId>
+  <version>1.0.0</version>
+  <name>HelloWorldPlugin</name>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <!-- Only needed for SNAPSHOT builds; release builds come from Maven Central -->
+    <repository>
+      <id>repo-lanink-cn</id>
+      <url>https://repo.lanink.cn/repository/maven-public/</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Release (recommended) -->
+    <dependency>
+      <groupId>com.nukkit-mot</groupId>
+      <artifactId>nukkit-mot</artifactId>
+      <version>1.26.30-R1</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- SNAPSHOT (development builds; requires the repository above)
+    <dependency>
+      <groupId>cn.nukkit</groupId>
+      <artifactId>Nukkit</artifactId>
+      <version>MOT-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    -->
+  </dependencies>
+</project>
+```
+
+## Структура проекта
+
+Создайте следующие файлы:
+
+```text
+hello-world-plugin/
+├─ pom.xml
+└─ src/
+   └─ main/
+      ├─ java/
+      │  └─ com/
+      │     └─ example/
+      │        └─ helloworld/
+      │           └─ HelloWorldPlugin.java
+      └─ resources/
+         └─ plugin.yml
+```
+
+## Создание главного класса
+
+Создайте файл `src/main/java/com/example/helloworld/HelloWorldPlugin.java`:
+
+```java title="src/main/java/com/example/helloworld/HelloWorldPlugin.java"
+package com.example.helloworld;
+
+import cn.nukkit.plugin.PluginBase;
+
+public final class HelloWorldPlugin extends PluginBase {
+
+    @Override
+    public void onEnable() {
+        this.getLogger().info("Hello from my first Nukkit-MOT plugin!");
+    }
+}
+```
+
+`onEnable()` — первый метод жизненного цикла, которым пользуется большинство авторов плагинов. Когда сервер успешно включает ваш плагин, вызывается именно этот метод.
+
+## Создание `plugin.yml`
+
+Создайте файл `src/main/resources/plugin.yml`:
+
+```yaml title="src/main/resources/plugin.yml"
+name: HelloWorldPlugin
+main: com.example.helloworld.HelloWorldPlugin
+version: "1.0.0"
+api: ["1.0.0"]
+author: YourName
+description: My first Nukkit-MOT plugin
+```
+
+Этот файл обязателен. Nukkit-MOT читает его из jar и использует, чтобы найти входной класс вашего плагина.
+
+:::warning Внимательно проверьте поле `main`
+`main` должен точно совпадать с именем вашего Java-пакета и именем класса. Если он указывает на неверный класс, плагин не загрузится.
+:::
+
+## Сборка jar плагина
+
+Выполните эту команду в корне проекта:
+
+```bash
+mvn clean package
+```
+
+Если вы предпочитаете IntelliJ IDEA, откройте панель Maven и запустите `clean`, затем `package`.
+
+Результат обычно такой:
+
+```text
+target/hello-world-plugin-1.0.0.jar
+```
+
+Поскольку `plugin.yml` находится в `src/main/resources/`, Maven автоматически копирует его в jar.
+
+## Прежде чем продолжить
+
+- Если Maven не может разрешить `com.nukkit-mot:nukkit-mot:1.26.30-R1`, проверьте сетевое подключение. Если не удаётся разрешить `cn.nukkit:Nukkit:MOT-SNAPSHOT`, дополнительно перепроверьте URL репозитория.
+- Если проект успешно собирается, переходите к разделу [Основы плагинов](./plugin-basics).

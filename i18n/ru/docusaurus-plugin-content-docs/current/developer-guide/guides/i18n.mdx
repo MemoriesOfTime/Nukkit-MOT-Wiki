@@ -1,0 +1,152 @@
+---
+sidebar_position: 13
+---
+
+import FolderView from '@site/src/components/FolderView';
+
+# Руководство по i18n
+
+## Регистрация i18n для плагинов \{#registering-i18n-for-plugins}
+
+Рассмотрим на примере проекта ExamplePlugin-Maven.
+
+Вам необходимо зарегистрировать i18n в главном классе вашего плагина.
+
+```java title="ExamplePlugin.java"
+package cn.nukkitmot.exampleplugin;
+
+import cn.nukkit.lang.PluginI18n;
+import cn.nukkit.lang.PluginI18nManager;
+import cn.nukkit.plugin.PluginBase;
+
+public class ExamplePlugin extends PluginBase {
+    public static ExamplePlugin INSTANCE;   
+    public static PluginI18n I18N;
+    public static LangCode serverLangCode;
+
+    @Override
+    public void onLoad() {
+        //save Plugin Instance
+        INSTANCE = this;
+        //register the plugin i18n
+        I18N = PluginI18nManager.register(this);
+        initServerLangCode();
+    }
+    
+    public void initServerLangCode() {
+        switch (Server.getInstance().getLanguage().getLang()) {
+            case "eng" -> {
+                serverLangCode = LangCode.en_US;
+            }
+            case "chs" -> {
+                serverLangCode = LangCode.zh_CN;
+            }
+            case "deu" -> {
+                serverLangCode = LangCode.de_DE;
+            }
+            case "rus" -> {
+                serverLangCode = LangCode.ru_RU;
+            }
+            default -> {
+                try {
+                    serverLangCode = LangCode.valueOf(Server.getInstance().getLanguage().getLang());
+                } catch (IllegalArgumentException e) {
+                    serverLangCode = LangCode.en_US;
+                }
+            }
+        }
+    }
+}
+```
+
+Здесь я использую `PlayerLocallyInitializedEvent`, чтобы продемонстрировать применение:
+
+```java title="EventListener.java"
+package cn.nukkitmot.exampleplugin;
+
+import cn.nukkit.Server;
+import cn.nukkit.Player;
+import cn.nukkit.lang.LangCode;
+import cn.nukkit.event.player.PlayerLocallyInitializedEvent;
+
+import static cn.nukkitmot.exampleplugin.ExamplePlugin.INSTANCE;
+import static cn.nukkitmot.exampleplugin.ExamplePlugin.I18N;
+import static cn.nukkitmot.exampleplugin.ExamplePlugin.serverLangCode;
+
+public class EventListener implements Listener {
+    @EventHandler
+    public void joinEvent(PlayerLocallyInitializedEvent event) {
+        Player player = event.getPlayer();
+        LangCode playerLangCode = player.getLanguageCode();
+        // This is how to get the player's LangCode
+        player.sendMessage(I18N.tr(playerLangCode, "exampleplugin.helloworld", playerName));
+        // We can also get the server's LangCode
+        INSTANCE.getLogger().info(I18N.tr(serverLangCode, "exampleplugin.helloworld", playerName));
+    }
+}
+```
+
+## Добавление языковых файлов в ресурсы \{#adding-language-files-to-resources}
+
+Затем нам нужно создать папку `language` в `src/main/resources` для хранения языковых файлов **\<[LangCode](#langcode)\>.json**. Ваш каталог разработки плагина будет выглядеть примерно так:
+
+<FolderView
+    paths={[
+    'ExamplePlugin-Maven/lib',
+    'ExamplePlugin-Maven/src/main/java',
+    'ExamplePlugin-Maven/src/main/resources/language/en_US.lang',
+    'ExamplePlugin-Maven/target',
+]}
+>
+</FolderView>
+
+### Формат языковых файлов \{#language-files-format}
+
+Поддерживается многоязычный текст с параметрами, например `exampleplugin.helloworld=Hello {%0}!`
+
+\{%n\} будет заменён аргументом с индексом n
+
+```ini
+exampleplugin.helloworld=Hello {%0}!
+exampleplugin.examplecommand.description=this is a test command.
+```
+
+## LangCode \{#langcode}
+
+См. [cn.nukkit.lang.LangCode](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/lang/LangCode.java). Ниже приведена таблица кодов для удобства использования:
+
+:::note
+Здесь «Регион» не обозначает страну.
+:::
+
+| Код языка | Язык | Регион |
+|---------------|----------|--------|
+| en_US   | English  | United States |
+| en_GB   | English | United Kingdom |
+| de_DE   | Deutsch | Deutschland |
+| es_ES   | Español | España |
+| es_MX   | Español | México |
+| fr_FR   | Français | France |
+| fr_CA   | Français | Canada |
+| it_IT   | Italiano | Italia |
+| ja_JP   | 日本語 | 日本 |
+| ko_KR   | 한국어 | 대한민국 |
+| pt_BR   | Português | Brasil |
+| pt_PT   | Português | Portugal |
+| ru_RU   | Русский | Россия |
+| zh_CN   | 中文(简体) | 中国 |
+| zh_TW   | 中文(繁體) | 中国台湾 |
+| nl_NL   | Nederlands | Nederland |
+| bg_BG   | Български | България |
+| cs_CZ   | Čeština | Česko |
+| da_DK   | Dansk | Danmark |
+| el_GR   | Ελληνικά | Ελλάδα |
+| fi_FI   | Suomi | Suomi |
+| hu_HU   | Magyar | Magyarország |
+| id_ID   | Indonesia | Indonesia |
+| nb_NO   | Norsk bokmål | Norge |
+| pl_PL   | Polski | Polska |
+| sk_SK   | Slovenčina | Slovensko |
+| sv_SE   | Svenska | Sverige |
+| tr_TR   | Türkçe | Türkiye |
+| uk_UA   | Українська | Україна |

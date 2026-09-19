@@ -1,0 +1,266 @@
+---
+sidebar_position: 3
+title: Кастомные чары
+sidebar_label: Кастомные чары
+---
+
+# Кастомные чары
+
+Кастомные чары хорошо подходят, когда вам нужны определённые на уровне плагина боевые эффекты, правила добычи или прогрессия, которые могут использоваться как ванильными предметами, так и вашими собственными кастомными предметами.
+
+Типичные сценарии использования:
+
+- Придание инструменту или оружию поведения, которого нет у ванильных чар
+- Переиспользование одного и того же эффекта как на ванильных, так и на кастомных предметах
+- Раздача особого снаряжения через команды, таблицы лута, GUI или кастомные предметы-книги
+
+## Как работают кастомные чары в Nukkit-MOT
+
+Кастомные чары — это по-прежнему `Enchantment`, но они регистрируются по `Identifier`, а не по ванильному числовому ID.
+
+- Используйте `new Identifier("yourplugin", "your_enchantment")`
+- Не используйте зарезервированное пространство имён `minecraft`
+- Выберите `EnchantmentType`, чтобы определить область применения к предметам по умолчанию
+- Вызовите `Enchantment.register(enchantment, true)`, если вы также хотите получить сгенерированные кастомные предметы «зачарованная книга» для каждого уровня
+
+`EnchantmentType` покрывает только базовую категорию предметов. Если ваш кастомный предмет естественным образом не соответствует `DIGGER`, `SWORD`, `ARMOR` и так далее, переопределите `canEnchant(Item item)` и проверьте идентификатор кастомного пространства имён самостоятельно.
+
+:::warning Текущее ограничение сохраняемости
+Обычный NBT чар предмета хранит только числовые `id` и `lvl`. В текущей реализации Nukkit-MOT все кастомные чары плагинов используют общий `Enchantment.CUSTOM_ENCHANTMENT_ID`.
+
+Это означает, что не следует полагаться только на встроенный NBT чар, чтобы различать разные кастомные чары плагинов на одном и том же предмете. В практичном плагине также храните собственный маркер — например, кастомное поле NBT, лор или отдельный класс кастомного предмета.
+
+В примере ниже используется небольшой кастомный NBT-тег, благодаря которому чары можно надёжно определять в событиях и после перезапусков.
+:::
+
+## Структура класса чар
+
+Класс кастомных чар обычно определяет пять вещей:
+
+- Уникальный `Identifier`
+- Ключ отображаемого имени
+- Редкость
+- Область применения к предметам по умолчанию через `EnchantmentType`
+- Уровни, совместимость и особые правила через переопределения методов
+
+```java title="custom/enchantment/AutoRemeltedEnchantment.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.item.enchantment.EnchantmentType;
+import cn.nukkit.utils.Identifier;
+
+public final class AutoRemeltedEnchantment extends Enchantment {
+    public static final Identifier ID = new Identifier("exampleplugin", "auto_remelted");
+
+    public AutoRemeltedEnchantment() {
+        super(ID, "auto_remelted", Rarity.COMMON, EnchantmentType.DIGGER);
+    }
+
+    @Override
+    public int getMaxLevel() {
+        return 3;
+    }
+
+    @Override
+    public int getMinEnchantAbility(int level) {
+        return 5 + (level - 1) * 10;
+    }
+
+    @Override
+    public int getMaxEnchantAbility(int level) {
+        return this.getMinEnchantAbility(level) + 15;
+    }
+
+    @Override
+    protected boolean checkCompatibility(Enchantment enchantment) {
+        return enchantment.getId() != Enchantment.ID_SILK_TOUCH
+                && super.checkCompatibility(enchantment);
+    }
+
+    @Override
+    public boolean canEnchant(Item item) {
+        return super.canEnchant(item)
+                || "exampleplugin:blaze_pickaxe".equals(item.getNamespaceId());
+    }
+
+    @Override
+    public String getName() {
+        return "%enchantment.custom.auto_remelted";
+    }
+}
+```
+
+В этом примере используется `EnchantmentType.DIGGER`, поэтому ванильные кирки, топоры, лопаты и мотыги принимаются автоматически. Дополнительная проверка в `canEnchant` делает те же чары доступными и для кастомного инструмента с именем `exampleplugin:blaze_pickaxe`.
+
+## Полный пример: Auto Remelted
+
+Следующая последовательность шагов даёт полностью работоспособные кастомные чары:
+
+1. Определите класс чар
+2. Зарегистрируйте его заранее в жизненном цикле плагина
+3. Примените его к предмету
+4. Запустите реальный эффект из обычного события
+
+### Регистрация чар
+
+Зарегистрируйте чары заранее, прежде чем пытаться их получать или распространять:
+
+```java title="ExamplePlugin.java"
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.plugin.PluginBase;
+import com.example.myplugin.custom.enchantment.AutoRemeltedEnchantment;
+import com.example.myplugin.listener.AutoRemeltedListener;
+
+public final class ExamplePlugin extends PluginBase {
+    @Override
+    public void onLoad() {
+        Enchantment.register(new AutoRemeltedEnchantment(), true).assertOK();
+    }
+
+    @Override
+    public void onEnable() {
+        this.getServer().getPluginManager().registerEvents(new AutoRemeltedListener(), this);
+    }
+}
+```
+
+Передача `true` в `register(...)` указывает Nukkit-MOT сгенерировать кастомный предмет «зачарованная книга» для каждого уровня чар.
+
+### Применение к ванильным или кастомным предметам
+
+Если вы хотите, чтобы эффект надёжно работал в коде плагина, добавьте сразу и то, и другое:
+
+- Сам объект `Enchantment`, чтобы предмет визуально вёл себя как зачарованный
+- Собственный NBT-маркер, чтобы ваш слушатель смог позже опознать чары
+
+```java title="AutoRemeltedItems.java"
+package com.example.myplugin.custom.enchantment;
+
+import cn.nukkit.item.Item;
+import cn.nukkit.item.enchantment.Enchantment;
+import cn.nukkit.nbt.tag.CompoundTag;
+
+public final class AutoRemeltedItems {
+    public static final String AUTO_REMELTED_TAG = "exampleplugin:auto_remelted_level";
+
+    private AutoRemeltedItems() {
+    }
+
+    public static Item apply(Item item, int level) {
+        Enchantment enchantment = Enchantment.getEnchantment(AutoRemeltedEnchantment.ID).setLevel(level);
+        item.addEnchantment(enchantment);
+
+        CompoundTag tag = item.hasCompoundTag() ? item.getNamedTag() : new CompoundTag();
+        tag.putInt(AUTO_REMELTED_TAG, enchantment.getLevel());
+        item.setNamedTag(tag);
+        return item;
+    }
+}
+```
+
+Помощник можно использовать на ванильном предмете:
+
+```java title="java"
+Item ironPickaxe = Item.fromString("minecraft:iron_pickaxe");
+ironPickaxe = AutoRemeltedItems.apply(ironPickaxe, 2);
+```
+
+Или на кастомном:
+
+```java title="java"
+Item blazePickaxe = Item.fromString("exampleplugin:blaze_pickaxe");
+blazePickaxe = AutoRemeltedItems.apply(blazePickaxe, 2);
+```
+
+### Запуск поведения
+
+Регистрация лишь помещает чары в реестр. Реальное поведение всё равно должно выполняться из события, которое соответствует вашему замыслу.
+
+Для эффекта автоплавки `BlockBreakEvent` — стабильная точка срабатывания:
+
+```java title="listener/AutoRemeltedListener.java"
+package com.example.myplugin.listener;
+
+import cn.nukkit.Server;
+import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.Listener;
+import cn.nukkit.event.block.BlockBreakEvent;
+import cn.nukkit.inventory.FurnaceRecipe;
+import cn.nukkit.item.Item;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.myplugin.custom.enchantment.AutoRemeltedItems.AUTO_REMELTED_TAG;
+
+public final class AutoRemeltedListener implements Listener {
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        int level = this.getAutoRemeltedLevel(event.getItem());
+        if (level <= 0) {
+            return;
+        }
+
+        List<Item> remeltedDrops = new ArrayList<>();
+        boolean changed = false;
+
+        for (Item drop : event.getDrops()) {
+            FurnaceRecipe recipe = Server.getInstance().getCraftingManager().matchFurnaceRecipe(drop);
+            if (recipe == null) {
+                remeltedDrops.add(drop);
+                continue;
+            }
+
+            Item result = recipe.getResult();
+            result.setCount(drop.getCount());
+            remeltedDrops.add(result);
+            changed = true;
+        }
+
+        if (changed) {
+            event.setDrops(remeltedDrops.toArray(new Item[0]));
+            event.setDropExp(event.getDropExp() + Math.max(0, level - 1));
+        }
+    }
+
+    private int getAutoRemeltedLevel(Item item) {
+        if (!item.hasCompoundTag()) {
+            return 0;
+        }
+        return item.getNamedTag().getInt(AUTO_REMELTED_TAG);
+    }
+}
+```
+
+В этом и заключается ключевая идея: реестр сообщает Nukkit-MOT, что ваши чары существуют, но именно слушатель событий является реальной точкой срабатывания поведения для кастомной логики на стороне плагина.
+
+## Уровни, совместимость и момент срабатывания
+
+| Тема | Основной API | Для чего использовать |
+| --- | --- | --- |
+| Диапазон уровней | `getMinLevel()`, `getMaxLevel()`, `setLevel()` | Определить допустимый диапазон уровней и обрезать небезопасные значения |
+| Зачаровываемость | `getMinEnchantAbility(level)`, `getMaxEnchantAbility(level)` | Контролировать баланс, если ваш рабочий процесс использует правила зачаровываемости |
+| Область применения к предметам | `EnchantmentType` и `canEnchant(Item)` | Решить, какие ванильные и кастомные предметы могут получить чары |
+| Совместимость | `checkCompatibility(Enchantment enchantment)` | Блокировать комбинации вроде Silk Touch плюс Auto Remelted |
+| Момент срабатывания | Обычные события, такие как `BlockBreakEvent`, `EntityDamageByEntityEvent`, `PlayerInteractEvent`, `EntityShootBowEvent`, `ProjectileHitEvent` | Запустить реальный эффект в значимый для геймплея момент |
+
+`Enchantment` также предоставляет хуки вроде `doAttack`, `doPostAttack` и `doPostHurt`. Это полезные точки расширения на уровне движка, но для обычных кастомных чар плагинов на предметах сегодня более безопасный подход — обычные события плюс собственный маркер.
+
+## Взаимодействие с ванильными и кастомными предметами
+
+- Ванильные предметы обычно покрываются `EnchantmentType`, например `DIGGER`, `SWORD` или `ARMOR`
+- Кастомные предметы могут получить те же чары, если они предоставляют ожидаемое поведение предмета, например `isPickaxe()` или `isSword()`
+- Если кастомный предмет нельзя однозначно сопоставить со встроенным типом, переопределите `canEnchant(Item item)` и сравнивайте его идентификатор в пространстве имён напрямую
+
+Благодаря этому одна реализация чар переиспользуется как для ванильного, так и для кастомного снаряжения.
+
+## Частые ошибки
+
+- Не используйте пространство имён `minecraft` для чар плагинов
+- Не предполагайте, что `register(enchantment, true)` автоматически добавляет ваши чары в процесс стола зачаровывания или наковальни
+- Не определяйте кастомные чары плагина на обычном предмете только по числовому ID чар
+- Если на одном предмете нужно несколько разных кастомных чар, храните каждый эффект в собственном NBT или других метаданных на стороне плагина
+
+Когда вы рассматриваете реестр `Enchantment` как публичный слой определения, а собственные метаданные и события — как слой поведения, поддерживать кастомные чары становится гораздо проще.

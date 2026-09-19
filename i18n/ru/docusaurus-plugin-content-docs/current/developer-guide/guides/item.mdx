@@ -1,0 +1,148 @@
+---
+sidebar_position: 8
+---
+
+# Руководство по предметам
+
+Класс `Item` используется для обработки всех операций, связанных с предметами, на сервере. Ниже описаны основные функции класса `Item` и способы его применения.
+
+## Обзор класса `Item` \{#item-class-overview}
+
+Находится в пакете [cn.nukkit.item](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/Item.java).
+
+Предоставляет большое количество методов для создания и изменения предметов в игре — ими могут быть блоки, инструменты, еда и т. д.
+
+## Конструкторы \{#constructors}
+
+Класс `Item` предоставляет несколько конструкторов, позволяющих создавать экземпляры предметов на основе различных параметров.
+
+### Пример кода: \{#example-code}
+```java
+// Import the Item class
+import cn.nukkit.item.Item;
+
+// Create the item by item ID and quantity
+Item diamond = Item.get(Item.DIAMOND, 0, 1); // create 1 diamond
+// Give the player a diamond
+player.giveItem(diamond);
+// Or
+player.getInventory().addItem(diamond);
+
+// Create items via namespaces (recommended!)
+Item apple = Item.fromString("minecraft:apple");
+```
+
+### Пояснение к коду: \{#code-explanation}
+
+:::warning
+
+Всегда используйте метод `Item.get()` или `Item.fromString()` для получения предмета, а не создавайте экземпляр объекта предмета напрямую через `new ItemDiamond(id, meta, count)`!
+
+:::
+
+- `Item.DIAMOND`: это ID предмета «алмаз» — у каждого предмета есть уникальный ID.
+- `0`: это номер варианта (метаданные) предмета; для большинства предметов он равен 0.
+- `1`: это количество предметов.
+
+## Основные методы \{#main-methods}
+
+Ниже приведены некоторые часто используемые методы класса `Item` и примеры их применения.
+
+### `getId()` \{#get-id}
+Возвращает ID предмета.
+```java
+int id = diamond.getId(); // Get the ID of the diamond
+// Output: 264
+```
+
+### `getNamespaceId()` \{#get-namespace-id}
+Возвращает пространство имён предмета.
+```java
+String namespace = diamond.getNamespaceId(); // Get the namespace of the diamond
+// Output: minecraft:diamond
+```
+
+### `getCount()` \{#get-count}
+Возвращает количество предмета.
+```java
+int count = diamond.getCount(); // Get the quantity of the diamond
+// Output: 1
+```
+
+### `getName()` \{#get-name}
+Возвращает название предмета.
+```java
+String name = diamond.getName(); // Get the name of the diamond
+// Output: Diamond
+```
+
+### `getEnchantmentLevel(int id)` \{#get-enchantment-level}
+Возвращает уровень зачарования предмета.
+Соответствующие ID зачарований можно найти в [cn.nukkit.item.enchantment.Enchantment](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/item/enchantment/Enchantment.java).
+```java
+int level = diamond.getEnchantmentLevel(Enchantment.ID_DAMAGE_ALL); // Get the diamond's sharpness level. If it's not enchanted, return 0.
+// Output: 0
+```
+
+## Работа со свойствами предмета \{#handling-item-properties}
+
+Атрибутами предметов можно управлять с помощью различных методов-сеттеров и геттеров.
+
+### Установка количества предметов \{#set-number-of-items}
+```java
+diamond.setCount(3); // Set the number of diamonds to 3
+```
+
+### Пример кода \{#example-code-properties}
+
+1. Установка базовых свойств предмета
+
+```java
+Item diamond = Item.get(Item.DIAMOND, 0, 1);
+// You can continue to add more lines
+diamond.setLore("Line 1", "Line 2");
+// If you do not want the text to be italicized, you can add "§r" at the beginning of the text to reset the format
+diamond.setCustomName("Custom Name of the Item");
+// Add Sharpness 5 and Protection 4 enchantments to the item
+diamond.addEnchantment(Enchantment.get(Enchantment.ID_DAMAGE_ALL).setLevel(5), Enchantment.get(Enchantment.ID_PROTECTION_ALL).setLevel(4));
+```
+
+2. Бесконечная прочность предметов
+
+```java
+// Achieved through nbt
+CompoundTag tag = diamond.hasCompoundTag() ? diamond.getNamedTag() : new CompoundTag();
+tag.putByte("Unbreakable", 1);
+// After modifying nbt, you need to setNamedTag for it to take effect
+diamond.setNamedTag(tag);
+```
+
+3. Режимы блокировки предметов
+
+Nukkit-MOT предоставляет класс `Item.ItemLockMode`, и разработчики могут использовать `setItemLockMode(ItemLockMode lockMode)` для установки режима блокировки предмета.
+
+- `Item.ItemLockMode.LOCK_NONE`
+
+Снимает блокировку предмета
+
+- `Item.ItemLockMode.LOCK_IN_INVENTORY`
+
+![блокировка в инвентаре](https://minecraft.wiki/images/Item_lock_yellow.png) — текстура, отображаемая поверх предмета.
+
+Запрещает изымать предмет из инвентаря игрока, выбрасывать его или использовать в крафте.
+
+- `Item.ItemLockMode.LOCK_IN_SLOT`
+
+![блокировка в слоте](https://minecraft.wiki/images/Item_lock_red.png) — текстура, отображаемая поверх предмета.
+
+Запрещает перемещать предмет или изымать его из слота инвентаря игрока, выбрасывать его и, как следствие, использовать в крафте.
+
+:::note
+
+Поддерживается начиная с 1.16.100 (версия протокола 419)
+
+:::
+
+```java
+diamond.setItemLockMode(Item.ItemLockMode.LOCK_IN_INVENTORY);
+```

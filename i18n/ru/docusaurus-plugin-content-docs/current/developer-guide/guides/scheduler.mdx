@@ -1,0 +1,329 @@
+---
+sidebar_position: 5
+---
+
+# Руководство по планировщику и асинхронным задачам
+
+Nukkit-MOT предоставляет авторам плагинов два разных направления выполнения:
+
+- основной поток сервера для работы с мирами, сущностями, игроками и инвентарями
+- асинхронный пул рабочих потоков для медленного ввода-вывода и дорогостоящих вычислений
+
+Это руководство показывает, как API планировщика сочетаются друг с другом, когда использовать каждое из них и где на самом деле проходит граница потоков.
+
+:::tip Область, основанная на исходном коде
+Эта страница написана по текущему исходному коду Nukkit-MOT, особенно `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool` и циклу тиков сервера.
+:::
+
+## Сначала основные правила
+
+- `Level`, блоки, чанки, сущности, инвентари и игроков следует рассматривать как API основного потока.
+- Используйте асинхронные задачи для файлового ввода-вывода, работы с базами данных, сжатия, HTTP-вызовов и тяжёлых вычислений.
+- Возвращайтесь в основной поток перед изменением игрового состояния.
+- В коде плагинов отдавайте предпочтение перегрузкам планировщика, принимающим экземпляр `Plugin`. Перегрузки без плагина в основном являются устаревшими, и некоторые из них помечены как deprecated.
+
+## Главная точка входа
+
+Используйте `Server#getScheduler()` или `PluginBase#getServer().getScheduler()`:
+
+```java
+ServerScheduler scheduler = this.getServer().getScheduler();
+```
+
+Время измеряется в тиках:
+
+- `20` тиков = `1` секунда
+- `1` тик = `0.05` секунды
+
+## Какой тип задачи выбрать?
+
+| API | Лучше всего для | Примечания |
+| --- | --- | --- |
+| `scheduleTask(plugin, runnable)` | Однократный запуск в основном потоке | Простейшая синхронная задача |
+| `scheduleDelayedTask(plugin, runnable, delay)` | Однократный запуск после задержки | Задержка указывается в тиках |
+| `scheduleRepeatingTask(plugin, runnable, period)` | Повторение в основном потоке | Выполняется до отмены |
+| `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | Отложенная повторяющаяся синхронная задача | Самый распространённый API таймера |
+| `scheduleTask(plugin, runnable, true)` | Асинхронная работа по принципу «запустил и забыл» | Нет встроенного колбэка завершения |
+| `scheduleAsyncTask(plugin, asyncTask)` | Асинхронная работа, требующая `onCompletion(...)` | Лучший асинхронный API для плагинов |
+| `NukkitRunnable` | Объектно-ориентированная обёртка над вызовами планировщика | Простая самоотмена и доступ к id задачи |
+| `PluginTask` | Старый стиль `Task` с `onRun(int currentTick)` | Полезно, если нужны сведения о тике или доступ к владельцу |
+
+## 1. Простые задачи в основном потоке
+
+Для небольшой отложенной или запланированной игровой логики обычно достаточно `Runnable`, привязанного к плагину.
+
+```java
+import cn.nukkit.Player;
+
+public void sendDelayedWelcome(Player player) {
+    this.getServer().getScheduler().scheduleDelayedTask(this, () -> {
+        if (!player.isOnline()) {
+            return;
+        }
+
+        player.sendMessage("Welcome back.");
+    }, 40);
+}
+```
+
+Это выполняется в основном потоке, поэтому безопасно обращаться к `Player`, `Level`, инвентарям и блокам.
+
+## 2. Повторяющиеся задачи и отмена
+
+Повторяющиеся задачи возвращают `TaskHandler`. Сохраните его, если позже нужно остановить задачу.
+
+```java
+import cn.nukkit.scheduler.TaskHandler;
+
+private TaskHandler autosaveReminderTask;
+
+public void startReminder() {
+    this.autosaveReminderTask = this.getServer().getScheduler().scheduleDelayedRepeatingTask(
+        this,
+        () -> this.getServer().broadcastMessage("Autosave runs every 5 minutes."),
+        20,
+        20 * 60 * 5
+    );
+}
+
+public void stopReminder() {
+    if (this.autosaveReminderTask != null && !this.autosaveReminderTask.isCancelled()) {
+        this.autosaveReminderTask.cancel();
+    }
+}
+```
+
+При отключении плагина ожидающие или повторяющиеся задачи, принадлежащие плагину, автоматически отменяются сервером. Не предполагайте, что это также прерывает асинхронную работу, уже отправленную в рабочий поток.
+
+## 3. `NukkitRunnable` для самоотменяющихся таймеров
+
+`NukkitRunnable` — это обёртка над планировщиком, удобная для обратных отсчётов, циклов повторных попыток и задач, которые хотят отменить сами себя.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.scheduler.NukkitRunnable;
+
+public void startCountdown(Player player) {
+    new NukkitRunnable() {
+        private int seconds = 5;
+
+        @Override
+        public void run() {
+            if (!player.isOnline()) {
+                this.cancel();
+                return;
+            }
+
+            if (seconds == 0) {
+                player.sendMessage("Go!");
+                this.cancel();
+                return;
+            }
+
+            player.sendMessage("Starting in " + seconds + "...");
+            seconds--;
+        }
+    }.runTaskTimer(this, 0, 20);
+}
+```
+
+Полезные методы:
+
+- `runTask(plugin)`
+- `runTaskLater(plugin, delay)`
+- `runTaskTimer(plugin, delay, period)`
+- `runTaskAsynchronously(plugin)`
+- `runTaskLaterAsynchronously(plugin, delay)`
+- `runTaskTimerAsynchronously(plugin, delay, period)`
+
+:::warning
+Экземпляр `NukkitRunnable` можно запланировать только один раз. Класс явно выбрасывает исключение, если вы попытаетесь повторно использовать тот же экземпляр после того, как он уже был запланирован.
+:::
+
+## 4. `PluginTask` и `Task`
+
+`Task` и `PluginTask` — более старые типы задач. Они всё ещё валидны и иногда полезны, когда нужен текущий тик в `onRun(int currentTick)`.
+
+В коде плагина, если вы выберете этот путь, предпочитайте `PluginTask` обычному `Task`.
+
+```java
+import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.scheduler.PluginTask;
+
+public final class HeartbeatTask extends PluginTask<PluginBase> {
+
+    public HeartbeatTask(PluginBase plugin) {
+        super(plugin);
+    }
+
+    @Override
+    public void onRun(int currentTick) {
+        getOwner().getLogger().info("Heartbeat tick = " + currentTick);
+    }
+}
+```
+
+```java
+this.getServer().getScheduler().scheduleRepeatingTask(new HeartbeatTask(this), 20);
+```
+
+## 5. Асинхронный `Runnable` против `AsyncTask`
+
+Фоновую работу можно выполнять двумя способами:
+
+### Асинхронный `Runnable`
+
+Используйте `scheduleTask(plugin, runnable, true)` или асинхронные варианты `NukkitRunnable`, когда нужна только фоновая работа по принципу «запустил и забыл».
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    // Slow file or network work here
+}, true);
+```
+
+Это просто, но здесь нет встроенного хука завершения в основном потоке.
+
+### `AsyncTask`
+
+Используйте `AsyncTask`, когда нужно:
+
+- чётко выделенная асинхронная фаза `onRun()`
+- фаза `onCompletion(Server server)` в основном потоке
+- объект результата через `setResult(...)` / `getResult()`
+
+Обычно это лучший асинхронный API для возможностей плагинов.
+
+:::warning
+Завершение `AsyncTask` собирается позже в основном потоке. Если асинхронная работа была отправлена до завершения работы плагина, `onCompletion(...)` всё ещё может выполниться после того, как ваш плагин начал отключаться. Проверяйте состояние плагина перед применением результатов, если гонки при завершении работы важны для вашей возможности.
+:::
+
+## 6. Шаблон `AsyncTask`: фоновая загрузка, применение в основном потоке
+
+Безопасный шаблон таков:
+
+1. скопируйте простые данные перед планированием
+2. выполните медленную работу в `onRun()`
+3. примените результат в `onCompletion(...)`
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.scheduler.AsyncTask;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
+
+public void loadProfile(Player player) {
+    UUID uuid = player.getUniqueId();
+    Path path = this.getDataFolder().toPath().resolve("profiles").resolve(uuid + ".json");
+
+    this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+        @Override
+        public void onRun() {
+            try {
+                String json = Files.exists(path) ? Files.readString(path) : "{}";
+                this.setResult(json);
+            } catch (IOException e) {
+                this.setResult(null);
+            }
+        }
+
+        @Override
+        public void onCompletion(Server server) {
+            Player online = server.getPlayer(uuid).orElse(null);
+            if (online == null) {
+                return;
+            }
+
+            String json = (String) this.getResult();
+            if (json == null) {
+                online.sendMessage("Failed to load profile.");
+                return;
+            }
+
+            online.sendMessage("Profile loaded: " + json.length() + " bytes");
+        }
+    });
+}
+```
+
+Почему это безопасно:
+
+- `UUID` и `Path` копируются до смены потока
+- чтение файла происходит вне основного потока
+- поиск игрока и отправка сообщений происходят в основном потоке в `onCompletion(...)`
+
+## 7. Ручное возвращение в основной поток
+
+Иногда вместо `AsyncTask` используется асинхронный `Runnable`. В этом случае запланируйте синхронную задачу-продолжение самостоятельно.
+
+```java
+this.getServer().getScheduler().scheduleTask(this, () -> {
+    String result = doSlowComputation();
+
+    this.getServer().getScheduler().scheduleTask(this, () -> {
+        this.getLogger().info("Computed value = " + result);
+    });
+}, true);
+```
+
+Это тот же шаблон, который используется во всём исходном коде сервера: сначала асинхронная работа, затем синхронная задача для изменений мира или игроков.
+
+## 8. Размер пула рабочих потоков
+
+Асинхронные задачи выполняются в пуле рабочих потоков планировщика. Размер пула управляется файлом `nukkit-mot.yml` через параметр `async-workers`.
+
+- по умолчанию: `auto`
+- `auto` вычисляется как `max(availableProcessors + 1, 4)`
+
+Текущий размер пула можно узнать так:
+
+```java
+int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
+```
+
+## 9. Границы потокобезопасности
+
+Считайте перечисленное ниже доступным только из основного потока, если вы лично не проверили, что конкретный путь в исходном коде явно безопасен:
+
+- `Player`
+- `Entity`
+- `Level`
+- чанки и блоки
+- инвентари и окна
+- большая часть диспетчеризации событий, изменяющих игровое состояние
+
+Безопасная асинхронная работа обычно включает:
+
+- чтение или запись файлов данных плагина
+- запросы к базам данных
+- преобразование JSON, YAML или NBT в памяти
+- сжатие, хеширование, генерацию изображений, поиск пути и другие тяжёлые вычисления
+
+## Частые ошибки
+
+### 1. Чтение или изменение игрового состояния из `onRun()`
+
+Не телепортируйте игроков, не устанавливайте блоки, не открывайте инвентари и не изменяйте сущности из асинхронного кода. Используйте `onCompletion(...)` или запланируйте синхронную задачу-продолжение.
+
+### 2. Захват живых игровых объектов в длительной асинхронной работе
+
+Не предполагайте, что ссылка на `Player`, чанк или мир всё ещё валидна к моменту завершения асинхронной задачи. Сначала скопируйте идентификаторы вроде `UUID`, имени мира или позиций, а затем снова найдите объекты в основном потоке.
+
+### 3. Использование устаревших перегрузок без плагина
+
+Предпочитайте перегрузки, привязанные к плагину, например `scheduleTask(this, runnable)`, а не устаревшие перегрузки без владельца-плагина. Именно принадлежность плагину обеспечивает автоматическую очистку при отключении.
+
+### 4. Предположение, что отключение плагина останавливает уже выполняющуюся асинхронную работу
+
+Отключение плагина отменяет принадлежащие ему запланированные задачи, но не останавливает задним числом асинхронную работу, уже выполняющуюся в пуле рабочих потоков. Защитите `onCompletion(...)`, если результат следует игнорировать во время завершения работы.
+
+### 5. Отношение к `onCancel()` как к «только отмена»
+
+Текущее поведение планировщика удаляет однократные объекты `Task` вызовом `TaskHandler.cancel()`, который также вызывает `Task#onCancel()`. Не полагайтесь на то, что `onCancel()` означает «только ручная отмена».
+
+### 6. Повторное использование `NukkitRunnable`
+
+Каждый экземпляр `NukkitRunnable` можно запланировать только один раз. Создавайте новый экземпляр каждый раз, когда хотите снова запустить задачу.

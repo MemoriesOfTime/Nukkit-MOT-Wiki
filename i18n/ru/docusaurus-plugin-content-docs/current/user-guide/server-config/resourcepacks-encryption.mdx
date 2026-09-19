@@ -1,0 +1,102 @@
+---
+sidebar_position: 3
+---
+
+import FolderView from '@site/src/components/FolderView';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Шифрование ресурспаков
+
+Nukkit-MOT поддерживает использование зашифрованных ресурспаков для защиты вашей работы. Это руководство поможет вам настроить шифрование ресурспака за три простых шага.
+
+:::caution Примечание для новичков
+Это шифрование основано на симметричном алгоритме AES. Хотя оно позволяет эффективно повысить безопасность вашего ресурспака, оно не может полностью предотвратить взлом с помощью профессиональных методов, таких как перехват пакетов.
+:::
+
+## 📦 Шифрование ресурспака \{#encrypt-resource-pack}
+{/* It is recommended to use the [encryptmypack](https://encryptmypack.com) online tool for encryption. The process is as follows:
+1. Prepare a resource pack that meets the requirements:
+   - Must be in `.mcpack` format
+   - The `manifest.json` file must be directly visible after extraction (not nested in a subfolder)
+2. Upload it to the encryption website to generate an encrypted pack */}
+Для шифрования рекомендуется использовать открытый консольный инструмент EncryptMyPack. Процесс следующий:
+
+1. **Скачайте инструмент**  
+   Скачайте последнюю версию программы со страницы [GitHub Releases](https://github.com/AllayMC/EncryptMyPack/releases/latest).
+2. **Подготовьте ресурспак**  
+   - Должен быть в формате `.zip` (файл .mcpack можно просто переименовать)
+   - В корне zip-файла должен находиться файл `manifest.json`
+   - Поддерживается включение подпаков (Sub Packs)
+3. **Шифрование**
+
+inputZip — полное имя входного zip-файла, например `example.zip`
+
+outputZip — полное имя выходного zip-файла, например `example.zip`
+
+key — произвольный 32-битный ключ. Если ключ не указан, будет использован ключ по умолчанию `liulihaocai123456789123456789123`.
+
+<Tabs groupId="operating-systems">
+  <TabItem value="win" label="Windows">
+```bash
+EncryptMyPack.exe encrypt <inputZip> <outputZip> [key]
+```
+  </TabItem>
+  <TabItem value="mac" label="macOS">
+```bash
+EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+  <TabItem value="linux" label="Linux">
+Добавьте права на выполнение
+```bash
+chmod +x EncryptMyPack
+```
+Затем вы можете выполнить следующую команду:
+```bash
+./EncryptMyPack encrypt <inputZip> <outputZip> [key]
+```
+</TabItem>
+</Tabs>
+
+:::tip Важное напоминание
+Nukkit-MOT лишь передаёт ключ клиенту и не участвует в самом процессе шифрования/расшифровки.
+:::
+
+## 🔑 Настройка ключа шифрования \{#configure-key}
+Ключи шифрования настраиваются в файле `packs.yml` в папке `resource_packs` на сервере (старые файлы `<pack name>.mcpack.key` больше не считываются). Файл создаётся автоматически при первом запуске; записи в нём индексируются по UUID пака, который можно найти в файле `manifest.json` пака в поле `header.uuid`.
+
+<FolderView
+  paths={[
+    'resource_packs/ExampleResourcePack.mcpack',
+    'resource_packs/packs.yml'
+  ]}
+/>
+
+```yaml
+# resource_packs/packs.yml
+"12c2b614-796a-3d8e-9364-cb39c86cebfa":
+  key: "0123456789abcdefGHIJKLMNOPQRSTUV" # 32-bit encryption key
+  cdn: "https://cdn.example.com/packs/ExampleResourcePack.mcpack" # optional
+```
+
+- `key`: 32-битный ключ шифрования для этого пака. Оставьте пустым, чтобы отключить шифрование.
+- `cdn` (необязательно): URL для скачивания пака с CDN. Клиент сначала пытается скачать пак по этому URL, а при неудаче автоматически переключается на обычную передачу данных чанками через сервер.
+
+:::tip Паки NetEase
+Файлы с именами вида `*.netease*` отправляются только игрокам, использующим клиент NetEase.
+:::
+
+## 🔄 Перезапуск сервера \{#restart-server}
+После изменения конфигурации необходимо перезапустить сервер, чтобы шифрование вступило в силу (Nukkit-MOT загружает конфигурации ресурспаков только при запуске).
+
+## ❓ Часто задаваемые вопросы \{#faq}
+| Вопрос | Ответ |
+|------|------|
+| Можно ли взломать зашифрованный ресурспак? | Он может быть взломан профессиональными методами, но значительно безопаснее незашифрованного ресурспака. |
+| Влияет ли шифрование на производительность игры? | Оно никак не влияет на производительность клиента или сервера. |
+| Поддерживается ли несколько зашифрованных паков? | Да, вы можете одновременно использовать несколько зашифрованных паков — просто добавьте в `packs.yml` секцию с UUID каждого пака. |
+
+:::success Готово!
+Теперь, когда ваши игроки будут загружать ресурспак, клиент автоматически использует настроенный ключ для его расшифровки и загрузки.
+:::

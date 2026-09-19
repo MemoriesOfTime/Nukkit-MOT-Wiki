@@ -1,0 +1,62 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.User Documentation": {
+    "message": "Документация пользователя",
+    "description": "The label for category 'User Documentation' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.User Documentation.link.generated-index.description": {
+    "message": "Развёртывание, настройка, эксплуатация и устранение неполадок при работе сервера Nukkit-MOT.",
+    "description": "The generated-index page description for category 'User Documentation' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "Быстрый старт",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started.link.generated-index.description": {
+    "message": "Полное руководство по запуску сервера Nukkit с нуля",
+    "description": "The generated-index page description for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Server Config": {
+    "message": "Конфигурация сервера",
+    "description": "The label for category 'Server Config' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Server Config.link.generated-index.description": {
+    "message": "О моём перерождении в сервер: настрой его под себя!",
+    "description": "The generated-index page description for category 'Server Config' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Developer Documentation": {
+    "message": "Документация для разработчиков",
+    "description": "The label for category 'Developer Documentation' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Developer Documentation.link.generated-index.description": {
+    "message": "Разработка плагинов, руководства по API и продвинутая кастомизация Nukkit-MOT.",
+    "description": "The generated-index page description for category 'Developer Documentation' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Basics": {
+    "message": "Основы разработки",
+    "description": "The label for category 'Tutorial Basics' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Basics.link.generated-index.description": {
+    "message": "Re:Zero — начало разработки NK-MOT в другом мире!",
+    "description": "The generated-index page description for category 'Tutorial Basics' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Guides": {
+    "message": "Руководства",
+    "description": "The label for category 'Guides' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Guides.link.generated-index.description": {
+    "message": "Знакомство с API Nukkit-MOT",
+    "description": "The generated-index page description for category 'Guides' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Tutorial Extras": {
+    "message": "Расширенные руководства",
+    "description": "The label for category 'Tutorial Extras' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Custom Content APIs": {
+    "message": "API кастомного контента",
+    "description": "The label for category 'Custom Content APIs' in sidebar 'tutorialSidebar'"
+  }
+}

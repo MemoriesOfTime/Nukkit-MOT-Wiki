@@ -1,0 +1,8 @@
+{
+  "label": "Быстрый старт",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Полное руководство по запуску сервера Nukkit с нуля"
+  }
+}

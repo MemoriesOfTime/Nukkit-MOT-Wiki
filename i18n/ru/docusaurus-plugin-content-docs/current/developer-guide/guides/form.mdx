@@ -1,0 +1,221 @@
+---
+sidebar_position: 10
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Руководство по формам
+
+В Nukkit-MOT формы делятся на четыре типа: модальные (Modal), простые (Simple), настраиваемые (Custom) и диалоги (Dialog).
+
+:::note
+
+Тип Dialog был добавлен в [PR#71](https://github.com/MemoriesOfTime/Nukkit-MOT/pull/71) (версия 1.20.30) и требует привязки к сущности для работы.
+
+:::
+
+## Модальная форма \{#modal-form}
+
+[FormWindowModal](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowModal.java) используется для простых действий подтверждения или отмены.
+
+### Пример использования \{#modal-form-usage-example}
+
+```java title="form/DemoModalForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowModal;
+
+public class DemoModalForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowModal form = new FormWindowModal("Title", "Description", "true", "false");
+        // Set actions for confirm and cancel
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            if (form.getResponse().getClickedButtonId() == 0) {
+                // User clicked the true button
+            } else {
+                // User clicked the false button
+            }
+        }));
+        // highlight-end
+        // Show the form to the player
+        player.showFormWindow(form);
+    }
+}
+```
+
+## Простая форма \{#simple-form}
+
+[FormWindowSimple](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowSimple.java) предоставляет более богатый набор кнопок.
+
+### Пример использования \{#simple-form-usage-example}
+
+```java title="form/DemoSimpleForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.element.ElementButton;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowSimple;
+
+public class DemoSimpleForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowSimple form = new FormWindowSimple("Title", "Description");
+        // Add buttons
+        form.addButton(new ElementButton("Button 1"));
+        form.addButton(new ElementButton("Button 2"));
+        form.addButton(new ElementButton("Button 3"));
+        // Set button click handling
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            int buttonIndex = form.getResponse().getClickedButtonId(); // Get the clicked button index
+            String buttonText = form.getResponse().getClickedButton().getText(); // Get the clicked button text
+            switch (buttonIndex) {
+                case 0:
+                    // Handle button 1 action
+                    break;
+                case 1:
+                    // Handle button 2 action
+                    break;
+                case 2:
+                    // Handle button 3 action
+                    break;
+                default:
+                    // Default handling
+                    break;
+            }
+        }));
+        // highlight-end
+        // Show the form to the player
+        player.showFormWindow(form);
+    }
+}
+```
+
+### Компоненты \{#simple-form-components}
+
+| Название компонента | Описание                                        | Ссылка                                                                                    |
+| -------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Кнопка         | Кнопка для простых действий по нажатию, может содержать изображения | [ElementButton](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementButton.java) |
+
+## Настраиваемая форма \{#custom-form}
+
+[FormWindowCustom](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowCustom.java) позволяет разработчикам настраивать содержимое и взаимодействие формы, включая поля ввода текста, выпадающие списки и т. д.
+
+### Пример использования \{#custom-form-usage-example}
+
+```java title="form/DemoCustomForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.form.element.ElementDropdown;
+import cn.nukkit.form.element.ElementInput;
+import cn.nukkit.form.handler.FormResponseHandler;
+import cn.nukkit.form.window.FormWindowCustom;
+
+import java.util.Arrays;
+
+public class DemoCustomForm {
+    public static void open(Player player) {
+        // highlight-start
+        FormWindowCustom form = new FormWindowCustom("Title");
+        // Add elements
+        form.addElement(new ElementInput("Text Input", "Default Value"));
+        form.addElement(new ElementDropdown("Dropdown", Arrays.asList("Option 1", "Option 2", "Option 3")));
+        // Set submission action
+        form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
+            if (form.wasClosed()) return;
+            String inputText = form.getResponse().getInputResponse(0); // Get the text input value
+            int selectedIndex = form.getResponse().getDropdownResponse(1).getElementID(); // Get the dropdown selection index
+            String selectedText = form.getResponse().getDropdownResponse(1).getElementContent(); // Get the dropdown selection text
+            // Handle user-submitted data
+        }));
+        // highlight-end
+        // Show the form to the player
+        player.showFormWindow(form);
+    }
+}
+```
+
+### Компоненты \{#custom-form-components}
+
+| Название компонента | Описание                                           | Ссылка                                                                                   |
+| -------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Выпадающий список | Выпадающий список, отображает перечень вариантов для выбора пользователем | [ElementDropdown](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementDropdown.java) |
+| Поле ввода     | Поле ввода текста, позволяет пользователям вводить строки | [ElementInput](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementInput.java) |
+| Метка          | Метка, добавляет текстовые надписи в форму         | [ElementLabel](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementLabel.java) |
+| Ползунок       | Горизонтальный ползунок, позволяет после задания минимального и максимального значений получать числовые значения | [ElementSlider](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementSlider.java) |
+| Ползунок с шагами | Горизонтальный ползунок с шагами, параметр задаётся строкой | [ElementStepSlider](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementStepSlider.java) |
+| Переключатель  | Переключатель, принимает логические значения (boolean) | [ElementToggle](https://github.com/MemoriesOfTime/Nukkit-MOT/tree/master/src/main/java/cn/nukkit/form/element/ElementToggle.java) |
+
+## Диалоговая форма \{#dialog-form}
+
+[FormWindowDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/FormWindowDialog.java) — особый тип формы, для работы которого требуется привязка к сущности. Сущность не может быть игроком.
+
+[ScrollingTextDialog](https://github.com/MemoriesOfTime/Nukkit-MOT/blob/master/src/main/java/cn/nukkit/form/window/ScrollingTextDialog.java) — расширенная версия диалога, предоставляющая возможность прокрутки текста.
+
+### Пример использования \{#dialog-form-usage-example}
+
+<Tabs groupId="dialog-type">
+  <TabItem value="normal" label="normal">
+```java title="form/DemoDialogForm.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.form.window.FormWindowDialog;
+
+public class DemoDialogForm {
+    public static void open(Player player, Entity entity) {
+        // highlight-start
+        FormWindowDialog form = new FormWindowDialog("Title", "Description", entity);
+        // Add options
+        form.addButton("Option 1");
+        form.addButton("Option 2");
+        // Set submission action
+        form.addHandler((player_, response) -> {
+            String buttonText = response.getClickedButton().getName(); // Get the clicked button text
+            // Handle user-submitted data
+        });
+        // highlight-end
+        // Show the dialog to the player
+        form.send(player);
+    }
+}
+```
+  </TabItem>
+  <TabItem value="scroll" label="scrolling text">
+```java title="form/DemoScrollingTextDialog.java"
+package cn.nukkitmot.exampleplugin.form;
+
+import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.form.window.FormWindowDialog;
+import cn.nukkit.form.window.ScrollingTextDialog;
+
+public class DemoScrollingTextDialog {
+    public static void open(Player player, Entity entity) {
+        // highlight-start
+        FormWindowDialog dialog = new FormWindowDialog("Title", "Description", entity);
+        // Add options
+        dialog.addButton("Option 1");
+        dialog.addButton("Option 2");
+        // Set submission action
+        dialog.addHandler((player_, response) -> {
+            String buttonText = response.getClickedButton().getName(); // Get the clicked button text
+            // Handle user-submitted data
+        });
+        ScrollingTextDialog form = new ScrollingTextDialog(player, dialog, 1);
+        // highlight-end
+        // Show the dialog to the player
+        form.send(player);
+    }
+}
+```
+  </TabItem>
+</Tabs>

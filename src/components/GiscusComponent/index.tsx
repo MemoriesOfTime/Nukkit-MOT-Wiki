@@ -19,7 +19,7 @@ export default function GiscusComponent() {
       emitMetadata="0"
       inputPosition="top"
       theme={colorMode}
-      lang={currentLocale === 'zh' ? 'zh-CN' : 'en'}
+      lang={currentLocale === 'zh' ? 'zh-CN' : currentLocale === 'ru' ? 'ru' : 'en'}
       loading="lazy"
     />
   );

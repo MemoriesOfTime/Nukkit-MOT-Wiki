@@ -1,0 +1,284 @@
+---
+sidebar_position: 12
+---
+
+# Руководство по скорбордам
+
+В Nukkit-MOT есть полноценный API скорбордов для отображения в боковой панели, списке игроков и под именем. Он поддерживает строки с произвольным текстом, строки, привязанные к игрокам, строки, привязанные к сущностям, регистрацию целей (objective) на уровне менеджера и хранение на основе JSON.
+
+:::tip Область, основанная на исходном коде
+Эта страница написана по текущему исходному коду Nukkit-MOT, особенно `IScoreboardManager`, `ScoreboardManager`, `IScoreboard`, `Scoreboard`, `ScoreboardLine`, `FakeScorer`, `PlayerScorer`, `EntityScorer` и встроенной команде `/scoreboard`.
+:::
+
+## Импорт правильного класса `Scoreboard`
+
+В дереве исходного кода есть два разных класса `Scoreboard`:
+
+- текущий API: `cn.nukkit.scoreboard.scoreboard.Scoreboard`
+- устаревшая обёртка совместимости: `cn.nukkit.scoreboard.Scoreboard`
+
+Для нового кода плагинов используйте класс из пакета `cn.nukkit.scoreboard.scoreboard`.
+
+## Основная модель
+
+Основные компоненты:
+
+| Тип | Роль |
+| --- | --- |
+| `IScoreboardManager` | Глобальный реестр, назначение слотов отображения, доступ к хранилищу |
+| `IScoreboard` / `Scoreboard` | Одна цель с отображаемым именем, критерием, порядком сортировки, наблюдателями и строками |
+| `IScoreboardLine` / `ScoreboardLine` | Один носитель значения (scorer) + одно значение счёта |
+| `IScorer` | Владелец строки: произвольный текст, игрок или сущность |
+| `DisplaySlot` | `SIDEBAR`, `LIST`, `BELOW_NAME` |
+| `SortOrder` | `ASCENDING` или `DESCENDING` |
+
+Важная точка входа:
+
+```java
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+```
+
+## 1. Приватная боковая панель для одного игрока
+
+Если вы хотите показать боковую панель только одному игроку, вам не нужна система слотов отображения глобального менеджера. Вы можете создать скорборд и напрямую подключить этого игрока как наблюдателя.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.network.protocol.types.SortOrder;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+public void showProfileSidebar(Player player, int kills, int coins) {
+    IScoreboard scoreboard = new Scoreboard("profile_sidebar", "Profile", "dummy", SortOrder.DESCENDING);
+
+    FakeScorer killsLine = new FakeScorer("Kills");
+    FakeScorer coinsLine = new FakeScorer("Coins");
+
+    scoreboard.addLine(killsLine, kills);
+    scoreboard.addLine(coinsLine, coins);
+    scoreboard.addViewer(player, DisplaySlot.SIDEBAR);
+}
+```
+
+Чтобы снова скрыть её:
+
+```java
+scoreboard.removeViewer(player, DisplaySlot.SIDEBAR);
+```
+
+Этот подход полезен для индивидуального интерфейса игрока, которому не нужны интеграция с командами или глобальный поиск целей.
+
+## 2. Обновление значений
+
+Сохраняйте ссылку на scorer или строку, если хотите обновить её позже. `ScoreboardLine#setScore(...)` автоматически отправляет обновление текущим наблюдателям.
+
+```java
+import cn.nukkit.scoreboard.scoreboard.IScoreboardLine;
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+FakeScorer killsLine = new FakeScorer("Kills");
+scoreboard.addLine(killsLine, 0);
+
+IScoreboardLine line = scoreboard.getLine(killsLine);
+if (line != null) {
+    line.setScore(12);
+}
+```
+
+Также можно удалять строки:
+
+```java
+scoreboard.removeLine(killsLine);
+```
+
+## 3. Массовая пересборка и `resend()`
+
+При множестве одновременных изменений пересоберите скорборд в памяти и отправьте его заново, вместо того чтобы отправлять десятки инкрементальных обновлений.
+
+```java
+import cn.nukkit.scoreboard.scorer.FakeScorer;
+
+scoreboard.removeAllLine(false);
+scoreboard.addLine(new FakeScorer("Kills"), kills);
+scoreboard.addLine(new FakeScorer("Coins"), coins);
+scoreboard.addLine(new FakeScorer("Rank"), rankPoints);
+scoreboard.resend();
+```
+
+Есть также сокращение для простых боковых панелей с произвольным текстом:
+
+```java
+scoreboard.setLines(List.of(
+    "Profile",
+    "Kills",
+    "Coins"
+));
+```
+
+`setLines(List<String>)` пересобирает все строки с использованием `FakeScorer`, а затем вызывает `resend()`.
+
+## 4. Глобальные цели через `ScoreboardManager`
+
+Регистрируйте скорборд в менеджере, если хотите, чтобы он вёл себя как настоящая серверная цель:
+
+- доступность по имени цели
+- возможность использования командой `/scoreboard`
+- видимость для функций, которые ищут цели счёта по имени
+- возможность сохранения через хранилище скорбордов
+
+```java
+import cn.nukkit.scoreboard.manager.IScoreboardManager;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+
+IScoreboardManager manager = this.getServer().getScoreboardManager();
+IScoreboard scoreboard = new Scoreboard("kills", "Kills", "dummy");
+
+if (!manager.containScoreboard(scoreboard.getObjectiveName())) {
+    manager.addScoreboard(scoreboard);
+}
+```
+
+Если позже вы захотите удалить его:
+
+```java
+manager.removeScoreboard("kills");
+```
+
+## 5. Слоты отображения менеджера против прямых наблюдателей
+
+Существует два стиля отображения:
+
+### Прямые наблюдатели у объекта скорборда
+
+Используйте `scoreboard.addViewer(player, slot)`, когда нужен точный контроль для каждого игрока.
+
+### Отображение слота под управлением менеджера
+
+Используйте `manager.setDisplay(slot, scoreboard)`, когда хотите назначить один скорборд на глобальный слот для зарегистрированных наблюдателей менеджера.
+
+```java
+import cn.nukkit.network.protocol.types.DisplaySlot;
+
+manager.setDisplay(DisplaySlot.SIDEBAR, scoreboard);
+```
+
+Чтобы очистить слот:
+
+```java
+manager.setDisplay(DisplaySlot.SIDEBAR, null);
+```
+
+Если вы используете отображение на уровне менеджера в коде плагина, регистрируйте и удаляйте наблюдателей самостоятельно:
+
+```java
+manager.addViewer(player);
+manager.removeViewer(player);
+```
+
+## 6. Выбор типа Scorer
+
+Тип scorer определяет, к чему привязана строка.
+
+| Scorer | Для чего подходит | Примечания |
+| --- | --- | --- |
+| `FakeScorer` | Текстовые строки вроде `Kills`, `Coins`, пустые разделители | Равенство определяется по тексту fake-имени |
+| `PlayerScorer` | Реальные значения, привязанные к игрокам | Пакеты собираются только когда игрок в сети |
+| `EntityScorer` | Значения, привязанные к сущностям | Полезно для строк, управляемых селекторами или привязанных к конкретным сущностям |
+
+### Пример: скорборд в стиле здоровья под именем
+
+`BELOW_NAME` наиболее полезен с `PlayerScorer`, поскольку строка связана с реальным игроком.
+
+```java
+import cn.nukkit.Player;
+import cn.nukkit.network.protocol.types.DisplaySlot;
+import cn.nukkit.scoreboard.scoreboard.IScoreboard;
+import cn.nukkit.scoreboard.scoreboard.Scoreboard;
+import cn.nukkit.scoreboard.scorer.PlayerScorer;
+
+IScoreboard healthBoard = new Scoreboard("health", "HP", "dummy");
+
+for (Player target : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addLine(new PlayerScorer(target), (int) target.getHealth());
+}
+
+for (Player viewer : this.getServer().getOnlinePlayers().values()) {
+    healthBoard.addViewer(viewer, DisplaySlot.BELOW_NAME);
+}
+```
+
+Когда здоровье игрока меняется, обновите строку этого игрока:
+
+```java
+PlayerScorer scorer = new PlayerScorer(player);
+if (healthBoard.containLine(scorer)) {
+    healthBoard.getLine(scorer).setScore((int) player.getHealth());
+}
+```
+
+## 7. Порядок сортировки и слоты
+
+Текущие слоты отображения:
+
+- `DisplaySlot.SIDEBAR`
+- `DisplaySlot.LIST`
+- `DisplaySlot.BELOW_NAME`
+
+Текущие режимы сортировки:
+
+- `SortOrder.ASCENDING`
+- `SortOrder.DESCENDING`
+
+`SortOrder` важнее всего для `SIDEBAR` и `LIST`. `BELOW_NAME` обычно используется с одним значением на отслеживаемого игрока, а не как ранжированный список.
+
+## 8. Сохранение и `scoreboard.json`
+
+Сервер создаёт `ScoreboardManager` с `JSONScoreboardStorage`, который опирается на файл `scoreboard.json` в пути данных сервера.
+
+Сохранить и перезагрузить данные можно через менеджер:
+
+```java
+manager.save();
+manager.read();
+```
+
+Важная деталь: изменения скорборда не сохраняются автоматически при каждом добавлении или изменении строки. Если ваш плагин рассчитывает на сохранение состояния скорборда после перезапуска, явно вызывайте `manager.save()` в подходящий момент.
+
+## 9. Безопасность основного потока
+
+API скорбордов взаимодействуют с пакетами `Player` и состоянием наблюдателей. Относитесь к созданию, обновлению и изменению отображения скорборда как к работе в основном потоке.
+
+Если значение приходит из медленного ввода-вывода или тяжёлых вычислений:
+
+1. вычислите его асинхронно
+2. вернитесь в основной поток
+3. обновите скорборд уже там
+
+Шаблон передачи между потоками описан в руководстве по планировщику.
+
+## Частые ошибки
+
+### 1. Импорт устаревшего `cn.nukkit.scoreboard.Scoreboard`
+
+Этот класс существует только для совместимости со старыми плагинами. Для новой работы используйте `cn.nukkit.scoreboard.scoreboard.Scoreboard`.
+
+### 2. Повторное использование одного и того же fake-текста
+
+Равенство `FakeScorer` определяется его текстом. Если вы используете одно и то же fake-имя дважды, более поздняя строка заменит более раннюю.
+
+Для разделителей боковой панели или нескольких визуально пустых строк используйте разные строки, например с разными кодами форматирования.
+
+### 3. Предположение, что `addScoreboard(...)` отклоняет дубликаты
+
+Текущий `ScoreboardManager.addScoreboard(...)` перезаписывает цель по её имени. Проверяйте `containScoreboard(name)` самостоятельно перед добавлением.
+
+### 4. Ожидание нормального отображения строк `PlayerScorer` для офлайн-игроков
+
+`PlayerScorer.toNetworkInfo(...)` возвращает `null`, когда игрок не в сети, поэтому такие строки отфильтровываются при отправке пакетов. Используйте `FakeScorer`, если нужны чисто текстовые строки или безопасные при офлайне метки.
+
+### 5. Отношение к отображению менеджера как к автоматическому для каждого игрока
+
+`manager.setDisplay(...)` отправляет данные только текущим наблюдателям менеджера. В коде плагина явно добавляйте или удаляйте наблюдателей, если вы полагаетесь на поведение отображения на уровне менеджера.
