@@ -1,0 +1,94 @@
+.hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-font-base-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: var(--ifm-global-shadow-lw);
+  animation: hint-rise 0.4s ease-out;
+}
+
+@keyframes hint-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint {
+    animation: none;
+  }
+}
+
+.globe {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.switchButton {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-contrast-foreground, #fff);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.switchButton:hover {
+  opacity: 0.85;
+}
+
+.closeButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--ifm-font-base-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.closeButton:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+@media (max-width: 480px) {
+  .hint {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .text {
+    font-size: 13px;
+  }
+}

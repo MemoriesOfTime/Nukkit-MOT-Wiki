@@ -1,17 +1,8 @@
 import { ReactNode } from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import { getDateParts } from '@site/src/utils/dateParts';
 
 // 以北京时间判断是否为 10 月 1 日（国庆节）
-function getShanghaiDateParts(): { month: number; day: number; year: number } {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Shanghai',
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-  }).formatToParts(new Date());
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  return { month: get('month'), day: get('day'), year: get('year') };
-}
 
 // 金星飘落：固定参数避免 SSR 与客户端水合不一致
 const STARS = [
@@ -32,7 +23,7 @@ const STARS = [
 export default function NationalDayTheme(): ReactNode {
   const { i18n } = useDocusaurusContext();
   const isChinese = i18n.currentLocale === 'zh';
-  const { month, day, year } = getShanghaiDateParts();
+  const { month, day, year } = getDateParts('Asia/Shanghai');
   const active = isChinese && month === 10 && day === 1;
 
   if (!active) return null;

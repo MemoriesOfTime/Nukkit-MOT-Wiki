@@ -260,3 +260,241 @@ html:has(.national-day-banner) .footer--dark {
     animation: none;
   }
 }
+
+/* ===== 程序员节主题（每年的第 256 天，仅俄语页面由 ProgrammersDayTheme 组件启用） =====
+   通过 :has(.programmers-day-banner) 检测横幅是否存在来决定整站配色，
+   不依赖 JS 给 <html> 加类。 */
+html:has(.programmers-day-banner) {
+  --ifm-color-primary: #2b4acb;
+  --ifm-color-primary-dark: #2742b6;
+  --ifm-color-primary-darker: #243daa;
+  --ifm-color-primary-darkest: #1d328a;
+  --ifm-color-primary-light: #405cd2;
+  --ifm-color-primary-lighter: #4d68d6;
+  --ifm-color-primary-lightest: #7186e0;
+  /* 页面整体冷蓝基调 */
+  --ifm-background-color: #f5f7ff;
+}
+
+html[data-theme='dark']:has(.programmers-day-banner) {
+  --ifm-color-primary: #85a2ff;
+  --ifm-color-primary-dark: #6d8dfb;
+  --ifm-color-primary-darker: #5c7cf8;
+  --ifm-color-primary-darkest: #3d58d1;
+  --ifm-color-primary-light: #9db6ff;
+  --ifm-color-primary-lighter: #b0c5ff;
+  --ifm-color-primary-lightest: #d6e0ff;
+  --ifm-background-color: #10141f;
+}
+
+html:has(.programmers-day-banner) .footer--dark {
+  background-color: #191f35;
+}
+
+/* --- 终端风横幅：黑底、等宽字体、结尾闪烁光标 --- */
+.programmers-day-banner {
+  position: relative;
+  z-index: calc(var(--ifm-z-index-fixed) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #0d1117;
+  border-bottom: 1px solid #30363d;
+  color: #7ee787;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+.programmers-day-banner-tag {
+  color: #79c0ff;
+}
+
+.programmers-day-banner-extra {
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.programmers-day-cursor {
+  color: #7ee787;
+  animation: programmers-day-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes programmers-day-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* --- 代码符号雨：全屏固定层，不响应鼠标，不遮挡交互 --- */
+.programmers-day-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.programmers-day-rain span {
+  position: absolute;
+  top: -5vh;
+  font-family: var(--ifm-font-family-monospace);
+  text-shadow: 0 0 6px color-mix(in srgb, currentColor 55%, transparent);
+  opacity: 0;
+  animation-name: programmers-day-glyph-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes programmers-day-glyph-fall {
+  0% {
+    transform: translate3d(0, -6vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.55;
+  }
+  92% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(4vw, 110vh, 0) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* 小屏隐藏二进制补充说明，横幅保持单行 */
+@media (max-width: 576px) {
+  .programmers-day-banner-extra {
+    display: none;
+  }
+}
+
+/* 减少动态：关掉符号雨与光标闪烁 */
+@media (prefers-reduced-motion: reduce) {
+  .programmers-day-rain {
+    display: none;
+  }
+
+  .programmers-day-cursor {
+    animation: none;
+  }
+}
+
+/* ===== Minecraft 生日主题（每年 5 月 17 日，全语言页面由 MinecraftBirthdayTheme 组件启用） =====
+   2009-05-17 游戏首次公开发布。通过 :has(.minecraft-birthday-banner) 检测横幅是否存在
+   来决定整站配色，不依赖 JS 给 <html> 加类。 */
+html:has(.minecraft-birthday-banner) {
+  --ifm-color-primary: #4e9e3e;
+  --ifm-color-primary-dark: #458d37;
+  --ifm-color-primary-darker: #408433;
+  --ifm-color-primary-darkest: #356c2a;
+  --ifm-color-primary-light: #5cae4c;
+  --ifm-color-primary-lighter: #68b658;
+  --ifm-color-primary-lightest: #84c977;
+  /* 页面整体草绿基调 */
+  --ifm-background-color: #f5faf1;
+}
+
+html[data-theme='dark']:has(.minecraft-birthday-banner) {
+  --ifm-color-primary: #6fdc5f;
+  --ifm-color-primary-dark: #5ccd4e;
+  --ifm-color-primary-darker: #52c245;
+  --ifm-color-primary-darkest: #3f9e35;
+  --ifm-color-primary-light: #82e374;
+  --ifm-color-primary-lighter: #96e987;
+  --ifm-color-primary-lightest: #bcf0b0;
+  --ifm-background-color: #0f1710;
+}
+
+html:has(.minecraft-birthday-banner) .footer--dark {
+  background-color: #142316;
+}
+
+/* --- 草方块横幅：上缘草绿、下缘泥土，两侧苦力怕脸 --- */
+.minecraft-birthday-banner {
+  position: relative;
+  z-index: calc(var(--ifm-z-index-fixed) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 5px, rgba(0, 0, 0, 0.05) 5px 10px),
+    linear-gradient(180deg, #6cbb45 0 36%, #7a4f2d 36% 100%);
+  border-bottom: 2px solid #59371d;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.minecraft-birthday-banner-extra {
+  color: #f0e2c8;
+  font-weight: 500;
+}
+
+.minecraft-birthday-creeper {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+}
+
+/* --- 像素雨：全屏固定层，不响应鼠标，不遮挡交互 --- */
+.minecraft-birthday-pixels {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.minecraft-birthday-pixels span {
+  position: absolute;
+  top: -5vh;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: minecraft-birthday-pixel-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes minecraft-birthday-pixel-fall {
+  0% {
+    transform: translate3d(0, -6vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.55;
+  }
+  92% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(4vw, 110vh, 0) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* 小屏隐藏首发日期补充说明，横幅保持单行 */
+@media (max-width: 576px) {
+  .minecraft-birthday-banner-extra {
+    display: none;
+  }
+}
+
+/* 减少动态：关掉像素雨 */
+@media (prefers-reduced-motion: reduce) {
+  .minecraft-birthday-pixels {
+    display: none;
+  }
+}
