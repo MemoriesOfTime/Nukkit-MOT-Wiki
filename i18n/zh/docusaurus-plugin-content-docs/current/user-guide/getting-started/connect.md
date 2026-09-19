@@ -61,6 +61,8 @@ CheckNetIsolation LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"
 
 2. **配置防火墙**
    - 确保防火墙允许 **UDP 19132** 端口的入站连接
+   - 同时放行 **TCP 19132** 端口供 [NetherNet](../server-config/nukkit-mot-yml.mdx) 使用——基岩版 1.26.50 起客户端默认的 WebRTC 传输
+   - NetherNet 媒体流量（WebRTC 游戏数据）默认使用 **UDP 19134** 端口——改过端口的话见 [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
    - 云服务器需要在安全组中开放端口
 
 3. **配置端口转发** (如果需要)
@@ -87,7 +89,6 @@ Nukkit 服务器支持以下基岩版客户端:
 netease-settings:
   client-support: true
 ```
-旧的 `server.properties` 中的 `netease-client-support` 会在启动时自动迁移到 `nukkit-mot.yml`。
 :::
 
 ## 验证连接

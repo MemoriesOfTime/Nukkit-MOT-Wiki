@@ -8,6 +8,7 @@ import ZlibProviderDemo from '@site/src/components/ZlibProviderDemo';
 import CompressionThresholdDemo from '@site/src/components/CompressionThresholdDemo';
 import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
 import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
+import DefaultPortsGrid from '@site/src/components/DefaultPortsGrid';
 
 # nukkit-mot.yml
 
@@ -140,6 +141,79 @@ LevelDB 自动压缩任务运行的频率
 
 ## network-settings（网络设置） {#network-settings}
 
+### `nethernet` {#network-settings-nethernet}
+
+NetherNet（WebRTC）传输设置，与 RakNet 并行运行
+
+NetherNet 是基岩版用来接替 RakNet 的、基于 WebRTC 的传输协议：1.21.90+ 客户端已可通过它接入（最初用于纯 UDP 被屏蔽的受限网络），自基岩版 1.26.50 起更是客户端的默认传输方式。Nukkit-MOT 同时监听两种传输——旧客户端继续走 RakNet，NetherNet 客户端通过 HTTP 信令 + WebRTC 接入
+
+两种传输对网络的占用如下：
+
+- 信令走 **TCP `server-port`**（UDP 侧仍归 RakNet）——请在防火墙放行该端口的 TCP，否则 NetherNet 玩家完全无法连接
+- 媒体（游戏流量）走 **UDP**——默认钉在 `19134`（ICE 复用，单端口服务所有连接）；可通过 [`server-udp-ports`](server-properties.mdx#server-udp-ports) 修改（设为 `0` 则改回系统自动分配），该条目还说明了媒体 UDP 不通时的处理方法
+
+<DefaultPortsGrid
+    labelSignaling="NetherNet 信令"
+    labelMedia="NetherNet 媒体（ICE 复用）"
+    labelIpv6Idle="IPv6 监听器（默认关闭）"
+    legendActive="默认监听"
+    legendIdle="默认未占用"
+    caption="默认配置下的端口占用（server-port=19132，NetherNet 默认开启，server-udp-ports=19134）"
+/>
+
+监控：`/status` 会输出最近 10 分钟的 NetherNet 区块（接受的加入、ICE 连通数、完成的握手）；`/status full` 额外显示媒体流量与掉线计数。NetherNet 禁用时该区块隐藏。
+
+```yaml
+network-settings:
+  nethernet:
+    enabled: true
+    ice-servers: []
+    identity-file: keys/nethernet-identity.pem
+    identity-domain: ''
+```
+
+#### `enabled`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | on  |
+
+默认与 RakNet 并行启用
+
+启用期间，信令通过 TCP 复用 `server-port`，媒体钉在 UDP `19134`（ICE 复用，单端口服务所有连接——见 [`server-udp-ports`](server-properties.mdx#server-udp-ports)；设为 `0` 则改回系统自动分配）
+
+设为 `false` 则只运行 RakNet——TCP 信令端点与媒体端口随之消失，其他一切不变
+
+#### `ice-servers`
+| 数据类型    | 默认值 |
+|---------|-----|
+| `List<String>` | [] |
+
+额外的 ICE STUN/TURN 服务器，例如 `stun:stun.l.google.com:19302`
+
+TURN 凭证直接写在 URL 中：`turn:user:pass@host:port?transport=udp`
+
+当玩家侧为对称 NAT、无法建立直连媒体路径时，可添加 TURN 中继——完整的媒体不可达排查清单见 [`server-udp-ports`](server-properties.mdx#server-udp-ports)
+
+#### `identity-file`
+| 数据类型    | 默认值 |
+|---------|-----|
+| String | keys/nethernet-identity.pem |
+
+运营者身份 PEM 文件，首次启动时生成，请妥善保留
+
+更换该文件会使所有回归玩家重新确认信任提示
+
+运行多个服务器？在它们之间共享同一身份文件即可呈现为同一运营者
+
+#### `identity-domain`
+| 数据类型    | 默认值 |
+|---------|-----|
+| String |     |
+
+客户端信任提示中显示的运营者名称，留空则使用 MOTD
+
+仅用于展示——可以随时修改，无需更换身份密钥
+
 ### `zlib-provider`
 | 数据类型    | 默认值 |
 |---------|-----|
@@ -247,7 +321,9 @@ RakNet Cookie 模式，用于连接安全验证。可用值：
 单位为毫秒，1000 毫秒 = 1 秒
 
 :::note
-此选项目前为保留项，服务器尚未实际应用它。
+此超时同时约束 RakNet 与 NetherNet 会话的登录阶段，并约束 NetherNet WebRTC 握手阶段。
+
+设为 `0` 可禁用登录超时；此时 NetherNet WebRTC 握手仍会回退到 30 秒。
 :::
 
 ### `query-plugins`

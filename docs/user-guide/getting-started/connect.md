@@ -61,6 +61,8 @@ If the server is deployed on a remote host or cloud server:
 
 2. **Configure Firewall**
    - Ensure the firewall allows inbound connections on **UDP port 19132**
+   - Also open **TCP port 19132** for [NetherNet](../server-config/nukkit-mot-yml.mdx), the WebRTC transport that is the client default since Bedrock 1.26.50
+   - NetherNet media (WebRTC game traffic) uses **UDP port 19134** by default — see [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports) if you changed it
    - Cloud servers need to open the port in security groups
 
 3. **Configure Port Forwarding** (if needed)
@@ -87,7 +89,6 @@ If using NetEase Minecraft client, make sure to enable in `nukkit-mot.yml`:
 netease-settings:
   client-support: true
 ```
-The legacy `netease-client-support` key in `server.properties` is automatically migrated to `nukkit-mot.yml` on startup.
 :::
 
 ## Verify Connection

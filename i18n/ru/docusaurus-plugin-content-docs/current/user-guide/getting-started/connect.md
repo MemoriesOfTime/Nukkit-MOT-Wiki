@@ -61,6 +61,8 @@ CheckNetIsolation LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"
 
 2. **Настройте межсетевой экран**
    - Убедитесь, что межсетевой экран разрешает входящие подключения по **UDP-порту 19132**
+   - Также откройте **TCP-порт 19132** для [NetherNet](../server-config/nukkit-mot-yml.mdx) — транспорта на WebRTC, который по умолчанию используется клиентами с Bedrock 1.26.50
+   - Медиатрафик NetherNet (игровые данные WebRTC) по умолчанию использует **UDP-порт 19134** — если порт изменён, см. [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
    - Для облачных серверов необходимо открыть порт в группах безопасности
 
 3. **Настройте проброс портов** (при необходимости)
@@ -87,7 +89,6 @@ CheckNetIsolation LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"
 netease-settings:
   client-support: true
 ```
-Устаревший ключ `netease-client-support` из `server.properties` автоматически переносится в `nukkit-mot.yml` при запуске.
 :::
 
 ## Проверка подключения

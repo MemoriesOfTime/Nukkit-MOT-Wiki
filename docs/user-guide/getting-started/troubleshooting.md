@@ -110,7 +110,18 @@ Enable NetEase client support in `nukkit-mot.yml`:
 netease-settings:
   client-support: true
 ```
-The legacy `netease-client-support` key in `server.properties` is automatically migrated to `nukkit-mot.yml` on startup.
+
+### NetherNet Players Hang on Connecting
+
+**Issue Description:**
+Players using NetherNet (the WebRTC transport, the client default since Bedrock 1.26.50) hang on "Connecting" or drop right after joining. The log shows `NetherNet media may be unreachable: ... ICE attempts, 0 connected`.
+
+**Check Method:**
+- `/status` shows NetherNet joins accepted while ICE connected stays 0 — the media UDP path is blocked
+
+**Solution:**
+- Open `server-port` for TCP (NetherNet signaling) in the firewall
+- Allow the media UDP port inbound (firewall / cloud security group / port forwarding) — `19134` by default; for port windows, NAT port mappings and TURN relay see [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
 
 ## Plugin Issues
 

@@ -8,6 +8,7 @@ import ZlibProviderDemo from '@site/src/components/ZlibProviderDemo';
 import CompressionThresholdDemo from '@site/src/components/CompressionThresholdDemo';
 import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
 import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
+import DefaultPortsGrid from '@site/src/components/DefaultPortsGrid';
 
 # nukkit-mot.yml
 
@@ -136,6 +137,72 @@ See: https://spark.lucko.me/docs
 
 ## network-settings (Network Settings) {#network-settings}
 
+### `nethernet` {#network-settings-nethernet}
+
+NetherNet (WebRTC) transport settings, runs alongside RakNet
+
+NetherNet is the WebRTC-based transport Bedrock Edition uses to succeed RakNet: clients 1.21.90+ can join over it (starting with restricted networks where plain UDP is blocked), and since Bedrock 1.26.50 it is the client's default transport. Nukkit-MOT listens on both transports at once — legacy clients keep RakNet, NetherNet clients join over HTTP signaling + WebRTC
+
+The two transports use the network like this:
+
+- Signaling over **TCP on `server-port`** (RakNet keeps the UDP side) — open `server-port` for TCP in the firewall, otherwise NetherNet players cannot connect at all
+- Media (game traffic) over **UDP** — pinned to `19134` by default, a single ICE mux port that serves all peers; change it (or set `0` for system-assigned ports) via [`server-udp-ports`](server-properties.mdx#server-udp-ports), which also explains what to do when media UDP is unreachable
+
+<DefaultPortsGrid />
+
+Monitoring: `/status` prints a NetherNet block covering the last 10 minutes (joins accepted, ICE connections, completed handshakes); `/status full` adds media traffic and drop counters. The block is hidden while NetherNet is disabled.
+
+```yaml
+network-settings:
+  nethernet:
+    enabled: true
+    ice-servers: []
+    identity-file: keys/nethernet-identity.pem
+    identity-domain: ''
+```
+
+#### `enabled`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enabled by default alongside RakNet
+
+While enabled, signaling shares `server-port` over TCP and media pins UDP `19134` (one ICE mux port serves all peers — see [`server-udp-ports`](server-properties.mdx#server-udp-ports); `0` reverts media to system-assigned ports)
+
+Set to `false` to run RakNet only — the TCP signaling endpoint and the media port disappear, nothing else changes
+
+#### `ice-servers`
+| Data Type    | Default Value |
+|--------------|---------------|
+| `List<String>` | []          |
+
+Extra ICE STUN/TURN servers, e.g. `stun:stun.l.google.com:19302`
+
+TURN credentials go in the URL: `turn:user:pass@host:port?transport=udp`
+
+Add a TURN relay when players behind symmetric NAT cannot establish a direct media path — see [`server-udp-ports`](server-properties.mdx#server-udp-ports) for the full media-unreachable checklist
+
+#### `identity-file`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    | keys/nethernet-identity.pem |
+
+Operator identity PEM file, generated on first start, keep it
+
+Changing it makes all returning players re-confirm the trust prompt
+
+Running several servers? Share one identity file across them to present as the same operator
+
+#### `identity-domain`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Operator name in the client trust prompt, empty uses the MOTD
+
+Display text only — it can be changed at any time without replacing the identity key
+
 ### `zlib-provider`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -228,7 +295,9 @@ how long should the server wait before kicking player if no response from the cl
 in milliseconds, 1000 milliseconds = 1 second
 
 :::note
-This option is currently reserved and not yet applied by the server.
+This timeout bounds the login phase of both RakNet and NetherNet sessions, and also bounds the NetherNet WebRTC handshake phase.
+
+Set it to `0` to disable the login timeout; the NetherNet WebRTC handshake then still falls back to 30 seconds.
 :::
 
 ### `query-plugins`

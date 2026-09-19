@@ -110,7 +110,18 @@ Address already in use
 netease-settings:
   client-support: true
 ```
-Устаревший ключ `netease-client-support` из `server.properties` автоматически переносится в `nukkit-mot.yml` при запуске.
+
+### Игроки NetherNet застревают на «Подключении»
+
+**Описание проблемы:**
+Игроки NetherNet (транспорт WebRTC, клиент по умолчанию с Bedrock 1.26.50) застревают на «Подключении» или отключаются сразу после входа. В логе — `NetherNet media may be unreachable: ... ICE attempts, 0 connected`.
+
+**Метод проверки:**
+- `/status` показывает рост принятых входов NetherNet при ICE-подключениях, равных 0 — путь UDP для медиатрафика заблокирован
+
+**Решение:**
+- Откройте `server-port` для TCP (сигналинг NetherNet) в файрволе
+- Разрешите входящий UDP для порта медиатрафика (файрвол / группы безопасности / проброс портов) — по умолчанию это `19134`; про диапазоны портов, NAT-отображение и TURN-релей см. [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
 
 ## Проблемы с плагинами
 

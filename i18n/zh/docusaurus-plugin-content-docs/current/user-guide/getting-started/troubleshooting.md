@@ -110,7 +110,18 @@ Address already in use
 netease-settings:
   client-support: true
 ```
-旧的 `server.properties` 中的 `netease-client-support` 会在启动时自动迁移到 `nukkit-mot.yml`。
+
+### NetherNet 玩家卡在"连接中"
+
+**问题描述:**
+使用 NetherNet（WebRTC 传输，基岩版 1.26.50 起客户端默认）的玩家卡在"连接中"，或加入后立刻掉线。日志出现 `NetherNet media may be unreachable: ... ICE attempts, 0 connected`。
+
+**检查方法:**
+- `/status` 中 NetherNet 的"接受的加入"在增长而 ICE 连通数恒为 0 —— 媒体 UDP 路径被阻断
+
+**解决方案:**
+- 在防火墙放行 `server-port` 的 TCP（NetherNet 信令）
+- 放行媒体 UDP 端口的入站（防火墙/云安全组/端口转发）——默认为 `19134`；端口窗口、NAT 端口映射与 TURN 中继详见 [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
 
 ## 插件问题
 

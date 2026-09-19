@@ -8,6 +8,7 @@ import ZlibProviderDemo from '@site/src/components/ZlibProviderDemo';
 import CompressionThresholdDemo from '@site/src/components/CompressionThresholdDemo';
 import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
 import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
+import DefaultPortsGrid from '@site/src/components/DefaultPortsGrid';
 
 # nukkit-mot.yml
 
@@ -136,6 +137,79 @@ import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
 
 ## network-settings (Настройки сети) {#network-settings}
 
+### `nethernet` {#network-settings-nethernet}
+
+Настройки транспорта NetherNet (WebRTC), работает параллельно с RakNet
+
+NetherNet — основанный на WebRTC транспорт, которым Bedrock Edition приходит на смену RakNet: клиенты версий 1.21.90+ могут подключаться через него (сначала — из сетей с ограничениями, где заблокирован чистый UDP), а с Bedrock 1.26.50 это транспорт клиента по умолчанию. Nukkit-MOT прослушивает оба транспорта одновременно — старые клиенты остаются на RakNet, клиенты NetherNet заходят через HTTP-сигналинг + WebRTC
+
+Транспорты используют сеть так:
+
+- Сигналинг по **TCP на порту `server-port`** (UDP-сторона остаётся за RakNet) — откройте `server-port` для TCP в файрволе, иначе игроки NetherNet вовсе не смогут подключиться
+- Медиатрафик (игровые данные) по **UDP** — по умолчанию закреплён за портом `19134` (ICE mux, один порт обслуживает всех участников); меняется через [`server-udp-ports`](server-properties.mdx#server-udp-ports) (`0` — снова системное назначение), там же описано, что делать, если UDP медиатрафика недоступен
+
+<DefaultPortsGrid
+    labelSignaling="Сигналинг NetherNet"
+    labelMedia="Медиатрафик NetherNet (ICE mux)"
+    labelIpv6Idle="IPv6-прослушивание (выключено)"
+    legendActive="прослушивается по умолчанию"
+    legendIdle="не используется по умолчанию"
+    caption="Занятость портов при конфигурации по умолчанию (server-port=19132, NetherNet включён, server-udp-ports=19134)"
+/>
+
+Мониторинг: `/status` выводит блок NetherNet за последние 10 минут (принятые входы, ICE-подключения, завершённые рукопожатия); `/status full` добавляет трафик и счётчики отключений. Пока NetherNet отключён, блок скрыт.
+
+```yaml
+network-settings:
+  nethernet:
+    enabled: true
+    ice-servers: []
+    identity-file: keys/nethernet-identity.pem
+    identity-domain: ''
+```
+
+#### `enabled`
+| Тип данных | Значение по умолчанию |
+|-----------|---------------|
+| Boolean   | on            |
+
+Включён по умолчанию параллельно с RakNet
+
+Пока включён, сигналинг использует `server-port` по TCP, а медиатрафик закреплён за UDP `19134` (один ICE mux порт обслуживает всех участников — см. [`server-udp-ports`](server-properties.mdx#server-udp-ports); `0` возвращает системное назначение портов)
+
+Установите `false`, чтобы работать только с RakNet — TCP-эндпоинт сигналинга и порт медиатрафика исчезнут, больше ничего не изменится
+
+#### `ice-servers`
+| Тип данных    | Значение по умолчанию |
+|--------------|---------------|
+| `List<String>` | []          |
+
+Дополнительные ICE STUN/TURN-серверы, например `stun:stun.l.google.com:19302`
+
+Учётные данные TURN указываются прямо в URL: `turn:user:pass@host:port?transport=udp`
+
+Добавьте TURN-релей, когда игроки за симметричным NAT не могут установить прямой путь для медиатрафика — полный чек-лист при недоступном медиатрафике см. в [`server-udp-ports`](server-properties.mdx#server-udp-ports)
+
+#### `identity-file`
+| Тип данных | Значение по умолчанию |
+|-----------|---------------|
+| String    | keys/nethernet-identity.pem |
+
+PEM-файл идентичности оператора, создаётся при первом запуске — сохраните его
+
+Его замена заставит всех возвращающихся игроков заново подтверждать запрос доверия
+
+Запускаете несколько серверов? Расшарьте один файл идентичности между ними, чтобы выглядеть единым оператором
+
+#### `identity-domain`
+| Тип данных | Значение по умолчанию |
+|-----------|---------------|
+| String    |               |
+
+Имя оператора в запросе доверия на клиенте; если пусто, используется MOTD
+
+Только отображаемый текст — его можно менять в любой момент, не меняя ключ идентичности
+
 ### `zlib-provider`
 | Тип данных | Значение по умолчанию |
 |-----------|---------------|
@@ -228,7 +302,9 @@ IP-адреса, превышающие этот лимит, будут врем
 в миллисекундах, 1000 миллисекунд = 1 секунда
 
 :::note
-В настоящее время эта опция зарезервирована и ещё не применяется сервером.
+Этот тайм-аут ограничивает фазу входа как для сессий RakNet, так и для NetherNet, а также фазу рукопожатия NetherNet WebRTC.
+
+Значение `0` отключает тайм-аут входа; при этом рукопожатие NetherNet WebRTC всё равно ограничено 30 секундами.
 :::
 
 ### `query-plugins`

@@ -51,6 +51,8 @@ motd 的第二行
 
 基岩版使用 UDP 协议
 
+启用 NetherNet 时，同一端口还会通过 TCP 提供 WebRTC 信令，因此也需要放行该端口的 TCP
+
 :::
 
 ## `server-ip`
@@ -68,6 +70,60 @@ motd 的第二行
 
 基岩版使用 UDP 协议
 
+该地址同时绑定 RakNet UDP 监听器和 NetherNet TCP 信令
+
+:::
+
+## `server-udp-ports`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer / String | 19134 |
+
+NetherNet（WebRTC）媒体使用的 UDP 端口/窗口，语法与 Bedrock 官方服务端一致：
+
+| 取值 | 说明 |
+|-----|-----|
+| `19134` | 单个 ICE 复用端口服务所有媒体连接（默认） |
+| `0` | 每个连接的媒体端口由系统自动分配 |
+| `N` | 钉住单个媒体端口 |
+| `A-B` | 钉住一段媒体端口窗口 |
+| `[ip:]external[-external]:internal[-internal]` | 同时发布外部端口映射（例如在 NAT 后）。冒号两侧的范围长度必须一致 |
+
+条目可带 IP 前缀（IPv6 需加方括号，如 `[2001:db8::1]:...`），多个逗号分隔的条目会累积发布的 IP，但端口窗口与偏移必须一致
+
+:::warning
+配置的端口不得覆盖 `server-port`（其 UDP 侧属于 RakNet）或 IPv6 监听器端口；非法取值会中止启动，而不是回退到自动分配端口。
+:::
+
+### 媒体 UDP 不通——玩家卡在连接 {#nethernet-media-unreachable}
+
+当 NetherNet 玩家卡在"连接中"或加入后立刻掉线时，通常是媒体 UDP 路径被阻断。服务器会自行报告——日志中出现告警：
+
+```
+NetherNet media may be unreachable: 6 ICE attempts, 0 connected in the last 5 minutes.
+Check the firewall/port forwarding for the media UDP window udp/... (server-udp-ports)
+```
+
+同时 `/status` 里"接受的加入"在增长而 ICE 连通数恒为 0。
+
+按以下方法解决：
+
+1. 放行媒体 UDP 端口的入站——主机防火墙、云安全组、路由器端口转发都要放行。默认只钉一个端口 `19134`，直接放行/转发 UDP `19134` 即可；只有设为 `0` 时端口才由系统分配、不可预知——先钉住窗口（如 `server-udp-ports=50000-50010`）再转发
+2. 公网端口与内部端口不一致（NAT 映射）？改为发布外部一侧：`server-udp-ports=60000-60010:50000-50010`
+3. 对称 NAT 后的玩家仍然连不上？在 [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet) 中配置 TURN 中继转发媒体：
+
+```yaml
+network-settings:
+  nethernet:
+    ice-servers:
+      - stun:stun.l.google.com:19302
+      - 'turn:user:pass@turn.example.com:3478?transport=udp'
+```
+
+:::tip 按 /status 的数字排查
+- **接受的加入**在增长而 **ICE 连通数恒为 0** —— 媒体 UDP 被阻断；按上面的步骤处理
+- **ICE 连通数**在增长但**完成的握手**很少 —— DTLS 握手失败，通常是中间设备干扰 UDP
+- **连接后掉线**很多 —— NAT 超时或链路抖动
 :::
 
 ## `server-ipv6-port`
@@ -245,9 +301,13 @@ Nukkit 使用的默认语言
 |---------|-----|
 | Boolean | on  |
 
-启用网络加密
+启用网络加密（针对 RakNet 会话）
 
 如果不使用代理软件，则建议启用此功能
+
+:::note
+NetherNet 会话始终由 DTLS 加密，不受此选项影响
+:::
 
 ## `force-resources`
 | 数据类型    | 默认值 |

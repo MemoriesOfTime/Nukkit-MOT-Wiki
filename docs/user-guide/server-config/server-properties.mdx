@@ -51,6 +51,8 @@ you will need to port forward in order to have your server publicly accessible
 
 bedrock edition uses UDP
 
+when NetherNet is enabled, the same port also serves the WebRTC signaling over TCP, so open the port for TCP as well
+
 :::
 
 ## `server-ip`
@@ -68,6 +70,60 @@ you will need to port forward in order to have your server publicly accessible
 
 bedrock edition uses UDP
 
+this address binds both the RakNet UDP listener and the NetherNet TCP signaling
+
+:::
+
+## `server-udp-ports`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer / String | 19134 |
+
+UDP port/window for NetherNet (WebRTC) media, using the same syntax as Bedrock Dedicated Server:
+
+| Value | Description |
+|-------|-------------|
+| `19134` | One ICE mux port serves all media connections (default) |
+| `0` | Media ports are system-assigned per connection |
+| `N` | Pin a single media port |
+| `A-B` | Pin a window of media ports |
+| `[ip:]external[-external]:internal[-internal]` | Also publish an external port mapping, e.g. behind NAT. Both ranges must have the same length |
+
+Entries may carry an IP prefix (`[2001:db8::1]:...` for IPv6) and multiple comma-separated entries accumulate advertised IPs while the window and offset must agree.
+
+:::warning
+The configured ports must not cover `server-port` (its UDP side belongs to RakNet) or the IPv6 listener port, and invalid values abort startup instead of falling back to automatic ports.
+:::
+
+### Media UDP unreachable — players hang on join {#nethernet-media-unreachable}
+
+When NetherNet players hang on "Connecting" or drop right after joining, the media UDP path is blocked. The server reports this on its own — the log warns:
+
+```
+NetherNet media may be unreachable: 6 ICE attempts, 0 connected in the last 5 minutes.
+Check the firewall/port forwarding for the media UDP window udp/... (server-udp-ports)
+```
+
+and `/status` shows joins accepted while ICE connected stays 0.
+
+Fix it like this:
+
+1. Allow the media UDP port inbound — host firewall, cloud security group and router port forwarding alike. The default pins a single port, `19134`, so simply open/forward UDP `19134`; only with `server-udp-ports=0` are the ports system-assigned and unpredictable — pin a window first (e.g. `server-udp-ports=50000-50010`) and forward that
+2. Public ports differ from the internal ones (NAT mapping)? Publish the external side instead: `server-udp-ports=60000-60010:50000-50010`
+3. Still failing for players behind symmetric NAT? Relay the media through a TURN server configured in [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet):
+
+```yaml
+network-settings:
+  nethernet:
+    ice-servers:
+      - stun:stun.l.google.com:19302
+      - 'turn:user:pass@turn.example.com:3478?transport=udp'
+```
+
+:::tip Diagnosing by the /status numbers
+- Joins accepted rising while **ICE connected stays 0** — media UDP is blocked; apply the steps above
+- ICE connected rising but **few handshakes completed** — the DTLS handshake fails, usually a middlebox interfering with UDP
+- Many **drops after connect** — NAT timeouts or connection jitter
 :::
 
 ## `server-ipv6-port`
@@ -245,9 +301,13 @@ if you disable this (not recommended), install a login plugin to protect player 
 |-----------|---------------|
 | Boolean   | on            |
 
-enable network encryption
+enable network encryption for RakNet sessions
 
 it's recommended to enable this if you don't use a proxy software
+
+:::note
+NetherNet sessions are always DTLS-secured, regardless of this option.
+:::
 
 ## `force-resources`
 | Data Type | Default Value |
