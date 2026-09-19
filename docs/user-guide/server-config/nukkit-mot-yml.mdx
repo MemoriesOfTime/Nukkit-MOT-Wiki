@@ -886,6 +886,17 @@ When disabled, the legacy linear formula is used instead: armor reduces `damage 
 Keep this enabled unless you need to preserve pre-1.21 combat behavior for backwards compatibility.
 :::
 
+### `vanilla-knockback-resistance`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Use the vanilla armor knockback resistance formula.
+
+When enabled, each worn netherite armor piece resists 10% of incoming knockback (a full set resists 40%), matching vanilla Bedrock behavior. The total resistance is also synced to the client as an attribute, so client-side prediction matches the server.
+
+When disabled, armor no longer contributes knockback resistance and players take knockback at full strength (legacy behavior). Knockback resistance from other sources, such as entity attributes set by plugins, is not affected.
+
 ## netease-settings (NetEase Settings) {#netease-settings}
 
 ### `client-support`
