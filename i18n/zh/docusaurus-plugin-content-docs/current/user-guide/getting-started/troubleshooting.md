@@ -121,7 +121,7 @@ netease-settings:
 
 **解决方案:**
 - 在防火墙放行 `server-port` 的 TCP（NetherNet 信令）
-- 放行媒体 UDP 端口的入站（防火墙/云安全组/端口转发）——默认为 `19134`；端口窗口、NAT 端口映射与 TURN 中继详见 [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
+- 放行媒体 UDP 端口的入站（防火墙/云安全组/端口转发）——默认媒体与 RakNet 共用 `server-port` 的 UDP 侧（`19132`），RakNet 本就要求放行；钉住独立端口（`19134` 等）时则必须显式放行。端口窗口、NAT 端口映射与 TURN 中继详见 [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
 
 ## 插件问题
 

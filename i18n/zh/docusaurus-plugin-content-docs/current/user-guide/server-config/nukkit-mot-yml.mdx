@@ -150,18 +150,18 @@ NetherNet 是基岩版用来接替 RakNet 的、基于 WebRTC 的传输协议：
 两种传输对网络的占用如下：
 
 - 信令走 **TCP `server-port`**（UDP 侧仍归 RakNet）——请在防火墙放行该端口的 TCP，否则 NetherNet 玩家完全无法连接
-- 媒体（游戏流量）走 **UDP**——默认钉在 `19134`（ICE 复用，单端口服务所有连接）；可通过 [`server-udp-ports`](server-properties.mdx#server-udp-ports) 修改（设为 `0` 则改回系统自动分配），该条目还说明了媒体 UDP 不通时的处理方法
+- 媒体（游戏流量）走 **UDP**——默认与 RakNet 共用 `server-port` 的 UDP 侧（`19132`），由 RakNet socket 进程内中继，无需额外放行端口；可通过 [`server-udp-ports`](server-properties.mdx#server-udp-ports) 钉住独立媒体端口（如 `19134`）、端口窗口，或设为 `0` 改回系统自动分配，该条目还说明了媒体 UDP 不通时的处理方法
 
 <DefaultPortsGrid
     labelSignaling="NetherNet 信令"
-    labelMedia="NetherNet 媒体（ICE 复用）"
+    labelRaknet="RakNet + NetherNet 媒体（进程内中继）"
     labelIpv6Idle="IPv6 监听器（默认关闭）"
     legendActive="默认监听"
     legendIdle="默认未占用"
-    caption="默认配置下的端口占用（server-port=19132，NetherNet 默认开启，server-udp-ports=19134）"
+    caption="默认配置下的端口占用（server-port=19132，NetherNet 默认开启，server-udp-ports=19132：媒体与 RakNet 共用端口）"
 />
 
-监控：`/status` 会输出最近 10 分钟的 NetherNet 区块（接受的加入、ICE 连通数、完成的握手）；`/status full` 额外显示媒体流量与掉线计数。NetherNet 禁用时该区块隐藏。
+监控：`/status` 会输出最近 10 分钟的 NetherNet 区块（接受的加入、ICE 连通数、完成的握手）；`/status full` 额外显示媒体流量、掉线计数与共用端口中继统计。NetherNet 禁用时该区块隐藏。
 
 ```yaml
 network-settings:
@@ -179,7 +179,7 @@ network-settings:
 
 默认与 RakNet 并行启用
 
-启用期间，信令通过 TCP 复用 `server-port`，媒体钉在 UDP `19134`（ICE 复用，单端口服务所有连接——见 [`server-udp-ports`](server-properties.mdx#server-udp-ports)；设为 `0` 则改回系统自动分配）
+启用期间，信令通过 TCP 复用 `server-port`，媒体默认与其共用 UDP 侧（由 RakNet socket 进程内中继——如需独立端口可通过 [`server-udp-ports`](server-properties.mdx#server-udp-ports) 钉住，如 `19134`；设为 `0` 则改回系统自动分配）
 
 设为 `false` 则只运行 RakNet——TCP 信令端点与媒体端口随之消失，其他一切不变
 

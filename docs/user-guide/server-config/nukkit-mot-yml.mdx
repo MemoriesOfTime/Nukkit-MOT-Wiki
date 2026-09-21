@@ -146,11 +146,11 @@ NetherNet is the WebRTC-based transport Bedrock Edition uses to succeed RakNet: 
 The two transports use the network like this:
 
 - Signaling over **TCP on `server-port`** (RakNet keeps the UDP side) — open `server-port` for TCP in the firewall, otherwise NetherNet players cannot connect at all
-- Media (game traffic) over **UDP** — pinned to `19134` by default, a single ICE mux port that serves all peers; change it (or set `0` for system-assigned ports) via [`server-udp-ports`](server-properties.mdx#server-udp-ports), which also explains what to do when media UDP is unreachable
+- Media (game traffic) over **UDP** — shares `server-port`'s UDP side (`19132`) with RakNet by default, relayed in-process from the RakNet socket, so no extra port is needed; pin a standalone media port (e.g. `19134`), a port window, or `0` for system-assigned ports via [`server-udp-ports`](server-properties.mdx#server-udp-ports), which also explains what to do when media UDP is unreachable
 
 <DefaultPortsGrid />
 
-Monitoring: `/status` prints a NetherNet block covering the last 10 minutes (joins accepted, ICE connections, completed handshakes); `/status full` adds media traffic and drop counters. The block is hidden while NetherNet is disabled.
+Monitoring: `/status` prints a NetherNet block covering the last 10 minutes (joins accepted, ICE connections, completed handshakes); `/status full` adds media traffic, drop counters and shared-port relay statistics. The block is hidden while NetherNet is disabled.
 
 ```yaml
 network-settings:
@@ -168,7 +168,7 @@ network-settings:
 
 Enabled by default alongside RakNet
 
-While enabled, signaling shares `server-port` over TCP and media pins UDP `19134` (one ICE mux port serves all peers — see [`server-udp-ports`](server-properties.mdx#server-udp-ports); `0` reverts media to system-assigned ports)
+While enabled, signaling shares `server-port` over TCP and media shares its UDP side by default (relayed in-process from the RakNet socket — pin a standalone port like `19134` via [`server-udp-ports`](server-properties.mdx#server-udp-ports) if you prefer; `0` reverts media to system-assigned ports)
 
 Set to `false` to run RakNet only — the TCP signaling endpoint and the media port disappear, nothing else changes
 

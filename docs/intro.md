@@ -37,7 +37,6 @@ Only interested in newer versions? You might want to try [Lumi](https://github.c
 docker run -d --name nukkit-mot \
   -p 19132:19132/udp \
   -p 19132:19132/tcp \
-  -p 19134:19134/udp \
   -v $(pwd)/data:/data \
   -e JAVA_OPTS="-Xms2G -Xmx2G" \
   --restart unless-stopped \

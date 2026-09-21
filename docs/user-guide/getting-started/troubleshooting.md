@@ -121,7 +121,7 @@ Players using NetherNet (the WebRTC transport, the client default since Bedrock 
 
 **Solution:**
 - Open `server-port` for TCP (NetherNet signaling) in the firewall
-- Allow the media UDP port inbound (firewall / cloud security group / port forwarding) — `19134` by default; for port windows, NAT port mappings and TURN relay see [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
+- Allow the media UDP port inbound (firewall / cloud security group / port forwarding) — by default the media shares `server-port`'s UDP side (`19132`), already open for RakNet; a standalone pinned port (`19134` etc.) must be opened explicitly. Port windows, NAT port mappings and TURN relay: see [`server-udp-ports`](../server-config/server-properties.mdx#server-udp-ports)
 
 ## Plugin Issues
 
