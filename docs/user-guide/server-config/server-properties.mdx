@@ -77,22 +77,24 @@ this address binds both the RakNet UDP listener and the NetherNet TCP signaling
 ## `server-udp-ports`
 | Data Type | Default Value |
 |-----------|---------------|
-| Integer / String | 19134 |
+| Integer / String | 19132 |
 
-UDP port/window for NetherNet (WebRTC) media, using the same syntax as Bedrock Dedicated Server:
+UDP port for NetherNet (WebRTC) media, using the same syntax as Bedrock Dedicated Server:
 
 | Value | Description |
 |-------|-------------|
-| `19134` | One ICE mux port serves all media connections (default) |
+| `19132` | Media shares `server-port`'s UDP side with RakNet, relayed in-process from the RakNet socket (default — nothing extra to open or forward) |
 | `0` | Media ports are system-assigned per connection |
-| `N` | Pin a single media port |
+| `N` | Pin a standalone media port, e.g. `19134` (one ICE mux port serves all peers) |
 | `A-B` | Pin a window of media ports |
 | `[ip:]external[-external]:internal[-internal]` | Also publish an external port mapping, e.g. behind NAT. Both ranges must have the same length |
 
 Entries may carry an IP prefix (`[2001:db8::1]:...` for IPv6) and multiple comma-separated entries accumulate advertised IPs while the window and offset must agree.
 
+Sharing works when a single port is pinned exactly on `server-port` or the IPv6 listener port, or mapped onto one of them as a single-port mapping — `19132:50000` publishes the media on `19132` while relaying from the internal port `50000`. The media then arrives on the RakNet socket and is relayed in-process to a loopback port.
+
 :::warning
-The configured ports must not cover `server-port` (its UDP side belongs to RakNet) or the IPv6 listener port, and invalid values abort startup instead of falling back to automatic ports.
+Port windows must not cover `server-port` (its UDP side belongs to RakNet) or the IPv6 listener port — only a single pinned port or a single-port mapping may share them. Invalid values abort startup instead of falling back to automatic ports.
 :::
 
 ### Media UDP unreachable — players hang on join {#nethernet-media-unreachable}
@@ -108,7 +110,7 @@ and `/status` shows joins accepted while ICE connected stays 0.
 
 Fix it like this:
 
-1. Allow the media UDP port inbound — host firewall, cloud security group and router port forwarding alike. The default pins a single port, `19134`, so simply open/forward UDP `19134`; only with `server-udp-ports=0` are the ports system-assigned and unpredictable — pin a window first (e.g. `server-udp-ports=50000-50010`) and forward that
+1. Allow the media UDP port inbound — host firewall, cloud security group and router port forwarding alike. With the default the media shares `server-port`'s UDP side (`19132`), which RakNet already needs open — nothing extra to allow; a standalone pinned port (e.g. `server-udp-ports=19134`) must be opened/forwarded explicitly, and only with `server-udp-ports=0` are the ports system-assigned and unpredictable — pin a window first (e.g. `server-udp-ports=50000-50010`) and forward that
 2. Public ports differ from the internal ones (NAT mapping)? Publish the external side instead: `server-udp-ports=60000-60010:50000-50010`
 3. Still failing for players behind symmetric NAT? Relay the media through a TURN server configured in [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet):
 

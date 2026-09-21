@@ -77,22 +77,24 @@ motd 的第二行
 ## `server-udp-ports`
 | 数据类型    | 默认值 |
 |---------|-----|
-| Integer / String | 19134 |
+| Integer / String | 19132 |
 
-NetherNet（WebRTC）媒体使用的 UDP 端口/窗口，语法与 Bedrock 官方服务端一致：
+NetherNet（WebRTC）媒体使用的 UDP 端口，语法与 Bedrock 官方服务端一致：
 
 | 取值 | 说明 |
 |-----|-----|
-| `19134` | 单个 ICE 复用端口服务所有媒体连接（默认） |
+| `19132` | 媒体与 RakNet 共用 `server-port` 的 UDP 侧，由 RakNet socket 进程内中继（默认——无需额外放行端口） |
 | `0` | 每个连接的媒体端口由系统自动分配 |
-| `N` | 钉住单个媒体端口 |
+| `N` | 钉住独立的媒体端口，如 `19134`（ICE 复用，单端口服务所有连接） |
 | `A-B` | 钉住一段媒体端口窗口 |
 | `[ip:]external[-external]:internal[-internal]` | 同时发布外部端口映射（例如在 NAT 后）。冒号两侧的范围长度必须一致 |
 
 条目可带 IP 前缀（IPv6 需加方括号，如 `[2001:db8::1]:...`），多个逗号分隔的条目会累积发布的 IP，但端口窗口与偏移必须一致
 
+共用端口的条件：钉住的单个端口恰好是 `server-port` 或 IPv6 监听器端口，或者以单端口映射映射到它们——`19132:50000` 表示在 `19132` 上发布媒体、从内部端口 `50000` 中继。此时媒体流量到达 RakNet socket，由进程内中继转发到回环端口。
+
 :::warning
-配置的端口不得覆盖 `server-port`（其 UDP 侧属于 RakNet）或 IPv6 监听器端口；非法取值会中止启动，而不是回退到自动分配端口。
+端口窗口不得覆盖 `server-port`（其 UDP 侧属于 RakNet）或 IPv6 监听器端口——只有单个钉住端口或单端口映射可以与它们共用。非法取值会中止启动，而不是回退到自动分配端口。
 :::
 
 ### 媒体 UDP 不通——玩家卡在连接 {#nethernet-media-unreachable}
@@ -108,7 +110,7 @@ Check the firewall/port forwarding for the media UDP window udp/... (server-udp-
 
 按以下方法解决：
 
-1. 放行媒体 UDP 端口的入站——主机防火墙、云安全组、路由器端口转发都要放行。默认只钉一个端口 `19134`，直接放行/转发 UDP `19134` 即可；只有设为 `0` 时端口才由系统分配、不可预知——先钉住窗口（如 `server-udp-ports=50000-50010`）再转发
+1. 放行媒体 UDP 端口的入站——主机防火墙、云安全组、路由器端口转发都要放行。默认配置下媒体与 RakNet 共用 `server-port` 的 UDP 侧（`19132`），RakNet 本就要求放行，无需额外操作；钉住独立端口（如 `server-udp-ports=19134`）时则必须显式放行/转发该端口；只有设为 `0` 时端口才由系统分配、不可预知——先钉住窗口（如 `server-udp-ports=50000-50010`）再转发
 2. 公网端口与内部端口不一致（NAT 映射）？改为发布外部一侧：`server-udp-ports=60000-60010:50000-50010`
 3. 对称 NAT 后的玩家仍然连不上？在 [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet) 中配置 TURN 中继转发媒体：
 
