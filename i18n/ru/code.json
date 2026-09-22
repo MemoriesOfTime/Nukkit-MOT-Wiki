@@ -140,7 +140,7 @@
     "description": "The name for the dark color mode"
   },
   "theme.colorToggle.ariaLabel": {
-    "message": "Переключение между тёмным и светлым режимом (сейчас используется {mode})",
+    "message": "Переключить режим отображения (сейчас используется {mode})",
     "description": "The ARIA label for the color mode toggle"
   },
   "theme.docs.breadcrumbs.navAriaLabel": {

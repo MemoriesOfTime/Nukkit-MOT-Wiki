@@ -15,14 +15,26 @@
   z-index: 0;
 }
 
+/* 深色模式 hero 同样收敛为深色，与站点夜间基调一致。
+   注意巨型波浪圆盘几乎盖满整个 hero，「视觉底色」其实是圆盘色：
+   圆盘用 primary-darkest 微压暗（白字 ≥5:1），banner 底色再暗一档，
+   只在底部弧线处露出来形成波浪层次（方向与浅色模式相反：夜间的波浪应更暗）。 */
 [data-theme='dark'] .heroBanner {
-  background-color: var(--ifm-color-primary-lightest);
+  /* 不支持 color-mix 的内核回退到 primary-darkest（与圆盘同色，波浪隐没但布局不变） */
+  background-color: var(--ifm-color-primary-darkest);
+  background-color: color-mix(in srgb, var(--ifm-color-primary-darkest) 55%, #000);
 }
 
-/* 深色模式波浪：底色为亮薄荷，圆盘改用深色档主色保持可见 */
 [data-theme='dark'] .heroBanner::before,
 [data-theme='dark'] .heroBanner::after {
-  background-color: var(--ifm-color-primary);
+  background-color: var(--ifm-color-primary-darkest);
+  background-color: color-mix(in srgb, var(--ifm-color-primary-darkest) 88%, #000);
+}
+
+/* Infima 深色模式把 hero 文字翻成黑色，深底上需要保持白字 */
+[data-theme='dark'] .heroContent :global(.hero__title),
+[data-theme='dark'] .heroContent :global(.hero__subtitle) {
+  color: #ffffff;
 }
 
 .heroContent :global(.hero__title),
@@ -216,6 +228,38 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* 小屏：标题降一档保证品牌名单行放下，按钮改 2+1 网格减少纵向占屏。
+   放在基础 .buttons 规则之后，保证同优先级下 display: grid 覆盖 flex */
+@media screen and (max-width: 576px) {
+  .heroContent :global(.hero__title) {
+    font-size: 2.5rem;
+  }
+
+  .heroContent :global(.hero__subtitle) {
+    font-size: 1.125rem;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 24rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .buttons :global(.button) {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 1rem;
+  }
+
+  .buttons :global(.button):last-child {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

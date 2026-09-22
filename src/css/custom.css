@@ -33,9 +33,10 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-  /* HomepageFeatures SVG 主题变量（深色） */
+  /* HomepageFeatures SVG 主题变量（深色）；
+     线色比浅色档大幅压暗，避免黑卡上白亮网格过曝 */
   --feat-card-bg: #000000;
-  --feat-line: #dbdbdb;
+  --feat-line: #4d4d4d;
   --feat-title: #ffffff;
   --feat-muted: #dbdbdb;
   --feat-surface: #f5f5f5;

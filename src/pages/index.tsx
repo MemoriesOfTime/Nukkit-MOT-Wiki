@@ -10,7 +10,11 @@ import Translate, {translate} from '@docusaurus/Translate';
 import {useEffect, useRef, useState} from 'react';
 import { redirectToLanguageVersion } from '../redirects';
 
+// bStats 图表走 gh-info-api Worker 中转（大陆直连 bstats.org 缓慢/不可达）；
+// Worker 未部署更新或不可用时逐项回退直连，数字区最多退回 "—" 的现状。
 const BSTATS_CHART_BASE =
+  'https://gh-info-api.nkmot.com/bstats';
+const BSTATS_UPSTREAM_CHART_BASE =
   'https://bstats.org/api/v1/plugins/10277/charts';
 const BSTATS_MOT_PAGE_URL =
   'https://bstats.org/plugin/server-implementation/Nukkit/10277';
@@ -155,11 +159,28 @@ function WidelyUsedSection() {
       signal: controller.signal,
     };
     const safe = (p: Promise<unknown>) => p.catch(() => null);
+    // 单个图表：先走 Worker 中转，失败（含非 2xx）回退直连 bStats
+    const fetchChart = (chart: string): Promise<unknown> =>
+      fetch(`${BSTATS_CHART_BASE}/${chart}/data`, opts)
+        .then((r) => {
+          if (!r.ok) {
+            throw new Error(`proxy responded ${r.status}`);
+          }
+          return r.json();
+        })
+        .catch(() =>
+          fetch(`${BSTATS_UPSTREAM_CHART_BASE}/${chart}/data`, opts).then((r) => {
+            if (!r.ok) {
+              throw new Error(`upstream responded ${r.status}`);
+            }
+            return r.json();
+          }),
+        );
     Promise.all([
-      safe(fetch(`${BSTATS_CHART_BASE}/nukkit_version/data`, opts).then((r) => r.json())),
-      safe(fetch(`${BSTATS_CHART_BASE}/servers/data`, opts).then((r) => r.json())),
-      safe(fetch(`${BSTATS_CHART_BASE}/players/data`, opts).then((r) => r.json())),
-      safe(fetch(`${BSTATS_CHART_BASE}/location/data`, opts).then((r) => r.json())),
+      safe(fetchChart('nukkit_version')),
+      safe(fetchChart('servers')),
+      safe(fetchChart('players')),
+      safe(fetchChart('location')),
     ]).then(([ver, sv, pl, loc]) => {
       setStats({
         motServers: parseMotServerCount(ver),

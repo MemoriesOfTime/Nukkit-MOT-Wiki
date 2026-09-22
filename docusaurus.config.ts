@@ -89,10 +89,16 @@ const config: Config = {
     {tagName: 'script', attributes: {}, innerHTML: `document.documentElement.classList.add('js');`},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://giscus.app'}},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://www.googletagmanager.com'}},
+    {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://gh-info-api.nkmot.com'}},
     {tagName: 'link', attributes: {rel: 'preconnect', href: 'https://bstats.org'}},
   ],
 
   themeConfig: {
+    // 三态切换：跟随系统（实时响应系统亮暗变化、不持久化）→ 浅色 → 暗黑，循环
+    colorMode: {
+      defaultMode: 'light',
+      respectPrefersColorScheme: true,
+    },
     // Replace with your project's social card
     image: 'images/banner.png',
     metadata: [
