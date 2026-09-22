@@ -1,5 +1,6 @@
 import {useEffect, useRef} from 'react';
 import clsx from 'clsx';
+import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import Translate, {translate} from '@docusaurus/Translate';
 import styles from './styles.module.css';
@@ -11,6 +12,8 @@ type FeatureItem = {
   Svg: React.ComponentType<React.ComponentProps<'svg'>>;
   title: React.ReactNode;
   description: React.ReactNode;
+  /** “了解更多”深链目标：链到该特性最相关的文档页/锚点（Link 自动补 locale 前缀） */
+  href: string;
 };
 
 const FeatureList: FeatureItem[] = [
@@ -28,6 +31,7 @@ const FeatureList: FeatureItem[] = [
         Supports versions from 1.1 to the latest, allowing you to set the minimum protocol in the config for seamless gameplay.
       </Translate>
     ),
+    href: '/docs/user-guide/server-config/nukkit-mot-yml#multiversion-min-protocol',
   },
   {
     ariaLabelId: 'homepage.feature.aiEntity.title',
@@ -43,6 +47,7 @@ const FeatureList: FeatureItem[] = [
         Most entities with AI are fully supported, ensuring a dynamic and immersive environment for players.
       </Translate>
     ),
+    href: '/docs/user-guide/server-config/nukkit-mot-yml#entity-settings',
   },
   {
     ariaLabelId: 'homepage.feature.vanillaCommand.title',
@@ -58,6 +63,7 @@ const FeatureList: FeatureItem[] = [
         Fully supports vanilla commands, allowing you to manage and enhance gameplay with familiar commands.
       </Translate>
     ),
+    href: '/docs/intro#whats-new',
   },
   {
     ariaLabelId: 'homepage.feature.comprehensiveBlock.title',
@@ -73,6 +79,7 @@ const FeatureList: FeatureItem[] = [
         Built-in support for a broader range of vanilla blocks and newer-version variants, with placement, interaction, block entities, and redstone behavior continually brought closer to vanilla.
       </Translate>
     ),
+    href: '/docs/user-guide/server-config/nukkit-mot-yml#custom-block-settings',
   },
   {
     ariaLabelId: 'homepage.feature.neteaseClient.title',
@@ -88,6 +95,7 @@ const FeatureList: FeatureItem[] = [
         Seamlessly supports NetEase Minecraft clients alongside standard ones, with custom resource and behavior packs for the Chinese audience.
       </Translate>
     ),
+    href: '/docs/user-guide/getting-started/connect#supported-clients',
   },
   {
     ariaLabelId: 'homepage.feature.pluginApi.title',
@@ -103,6 +111,7 @@ const FeatureList: FeatureItem[] = [
         A mature plugin ecosystem covering events, forms, scoreboards, and custom blocks, items, enchantments & recipes — extend the server your way.
       </Translate>
     ),
+    href: '/docs/developer-guide/tutorial-basics/frist_java_plugin',
   },
 ];
 
@@ -112,6 +121,7 @@ function Feature({
   Svg,
   title,
   description,
+  href,
   reversed,
 }: FeatureItem & {reversed: boolean}) {
   return (
@@ -122,6 +132,14 @@ function Feature({
       <div className={styles.featureContent}>
         <Heading as="h2">{title}</Heading>
         <p>{description}</p>
+        <Link className={styles.featureLink} to={href}>
+          <Translate id="homepage.feature.learnMore" description="Feature deep link leading to the related docs page">
+            Learn more
+          </Translate>
+          <span className={styles.featureLinkArrow} aria-hidden="true">
+            →
+          </span>
+        </Link>
       </div>
     </div>
   );

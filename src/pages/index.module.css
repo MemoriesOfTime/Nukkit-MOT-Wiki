@@ -127,6 +127,38 @@
   flex-wrap: wrap;
 }
 
+/* 收尾 CTA：主题色轻染卡片，明暗模式自动跟随 */
+.ctaSection {
+  padding: 1rem 0 4.5rem;
+}
+
+.ctaCard {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  border-radius: 16px;
+  background-color: var(--ifm-color-emphasis-100);
+  /* 不支持 color-mix 的内核回退为纯 emphasis-100 底色 */
+  background-color: color-mix(in srgb, var(--ifm-color-primary) 7%, var(--ifm-color-emphasis-100));
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.ctaCard :global(h2) {
+  margin-bottom: 0.5rem;
+}
+
+.ctaCard p {
+  margin-bottom: 1.5rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.ctaButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 /* “广泛使用”特性行：与 HomepageFeatures 同款左右交叉布局，媒体为 1:1 动态 SVG */
 .usageSection {
   padding: 0 0 4rem;
@@ -179,6 +211,26 @@
 
   .usageSvg {
     width: clamp(180px, 55vw, 260px);
+  }
+}
+
+/* 小屏 CTA：卡片收紧，按钮纵向排满整行 */
+@media screen and (max-width: 576px) {
+  .ctaCard {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .ctaButtons {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 20rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ctaButtons :global(.button) {
+    width: 100%;
   }
 }
 

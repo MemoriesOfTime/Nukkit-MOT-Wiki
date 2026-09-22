@@ -83,6 +83,26 @@
   "homepage.feature.pluginApi.description": {
     "message": "Зрелая экосистема плагинов: события, формы, табло, а также кастомные блоки, предметы, чары и рецепты — расширяйте сервер по-своему."
   },
+  "homepage.feature.learnMore": {
+    "message": "Подробнее",
+    "description": "Feature deep link leading to the related docs page"
+  },
+  "homepage.cta.title": {
+    "message": "Готовы запустить свой сервер?",
+    "description": "Closing call-to-action title"
+  },
+  "homepage.cta.description": {
+    "message": "От установки до вашего первого плагина — документация проведёт вас шаг за шагом.",
+    "description": "Closing call-to-action description"
+  },
+  "homepage.cta.getStarted": {
+    "message": "🚀 Начать",
+    "description": "CTA button to start reading the docs"
+  },
+  "homepage.cta.joinCommunity": {
+    "message": "💬 Присоединяйтесь к сообществу",
+    "description": "CTA button to join the community chat"
+  },
   "theme.ErrorPageContent.title": {
     "message": "На странице произошёл сбой.",
     "description": "The title of the fallback page when the page crashed"

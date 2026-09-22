@@ -72,7 +72,7 @@ CheckNetIsolation LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"
    - **Адрес сервера**: публичный IP
    - **Порт**: `19132` (или пользовательский порт)
 
-## Поддерживаемые клиенты
+## Поддерживаемые клиенты {#supported-clients}
 
 Сервер Nukkit поддерживает следующие клиенты Bedrock Edition:
 

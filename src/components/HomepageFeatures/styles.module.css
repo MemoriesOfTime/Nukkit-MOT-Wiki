@@ -34,6 +34,33 @@
   flex: 1 1 0;
 }
 
+/* “了解更多”深链：与“广泛使用”区的 usageLink 同视觉级别，箭头悬停右移引导点击 */
+.featureLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.featureLink:hover {
+  color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+}
+
+[data-theme='dark'] .featureLink:hover {
+  color: var(--ifm-color-primary-light);
+}
+
+.featureLinkArrow {
+  transition: transform 160ms ease;
+}
+
+.featureLink:hover .featureLinkArrow {
+  transform: translateX(3px);
+}
+
 /* 响应式正方形：桌面/手机统一 1:1，与所有 SVG 原生比例一致 */
 .featureSvg {
   width: clamp(200px, 26vw, 320px);

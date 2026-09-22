@@ -249,6 +249,50 @@ function WidelyUsedSection() {
   );
 }
 
+/** 收尾 CTA：bStats 区之后、footer 之前的转化区。社区按钮按 locale 选择联系方式（zh 走 QQ 群） */
+function HomepageCta() {
+  const {i18n} = useDocusaurusContext();
+  const communityHref =
+    i18n.currentLocale === 'zh'
+      ? 'https://qm.qq.com/q/FKyS4IT9As'
+      : 'https://discord.gg/pJjQDQC';
+
+  return (
+    <section className={styles.ctaSection}>
+      <div className="container">
+        <div className={styles.ctaCard} data-reveal>
+          <Heading as="h2">
+            <Translate id="homepage.cta.title" description="Closing call-to-action title">
+              Ready to build your server?
+            </Translate>
+          </Heading>
+          <p>
+            <Translate id="homepage.cta.description" description="Closing call-to-action description">
+              From installation to your first plugin, the docs walk you through every step.
+            </Translate>
+          </p>
+          <div className={styles.ctaButtons}>
+            <Link className="button button--primary button--lg" to="/docs/intro">
+              <Translate id="homepage.cta.getStarted" description="CTA button to start reading the docs">
+                🚀 Get Started
+              </Translate>
+            </Link>
+            <Link
+              className="button button--secondary button--lg"
+              href={communityHref}
+              target="_blank"
+              rel="noopener noreferrer">
+              <Translate id="homepage.cta.joinCommunity" description="CTA button to join the community chat">
+                💬 Join the Community
+              </Translate>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ScrollHint() {
   const [visible, setVisible] = useState(true);
 
@@ -417,6 +461,7 @@ export default function Home(): React.ReactElement {
       <main id="homepage-main" className={clsx(styles.heroMain)}>
         <HomepageFeatures />
         <WidelyUsedSection />
+        <HomepageCta />
       </main>
     </Layout>
   );

@@ -72,7 +72,7 @@ CheckNetIsolation LoopbackExempt -a -n="Microsoft.MinecraftUWP_8wekyb3d8bbwe"
    - **服务器地址**: 公网 IP
    - **端口**: `19132` (或自定义端口)
 
-## 常见客户端
+## 常见客户端 {#supported-clients}
 
 Nukkit 服务器支持以下基岩版客户端:
 
