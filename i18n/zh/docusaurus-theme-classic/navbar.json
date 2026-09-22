@@ -6,5 +6,13 @@
   "logo.alt": {
     "message": "Memories Of Time Logo",
     "description": "The alt text of navbar logo"
+  },
+  "link.item.label.Activity": {
+    "message": "近期动态",
+    "description": "The label of navbar link with label=Activity linking to /activity"
+  },
+  "item.label.Activity": {
+    "message": "近期动态",
+    "description": "Navbar item with label Activity"
   }
 }

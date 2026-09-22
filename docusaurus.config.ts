@@ -108,17 +108,11 @@ const config: Config = {
         src: 'images/logo.png',
       },
       items: [
-        /*{
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
         {
-          href: 'https://github.com/facebook/docusaurus',
-          label: 'GitHub',
+          to: '/activity',
           position: 'right',
-        },*/
+          label: 'Activity',
+        },
         {
           type: 'localeDropdown',
           position: 'right',
@@ -237,6 +231,8 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
   plugins: [
+    // 本地 TS 插件需指向具体文件，目录形式（index.ts）无法被 Node require.resolve 解析
+    './src/plugins/github-activity/index.ts',
     [
       '@docusaurus/plugin-ideal-image',
       {

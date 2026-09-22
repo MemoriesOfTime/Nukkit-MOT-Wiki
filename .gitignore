@@ -24,3 +24,7 @@ yarn-error.log*
 .hintrc
 
 /.idea
+
+# Cloudflare Worker 本地产物
+/worker/node_modules
+/worker/.wrangler

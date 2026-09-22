@@ -10,3 +10,8 @@ export function getDateParts(timeZone?: string): { month: number; day: number; y
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
   return { month: get('month'), day: get('day'), year: get('year') };
 }
+
+// 站点 locale（en/zh/ru）→ Intl.BCP 47 语言标签
+export function localeTag(locale: string): string {
+  return locale === 'zh' ? 'zh-CN' : locale === 'ru' ? 'ru-RU' : 'en-US';
+}

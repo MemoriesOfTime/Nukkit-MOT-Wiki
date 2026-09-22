@@ -660,5 +660,103 @@
   "theme.tags.tagsPageTitle": {
     "message": "Теги",
     "description": "The title of the tag list page"
+  },
+  "activity.layout.title": {
+    "message": "Новости разработки · Nukkit-MOT Wiki"
+  },
+  "activity.layout.description": {
+    "message": "Недавняя активность разработки Nukkit-MOT: последние коммиты, версии и участники — собирается с GitHub во время сборки сайта."
+  },
+  "activity.title": {
+    "message": "Новости разработки",
+    "description": "Activity page title"
+  },
+  "activity.subtitle": {
+    "message": "Недавние коммиты, версии и участники Nukkit-MOT — данные автоматически загружаются с GitHub при открытии страницы.",
+    "description": "Activity page subtitle explaining the data source"
+  },
+  "activity.updatedAt": {
+    "message": "Данные собраны {date} (UTC)",
+    "description": "When the GitHub data was collected, {date} is a formatted timestamp"
+  },
+  "activity.updatedAtLive": {
+    "message": "В реальном времени · получено с GitHub {date} (UTC)",
+    "description": "Browser fetched fresh data from GitHub, {date} is a formatted timestamp"
+  },
+  "activity.updatedAtCache": {
+    "message": "Из кеша браузера · получено с GitHub {date} (UTC)",
+    "description": "Data served from the browser's local cache, {date} is a formatted timestamp"
+  },
+  "activity.refreshing": {
+    "message": "Получаем свежие данные…",
+    "description": "Shown while the browser fetches fresh GitHub data"
+  },
+  "activity.staleNote": {
+    "message": "сбор данных во время этой сборки не удался, показан последний сохранённый снимок"
+  },
+  "activity.viewGithub": {
+    "message": "Открыть на GitHub",
+    "description": "View repository on GitHub button"
+  },
+  "activity.stat.latestVersion": {
+    "message": "Последняя версия"
+  },
+  "activity.stat.commits30d": {
+    "message": "Коммиты · за 30 дней"
+  },
+  "activity.stat.contributors30d": {
+    "message": "Участники · за 30 дней"
+  },
+  "activity.stat.contributorsTotal": {
+    "message": "Участники · всего"
+  },
+  "activity.versions.title": {
+    "message": "Версии",
+    "description": "Version tags section title"
+  },
+  "activity.commits.title": {
+    "message": "Последние коммиты",
+    "description": "Recent commits section title"
+  },
+  "activity.commits.empty": {
+    "message": "Пока нет данных о коммитах."
+  },
+  "activity.commits.more": {
+    "message": "Показать ещё",
+    "description": "Show more commits button"
+  },
+  "activity.commit.anonAuthor": {
+    "message": "Неизвестный автор"
+  },
+  "activity.emptyFallback": {
+    "message": "Во время последней сборки не удалось собрать данные (возможно, сеть сборочной среды была ограничена). Загляните позже после следующей сборки или откройте репозиторий на GitHub."
+  },
+  "activity.chart.commitsTitle": {
+    "message": "Активность коммитов",
+    "description": "Commit activity chart title"
+  },
+  "activity.chart.commitsSubtitle": {
+    "message": "{total, plural, one {{total} коммит} few {{total} коммита} many {{total} коммитов} other {{total} коммитов}} за последние {days} дн.",
+    "description": "Commit activity chart subtitle, {days} window length and {total} commit count"
+  },
+  "activity.chart.commitsAria": {
+    "message": "Гистограмма количества коммитов по дням",
+    "description": "Accessibility label of the commit trend bar chart"
+  },
+  "activity.chart.barTip": {
+    "message": "{count, plural, one {{count} коммит} few {{count} коммита} many {{count} коммитов} other {{count} коммитов}} · {date}",
+    "description": "Bar tooltip: {count} commits on {date}"
+  },
+  "activity.chart.authorsTitle": {
+    "message": "Ведущие участники",
+    "description": "Top contributors chart title"
+  },
+  "activity.chart.authorsSubtitle": {
+    "message": "По числу коммитов за тот же период",
+    "description": "Top contributors chart subtitle"
+  },
+  "activity.chart.others": {
+    "message": "Другие",
+    "description": "Aggregated row for remaining authors"
   }
 }

@@ -15,12 +15,10 @@
     "message": "多版本、内置实体AI、广泛插件兼容的我的世界服务器"
   },
   "homepage.layout.title": {
-    "message": "Nukkit-MOT Wiki",
-    "description": "The homepage meta title"
+    "message": "Nukkit-MOT Wiki"
   },
   "homepage.layout.description": {
-    "message": "了解 Nukkit-MOT，享受多版本支持与丰富的插件生态。",
-    "description": "The homepage meta description"
+    "message": "了解 Nukkit-MOT，享受多版本支持与丰富的插件生态。"
   },
   "homepage.widelyUsed": {
     "message": "广泛使用",
@@ -670,5 +668,105 @@
   "theme.contentVisibility.draftBanner.message": {
     "message": "此页面是草稿，仅在开发环境中可见，不会包含在正式版本中。",
     "description": "The draft content banner message"
+  },
+  "activity.layout.title": {
+    "message": "近期开发动态 · Nukkit-MOT Wiki"
+  },
+  "activity.layout.description": {
+    "message": "Nukkit-MOT 近期开发动态：最新提交、版本标签与贡献者统计，构建时采集自 GitHub。"
+  },
+  "activity.title": {
+    "message": "近期开发动态",
+    "description": "Activity page title"
+  },
+  "activity.subtitle": {
+    "message": "Nukkit-MOT 的近期提交、版本标签与贡献者动态，访问时自动从 GitHub 获取。",
+    "description": "Activity page subtitle explaining the data source"
+  },
+  "activity.updatedAt": {
+    "message": "数据采集于 {date}（UTC）"
+  },
+  "activity.updatedAtLive": {
+    "message": "实时 · 获取于 {date}（UTC）",
+    "description": "Browser fetched fresh data from GitHub, {date} is a formatted timestamp"
+  },
+  "activity.updatedAtCache": {
+    "message": "本地缓存 · 获取于 {date}（UTC）",
+    "description": "Data served from the browser's local cache, {date} is a formatted timestamp"
+  },
+  "activity.refreshing": {
+    "message": "正在获取最新数据…",
+    "description": "Shown while the browser fetches fresh GitHub data"
+  },
+  "activity.staleNote": {
+    "message": "本次构建实时采集失败，当前展示的是上次缓存的数据",
+    "description": "Note shown when build-time collection failed and cached data is shown"
+  },
+  "activity.viewGithub": {
+    "message": "在 GitHub 上查看",
+    "description": "View repository on GitHub button"
+  },
+  "activity.stat.latestVersion": {
+    "message": "最新版本"
+  },
+  "activity.stat.commits30d": {
+    "message": "近 30 天提交"
+  },
+  "activity.stat.contributors30d": {
+    "message": "近 30 天贡献者"
+  },
+  "activity.stat.contributorsTotal": {
+    "message": "贡献者总数"
+  },
+  "activity.versions.title": {
+    "message": "版本标签",
+    "description": "Version tags section title"
+  },
+  "activity.commits.title": {
+    "message": "最近提交",
+    "description": "Recent commits section title"
+  },
+  "activity.commits.empty": {
+    "message": "暂时没有提交数据。",
+    "description": "Shown when no commit data is available"
+  },
+  "activity.commits.more": {
+    "message": "加载更多",
+    "description": "Show more commits button"
+  },
+  "activity.commit.anonAuthor": {
+    "message": "未知作者"
+  },
+  "activity.emptyFallback": {
+    "message": "上次构建未能采集到开发动态数据（可能是构建环境网络受限）。请等待下一次构建后重试，或直接前往 GitHub 仓库浏览。",
+    "description": "Shown when GitHub data could not be collected at build time"
+  },
+  "activity.chart.commitsTitle": {
+    "message": "提交趋势",
+    "description": "Commit activity chart title"
+  },
+  "activity.chart.commitsSubtitle": {
+    "message": "近 {days} 天共 {total} 次提交",
+    "description": "Commit activity chart subtitle, {days} window length and {total} commit count"
+  },
+  "activity.chart.commitsAria": {
+    "message": "每日提交数量柱状图",
+    "description": "Accessibility label of the commit trend bar chart"
+  },
+  "activity.chart.barTip": {
+    "message": "{count} 次提交 · {date}",
+    "description": "Bar tooltip: {count} commits on {date}"
+  },
+  "activity.chart.authorsTitle": {
+    "message": "活跃贡献者",
+    "description": "Top contributors chart title"
+  },
+  "activity.chart.authorsSubtitle": {
+    "message": "按同一时间段内的提交数排名",
+    "description": "Top contributors chart subtitle"
+  },
+  "activity.chart.others": {
+    "message": "其他",
+    "description": "Aggregated row for remaining authors"
   }
 }

@@ -46,5 +46,9 @@
   "link.item.label.Forums": {
     "message": "论坛",
     "description": "The label of footer link with label=Forums linking to https://bbs.nukkit-mot.com/"
+  },
+  "link.item.label.Activity": {
+    "message": "近期动态",
+    "description": "The label of footer link with label=Activity linking to /activity"
   }
 }

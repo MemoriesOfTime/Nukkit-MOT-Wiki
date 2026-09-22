@@ -1,0 +1,279 @@
+.page {
+  padding: 2.5rem 0 4rem;
+  /* 实底背景：新版 Infima 的 --ifm-background-color 默认透明（依赖浏览器 color-scheme 画布），
+     部分内嵌 webview 不渲染画布底色会露出黑底，这里用 surface 变量兜底 */
+  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  max-width: 46rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.dark .subtitle {
+  color: var(--ifm-color-emphasis-400);
+}
+
+.updatedAt {
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 0;
+}
+
+.dark .updatedAt {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.staleNote {
+  color: var(--ifm-color-warning-dark);
+}
+
+.dark .staleNote {
+  color: var(--ifm-color-warning-lightest);
+}
+
+.refreshing {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 996px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statCard {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-card-border-radius);
+  padding: 1rem 1.25rem;
+  background: var(--ifm-card-background-color);
+}
+
+.statValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ifm-font-color-base);
+  overflow-wrap: anywhere;
+}
+
+.statLabel {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.dark .statLabel {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  margin-bottom: 1rem;
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 2rem;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.9rem;
+  color: var(--ifm-font-color-base);
+  transition: border-color var(--ifm-transition-fast) var(--ifm-transition-timing-default),
+    background var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+
+.chip:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-primary-contrast-background);
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.timeline {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.dayGroup {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.dayHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 0 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.dayCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.4rem;
+  padding: 0 0.45rem;
+  border-radius: 0.7rem;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dark .dayCount {
+  background: var(--ifm-color-emphasis-700);
+  color: var(--ifm-color-emphasis-100);
+}
+
+.commitList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.commitItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.avatar {
+  flex: none;
+  border-radius: 50%;
+  margin-top: 0.15rem;
+}
+
+.avatarFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-weight: 700;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-700);
+}
+
+.dark .avatarFallback {
+  background: var(--ifm-color-emphasis-700);
+  color: var(--ifm-color-emphasis-200);
+}
+
+.commitBody {
+  min-width: 0;
+}
+
+.commitTitle {
+  color: var(--ifm-font-color-base);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.commitTitle:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.commitMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.dark .commitMeta {
+  color: var(--ifm-color-emphasis-500);
+}
+
+.commitAuthor {
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 600;
+}
+
+.dark .commitAuthor {
+  color: var(--ifm-color-emphasis-400);
+}
+
+.commitAuthor:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.commitSha {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem;
+  color: var(--ifm-color-emphasis-600);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 0.4rem;
+  padding: 0 0.4rem;
+}
+
+.commitSha:hover {
+  color: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.moreRow {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.empty {
+  border: 1px dashed var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-card-border-radius);
+  padding: 1.5rem;
+  color: var(--ifm-color-emphasis-700);
+  background: var(--ifm-color-emphasis-100);
+}
+
+.dark .empty {
+  color: var(--ifm-color-emphasis-300);
+  background: var(--ifm-color-emphasis-800);
+}
