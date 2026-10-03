@@ -13,7 +13,14 @@ sidebar_position: 2
 - [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar) - 国内访问较快
 - [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster) - 官方构建
 
-下载完成后,你会得到一个名为 `Nukkit-MOT-SNAPSHOT.jar` 的文件。
+CI 构建提供两种 jar,运行的是同一个服务端:
+
+- `Nukkit-MOT-SNAPSHOT.jar` —— 完整构建,内置全部依赖,离线即可直接运行
+- `Nukkit-MOT-SNAPSHOT-Lite.jar` —— 体积小得多。首次启动时会自动将运行时依赖下载(带校验)到服务端目录下的 `lib` 文件夹,然后启动服务器,因此首次启动需要联网(下载源包含 Maven Central 和 repo.lanink.cn)。之后的启动会检测到已下载的依赖,直接启动
+
+:::tip
+不知道选哪个?使用完整的 `Nukkit-MOT-SNAPSHOT.jar` 即可。
+:::
 
 :::info 说明
 建议从 Jenkins CI 下载,访问速度更快且更稳定。

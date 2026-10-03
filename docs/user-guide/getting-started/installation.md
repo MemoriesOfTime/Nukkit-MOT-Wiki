@@ -13,7 +13,14 @@ You can obtain the latest version of Nukkit-MOT from the following sources:
 - [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar) - Faster access in China
 - [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster) - Official builds
 
-After downloading, you will get a file named `Nukkit-MOT-SNAPSHOT.jar`.
+CI builds ship two flavors of the jar, both running the same server:
+
+- `Nukkit-MOT-SNAPSHOT.jar` — the full build with all dependencies bundled, ready to run offline
+- `Nukkit-MOT-SNAPSHOT-Lite.jar` — a much smaller download. On the first start it automatically downloads the runtime dependencies (checksum-verified) into a `lib` folder in the server directory and then starts the server, so the first start requires internet access (download mirrors include Maven Central and repo.lanink.cn). Later starts detect the downloaded dependencies and start directly
+
+:::tip
+Not sure which one to pick? Use the full `Nukkit-MOT-SNAPSHOT.jar`.
+:::
 
 :::info Note
 It's recommended to download from Jenkins CI for faster and more stable access.

@@ -78,10 +78,12 @@ Encryption keys are configured in the `packs.yml` file inside the server's `reso
 "12c2b614-796a-3d8e-9364-cb39c86cebfa":
   key: "0123456789abcdefGHIJKLMNOPQRSTUV" # 32-bit encryption key
   cdn: "https://cdn.example.com/packs/ExampleResourcePack.mcpack" # optional
+  priority: 10 # optional
 ```
 
 - `key`: the 32-bit encryption key for this pack. Leave empty for no encryption.
 - `cdn` (optional): a CDN download URL for this pack. The client tries downloading the pack from this URL first, automatically falling back to normal server chunk transfer if the CDN download fails.
+- `priority` (optional): the position of this pack in the resource pack stack (a whole number, `0` by default). A pack with a higher priority sits higher in the stack and overrides what the packs below it define; packs with equal priority keep their load order (by file name).
 
 :::tip NetEase Packs
 Files named `*.netease*` are only sent to players using the NetEase client.

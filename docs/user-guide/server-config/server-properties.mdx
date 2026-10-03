@@ -298,6 +298,17 @@ if you disable this (not recommended), install a login plugin to protect player 
 
 :::
 
+## `keep-existing-session-on-duplicate-login`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+keep the session that is already playing when a duplicate login arrives
+
+by default a new login with the same name or identity kicks the player that is already online; enable this to refuse the newcomer instead, so a player who is carrying loot cannot be evicted by someone reusing the nickname
+
+a stale session still times out by itself
+
 ## `encryption`
 | Data Type | Default Value |
 |-----------|---------------|

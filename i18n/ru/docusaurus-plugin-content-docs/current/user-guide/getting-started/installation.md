@@ -13,7 +13,14 @@ sidebar_position: 2
 - [Jenkins CI](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar) — более быстрый доступ из Китая
 - [GitHub Actions](https://github.com/MemoriesOfTime/Nukkit-MOT/actions/workflows/maven.yml?query=branch%3Amaster) — официальные сборки
 
-После скачивания вы получите файл с именем `Nukkit-MOT-SNAPSHOT.jar`.
+Сборки CI предоставляют два варианта jar — оба запускают один и тот же сервер:
+
+- `Nukkit-MOT-SNAPSHOT.jar` — полная сборка со всеми зависимостями, готовая к запуску без интернета
+- `Nukkit-MOT-SNAPSHOT-Lite.jar` — намного меньше по размеру. При первом запуске она автоматически скачивает зависимости времени выполнения (с проверкой контрольных сумм) в папку `lib` в каталоге сервера и затем запускает сервер, поэтому первый запуск требует доступа в интернет (зеркала включают Maven Central и repo.lanink.cn). Последующие запуски обнаруживают скачанные зависимости и стартуют сразу
+
+:::tip
+Не знаете, что выбрать? Используйте полную `Nukkit-MOT-SNAPSHOT.jar`.
+:::
 
 :::info Примечание
 Рекомендуется скачивать сборку с Jenkins CI для более быстрого и стабильного доступа.
