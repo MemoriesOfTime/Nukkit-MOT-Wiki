@@ -11,7 +11,7 @@ sidebar_position: 1
 Для запуска сервера Nukkit необходимо соответствие следующим базовым требованиям:
 
 - **Операционная система**: Windows, Linux или macOS
-- **Java**: Nukkit требует **Java 17 или новее**
+- **Java**: Nukkit требует **Java 21 или новее**
 - **Оперативная память**: не менее 1 ГБ ОЗУ (рекомендуется 2 ГБ и более)
 - **Дисковое пространство**: не менее 500 МБ свободного места
 
@@ -19,7 +19,7 @@ sidebar_position: 1
 
 ### Скачивание Java
 
-1. Перейдите на [сайт Adoptium](https://adoptium.net/temurin/releases?version=17), чтобы скачать Java 17 или новее
+1. Перейдите на [сайт Adoptium](https://adoptium.net/temurin/releases?version=21), чтобы скачать Java 21 или новее
 2. Выберите установочный пакет, подходящий для вашей операционной системы
 3. Скачайте и запустите установщик
 
@@ -35,9 +35,9 @@ java -version
 Если вы увидите вывод, похожий на следующий, значит Java успешно установлена:
 
 ```
-openjdk version "17.0.x" 20xx-xx-xx
-OpenJDK Runtime Environment Temurin-17.0.x (build ...)
-OpenJDK 64-Bit Server VM Temurin-17.0.x (build ...)
+openjdk version "21.0.x" 20xx-xx-xx
+OpenJDK Runtime Environment Temurin-21.0.x (build ...)
+OpenJDK 64-Bit Server VM Temurin-21.0.x (build ...)
 ```
 
 :::tip Совет

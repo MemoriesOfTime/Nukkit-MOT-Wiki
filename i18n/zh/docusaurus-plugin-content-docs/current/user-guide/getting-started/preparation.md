@@ -11,7 +11,7 @@ sidebar_position: 1
 运行 Nukkit 服务器需要满足以下基本要求:
 
 - **操作系统**: Windows、Linux 或 macOS
-- **Java**: Nukkit 需要 **Java 17 或更高版本**
+- **Java**: Nukkit 需要 **Java 21 或更高版本**
 - **内存**: 至少 1GB RAM (建议 2GB 或更多)
 - **存储空间**: 至少 500MB 可用空间
 
@@ -19,7 +19,7 @@ sidebar_position: 1
 
 ### 下载 Java
 
-1. 访问 [Adoptium 官网](https://adoptium.net/zh-CN/temurin/releases?version=17) 下载 Java 17 或更高版本
+1. 访问 [Adoptium 官网](https://adoptium.net/zh-CN/temurin/releases?version=21) 下载 Java 21 或更高版本
 2. 选择适合你操作系统的安装包
 3. 下载并运行安装程序
 
@@ -35,9 +35,9 @@ java -version
 如果看到类似以下的输出,说明 Java 安装成功:
 
 ```
-openjdk version "17.0.x" 20xx-xx-xx
-OpenJDK Runtime Environment Temurin-17.0.x (build ...)
-OpenJDK 64-Bit Server VM Temurin-17.0.x (build ...)
+openjdk version "21.0.x" 20xx-xx-xx
+OpenJDK Runtime Environment Temurin-21.0.x (build ...)
+OpenJDK 64-Bit Server VM Temurin-21.0.x (build ...)
 ```
 
 :::tip 提示

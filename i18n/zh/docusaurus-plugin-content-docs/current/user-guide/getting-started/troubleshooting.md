@@ -21,7 +21,7 @@ java -version
 ```
 
 **解决方案:**
-- 确保已安装 Java 17 或更高版本
+- 确保已安装 Java 21 或更高版本
 - 参考 [准备工作](preparation.md) 章节重新安装 Java
 
 #### 2. JAR 文件名不匹配

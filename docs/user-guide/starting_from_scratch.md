@@ -34,7 +34,7 @@ This tutorial has been split into multiple chapters for easy reference:
 
 If you want a quick experience, follow these minimal steps:
 
-1. **Install Java 17+** - [Preparation](getting-started/preparation.md)
+1. **Install Java 21+** - [Preparation](getting-started/preparation.md)
 2. **Download Nukkit-MOT** - [Download Link](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar)
 3. **Create Startup Script** - Refer to [Installation Tutorial](getting-started/installation.md)
 4. **Start Server** - Double-click to run the script

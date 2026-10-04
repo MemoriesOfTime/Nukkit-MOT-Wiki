@@ -21,7 +21,7 @@ java -version
 ```
 
 **Solution:**
-- Ensure Java 17 or higher is installed
+- Ensure Java 21 or higher is installed
 - Refer to the [Preparation](preparation.md) section to reinstall Java
 
 #### 2. JAR Filename Mismatch

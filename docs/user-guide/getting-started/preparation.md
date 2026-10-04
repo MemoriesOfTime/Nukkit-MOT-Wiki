@@ -11,7 +11,7 @@ Before setting up a Nukkit server, you need to prepare the necessary environment
 Running a Nukkit server requires meeting the following basic requirements:
 
 - **Operating System**: Windows, Linux, or macOS
-- **Java**: Nukkit requires **Java 17 or higher**
+- **Java**: Nukkit requires **Java 21 or higher**
 - **Memory**: At least 1GB RAM (2GB or more recommended)
 - **Storage**: At least 500MB available space
 
@@ -19,7 +19,7 @@ Running a Nukkit server requires meeting the following basic requirements:
 
 ### Download Java
 
-1. Visit the [Adoptium website](https://adoptium.net/temurin/releases?version=17) to download Java 17 or higher
+1. Visit the [Adoptium website](https://adoptium.net/temurin/releases?version=21) to download Java 21 or higher
 2. Select the installation package suitable for your operating system
 3. Download and run the installer
 
@@ -35,9 +35,9 @@ java -version
 If you see output similar to the following, Java is successfully installed:
 
 ```
-openjdk version "17.0.x" 20xx-xx-xx
-OpenJDK Runtime Environment Temurin-17.0.x (build ...)
-OpenJDK 64-Bit Server VM Temurin-17.0.x (build ...)
+openjdk version "21.0.x" 20xx-xx-xx
+OpenJDK Runtime Environment Temurin-21.0.x (build ...)
+OpenJDK 64-Bit Server VM Temurin-21.0.x (build ...)
 ```
 
 :::tip Tip

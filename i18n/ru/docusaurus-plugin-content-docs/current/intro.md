@@ -17,8 +17,6 @@ keywords:
 ## Введение {#introduction}
 Nukkit-MOT — это форк [Nukkit](https://github.com/CloudburstMC/Nukkit), обеспечивающий поддержку множества версий игры, совместимость с клиентами NetEase и хорошо развитую экосистему плагинов.
 
-Интересуют только новые версии? Возможно, вам подойдут [Lumi](https://github.com/KoshakMineDEV/Lumi) или [PowerNukkitX](https://github.com/PowerNukkitX/PowerNukkitX).
-
 ### Что нового в Nukkit-MOT? {#whats-new}
 1. Поддержка версий с 1.2 по 1.26.50 (минимальный протокол можно задать в конфигурации)
 2. Поддержка большинства сущностей с ИИ
@@ -28,7 +26,7 @@ Nukkit-MOT — это форк [Nukkit](https://github.com/CloudburstMC/Nukkit),
 6. Поддержка клиентов NetEase
 
 ## Как установить? {#how-to-install}
-1. Установите Java 17 или новее
+1. Установите Java 21 или новее
 2. Скачайте .jar-файл по ссылкам ниже
 3. Введите команду для запуска: `java -jar Nukkit-MOT-SNAPSHOT.jar` (замените `Nukkit-MOT-SNAPSHOT.jar` на имя скачанного вами файла)
 
@@ -78,7 +76,7 @@ docker run -d --name nukkit-mot \
     <dependency>
         <groupId>com.nukkit-mot</groupId>
         <artifactId>nukkit-mot</artifactId>
-        <version>1.26.40-R1</version>
+        <version>1.26.50-R1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -108,7 +106,7 @@ repositories {
 ```kts
 // Release
 dependencies {
-    compileOnly("com.nukkit-mot:nukkit-mot:1.26.40-R1")
+    compileOnly("com.nukkit-mot:nukkit-mot:1.26.50-R1")
 }
 
 // SNAPSHOT

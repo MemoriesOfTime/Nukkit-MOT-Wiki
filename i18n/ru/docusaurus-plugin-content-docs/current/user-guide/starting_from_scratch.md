@@ -34,7 +34,7 @@ sidebar_position: 1
 
 Если хотите быстро опробовать сервер, выполните следующие минимальные шаги:
 
-1. **Установите Java 17+** — [Подготовка](getting-started/preparation.md)
+1. **Установите Java 21+** — [Подготовка](getting-started/preparation.md)
 2. **Скачайте Nukkit-MOT** — [ссылка для скачивания](https://motci.cn/job/Nukkit-MOT/job/master/lastSuccessfulBuild/artifact/target/Nukkit-MOT-SNAPSHOT.jar)
 3. **Создайте скрипт запуска** — см. [руководство по установке](getting-started/installation.md)
 4. **Запустите сервер** — дважды щёлкните по скрипту, чтобы запустить его
