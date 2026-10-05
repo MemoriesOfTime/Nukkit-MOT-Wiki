@@ -13,7 +13,10 @@ interface Props {
 
 const FolderView: React.FC<Props> = ({ paths }) => {
     const fillDict = (data: { [key: string]: any }, path: string[]) => {
-        let first = path.shift();
+        const first = path.shift();
+        if (first === undefined) {
+            return;
+        }
 
         // Create if needed
         if (!(first in data)) {
