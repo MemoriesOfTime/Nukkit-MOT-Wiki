@@ -27,6 +27,17 @@ number of async worker threads
 
 if set to auto, it will try to automatically detect the number of cores and use that
 
+### `virtual-threads`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+use virtual threads for async tasks that opt in via the scheduler API
+
+requires Java 21 or newer, the setting has no effect on older Java versions
+
+tasks that do not opt in keep running on the `async-workers` pool
+
 ### `auto-tick-rate`
 | Data Type | Default Value |
 |-----------|---------------|

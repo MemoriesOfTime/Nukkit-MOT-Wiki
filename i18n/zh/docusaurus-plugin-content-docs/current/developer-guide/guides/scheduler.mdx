@@ -7,12 +7,12 @@ sidebar_position: 5
 在 Nukkit-MOT 里，插件代码大致会落在两条执行通道中：
 
 - 主线程：负责世界、实体、玩家、背包这类游戏状态操作
-- 异步工作线程池：负责慢 I/O 和重计算
+- 异步工作线程池：负责慢 I/O 和重计算；在 Java 21+ 上还可以为 I/O 密集型任务显式申请虚拟线程
 
 这篇指南会把调度器相关 API 串起来，说明每种任务该在什么场景下使用，以及线程边界到底在哪里。
 
 :::tip 基于源码编写
-本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `ServerScheduler`、`Task`、`PluginTask`、`NukkitRunnable`、`AsyncTask`、`TaskHandler`、`AsyncPool` 和服务端主循环。
+本页内容直接对照当前 Nukkit-MOT 源码整理，重点参考 `ServerScheduler`、`Task`、`PluginTask`、`NukkitRunnable`、`AsyncTask`、`TaskHandler`、`AsyncPool`、`VirtualThreadService` 和服务端主循环。
 :::
 
 ## 先记住四条规则
@@ -44,6 +44,7 @@ ServerScheduler scheduler = this.getServer().getScheduler();
 | `scheduleRepeatingTask(plugin, runnable, period)` | 主线程循环执行 | 直到手动取消 |
 | `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | 延迟后循环执行 | 最常见的定时器接口 |
 | `scheduleTask(plugin, runnable, true)` | 无回调的异步后台任务 | 只有异步执行，没有内建完成回调 |
+| `scheduleTask(plugin, runnable, true, true)` | 无回调的 I/O 密集型后台任务 | 可用时运行在虚拟线程上，见第 9 节 |
 | `scheduleAsyncTask(plugin, asyncTask)` | 需要 `onCompletion(...)` 的异步任务 | 最适合插件开发的异步接口 |
 | `NukkitRunnable` | 面向对象的调度器封装 | 适合自取消任务、倒计时、轮询 |
 | `PluginTask` | 旧式 `Task` 写法，带 `onRun(int currentTick)` | 适合需要 tick 值或 owner 访问的场景 |
@@ -135,6 +136,8 @@ public void startCountdown(Player player) {
 - `runTaskAsynchronously(plugin)`
 - `runTaskLaterAsynchronously(plugin, delay)`
 - `runTaskTimerAsynchronously(plugin, delay, period)`
+
+每个异步方法都有一个带 `virtual` 参数的重载，例如 `runTaskTimerAsynchronously(plugin, delay, period, true)`，详见第 9 节。
 
 :::warning
 同一个 `NukkitRunnable` 实例只能被调度一次。源码里会显式检查状态，如果你重复调度同一个实例，会直接抛异常。
@@ -284,7 +287,71 @@ this.getServer().getScheduler().scheduleTask(this, () -> {
 int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
 ```
 
-## 9. 线程安全边界
+以虚拟线程方式调度的任务不使用这个线程池，见下一节。
+
+## 9. 用虚拟线程跑 I/O 密集型异步任务
+
+在 Java 21 或更高版本上，Nukkit-MOT 可以让显式申请的异步任务运行在虚拟线程上，而不是固定大小的 `async-workers` 线程池。
+
+- 由 `nukkit-mot.yml` 里的 `virtual-threads` 控制，默认 `on`
+- 旧版本 Java 上该功能不可用，申请虚拟线程的任务会回退到 `async-workers` 线程池
+- 服务端 jar 本身保持对旧 JVM 的兼容：虚拟线程支持以多版本 jar（multi-release）类的形式打包在 jar 内，由 JVM 在类加载时自动选择对应版本
+
+虚拟线程是按任务逐一创建的低成本线程，最适合大量时间都花在等待 I/O 上的任务 —— 网络请求、数据库查询、文件读写。它不会加速 CPU 密集型代码：重计算仍然应该放在常规异步线程池。
+
+在依赖虚拟线程之前，可以先确认它是否处于启用状态：
+
+```java
+boolean enabled = this.getServer().getScheduler().isVirtualThreadsEnabled();
+```
+
+### 在 `AsyncTask` 中申请
+
+覆写 `isVirtual()` 并返回 `true`，`scheduleAsyncTask(...)` 会在虚拟线程池可用时自动选中它。
+
+```java
+this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+    @Override
+    protected boolean isVirtual() {
+        return true;
+    }
+
+    @Override
+    public void onRun() {
+        // 阻塞式 I/O，例如网络请求或数据库查询
+    }
+});
+```
+
+服务端内置的 I/O 密集型任务（如文件写入、debug paste 上传）使用的就是这条路径。
+
+### 调度器与 `NukkitRunnable` 重载
+
+每个异步调度方法都有一个末尾追加 `virtual` 参数的重载：
+
+```java
+this.getServer().getScheduler().scheduleTask(this, runnable, true, true);
+this.getServer().getScheduler().scheduleDelayedTask(this, runnable, delay, true, true);
+this.getServer().getScheduler().scheduleRepeatingTask(this, runnable, period, true, true);
+this.getServer().getScheduler().scheduleDelayedRepeatingTask(this, runnable, delay, period, true, true);
+```
+
+```java
+new NukkitRunnable() {
+    @Override
+    public void run() {
+        // 阻塞式 I/O
+    }
+}.runTaskTimerAsynchronously(this, 0, 20 * 60, true);
+```
+
+### 规则
+
+- 虚拟线程任务必须是异步任务：只申请 `virtual` 而不申请 `asynchronous` 会抛出 `PluginException`
+- 虚拟线程不可用时，`virtual` 任务会改跑平台线程池，同一份代码在任何 JVM 上都能工作
+- 在虚拟线程任务里，不要在阻塞 I/O 外层套长 `synchronized` 块 —— 在 Java 21 至 23 上这会钉住（pin）载体线程，可能耗尽调度资源
+
+## 10. 线程安全边界
 
 除非你已经明确验证过某条源码路径是线程安全的，否则下面这些对象都应视为主线程专用：
 

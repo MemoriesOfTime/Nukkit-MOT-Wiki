@@ -7,12 +7,12 @@ sidebar_position: 5
 Nukkit-MOT предоставляет авторам плагинов два разных направления выполнения:
 
 - основной поток сервера для работы с мирами, сущностями, игроками и инвентарями
-- асинхронный пул рабочих потоков для медленного ввода-вывода и дорогостоящих вычислений
+- асинхронный пул рабочих потоков для медленного ввода-вывода и дорогостоящих вычислений, с опциональными виртуальными потоками для задач ввода-вывода на Java 21+
 
 Это руководство показывает, как API планировщика сочетаются друг с другом, когда использовать каждое из них и где на самом деле проходит граница потоков.
 
 :::tip Область, основанная на исходном коде
-Эта страница написана по текущему исходному коду Nukkit-MOT, особенно `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool` и циклу тиков сервера.
+Эта страница написана по текущему исходному коду Nukkit-MOT, особенно `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool`, `VirtualThreadService` и циклу тиков сервера.
 :::
 
 ## Сначала основные правила
@@ -44,6 +44,7 @@ ServerScheduler scheduler = this.getServer().getScheduler();
 | `scheduleRepeatingTask(plugin, runnable, period)` | Повторение в основном потоке | Выполняется до отмены |
 | `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | Отложенная повторяющаяся синхронная задача | Самый распространённый API таймера |
 | `scheduleTask(plugin, runnable, true)` | Асинхронная работа по принципу «запустил и забыл» | Нет встроенного колбэка завершения |
+| `scheduleTask(plugin, runnable, true, true)` | Асинхронная работа с вводом-выводом по принципу «запустил и забыл» | Выполняется в виртуальном потоке, когда доступен, см. раздел 9 |
 | `scheduleAsyncTask(plugin, asyncTask)` | Асинхронная работа, требующая `onCompletion(...)` | Лучший асинхронный API для плагинов |
 | `NukkitRunnable` | Объектно-ориентированная обёртка над вызовами планировщика | Простая самоотмена и доступ к id задачи |
 | `PluginTask` | Старый стиль `Task` с `onRun(int currentTick)` | Полезно, если нужны сведения о тике или доступ к владельцу |
@@ -135,6 +136,8 @@ public void startCountdown(Player player) {
 - `runTaskAsynchronously(plugin)`
 - `runTaskLaterAsynchronously(plugin, delay)`
 - `runTaskTimerAsynchronously(plugin, delay, period)`
+
+У каждого асинхронного варианта есть также перегрузка с флагом `virtual`, например `runTaskTimerAsynchronously(plugin, delay, period, true)`. Подробнее — в разделе 9.
 
 :::warning
 Экземпляр `NukkitRunnable` можно запланировать только один раз. Класс явно выбрасывает исключение, если вы попытаетесь повторно использовать тот же экземпляр после того, как он уже был запланирован.
@@ -284,7 +287,71 @@ this.getServer().getScheduler().scheduleTask(this, () -> {
 int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
 ```
 
-## 9. Границы потокобезопасности
+Задачи, запланированные как виртуальные, этот пул не используют — см. следующий раздел.
+
+## 9. Виртуальные потоки для асинхронных задач с вводом-выводом
+
+На Java 21 или новее Nukkit-MOT может выполнять явно запрошенные асинхронные задачи на виртуальных потоках вместо пула фиксированного размера `async-workers`.
+
+- управляется параметром `virtual-threads` в `nukkit-mot.yml`, по умолчанию `on`
+- на более старых версиях Java функция просто недоступна, и такие задачи возвращаются в пул `async-workers`
+- jar сервера по-прежнему работает на старых JVM: поддержка упакована внутрь jar в виде multi-release классов, и JVM выбирает нужный вариант при загрузке класса
+
+Виртуальные потоки — это дешёвые потоки, создаваемые по одному на задачу. Они раскрывают себя, когда множество задач большую часть времени ждут ввода-вывода — HTTP-запросы, запросы к базам данных, работа с файлами. Они не ускоряют код, ограниченный процессором: тяжёлые вычисления оставляйте в обычном асинхронном пуле.
+
+Прежде чем полагаться на виртуальные потоки, проверьте, активен ли пул:
+
+```java
+boolean enabled = this.getServer().getScheduler().isVirtualThreadsEnabled();
+```
+
+### Явный запрос в `AsyncTask`
+
+Переопределите `isVirtual()`, вернув `true`. Метод `scheduleAsyncTask(...)` автоматически выберет виртуальный пул, когда он доступен.
+
+```java
+this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+    @Override
+    protected boolean isVirtual() {
+        return true;
+    }
+
+    @Override
+    public void onRun() {
+        // блокирующий ввод-вывод, например HTTP-запрос или запрос к базе данных
+    }
+});
+```
+
+Именно этот путь используют встроенные задачи сервера, связанные с вводом-выводом, — например, запись файлов и загрузка debug paste.
+
+### Перегрузки планировщика и `NukkitRunnable`
+
+У каждого асинхронного метода планировщика есть перегрузка с завершающим флагом `virtual`:
+
+```java
+this.getServer().getScheduler().scheduleTask(this, runnable, true, true);
+this.getServer().getScheduler().scheduleDelayedTask(this, runnable, delay, true, true);
+this.getServer().getScheduler().scheduleRepeatingTask(this, runnable, period, true, true);
+this.getServer().getScheduler().scheduleDelayedRepeatingTask(this, runnable, delay, period, true, true);
+```
+
+```java
+new NukkitRunnable() {
+    @Override
+    public void run() {
+        // блокирующий ввод-вывод
+    }
+}.runTaskTimerAsynchronously(this, 0, 20 * 60, true);
+```
+
+### Правила
+
+- виртуальные задачи должны быть асинхронными: запрос `virtual` без `asynchronous` приводит к `PluginException`
+- когда виртуальные потоки недоступны, задачи с флагом `virtual` выполняются в обычном пуле потоков, поэтому один и тот же код работает на любой JVM
+- внутри виртуальной задачи избегайте длинных блоков `synchronized` вокруг блокирующего ввода-вывода — на Java 21–23 они закрепляют (pin) несущий поток и могут истощить ресурсы планировщика
+
+## 10. Границы потокобезопасности
 
 Считайте перечисленное ниже доступным только из основного потока, если вы лично не проверили, что конкретный путь в исходном коде явно безопасен:
 

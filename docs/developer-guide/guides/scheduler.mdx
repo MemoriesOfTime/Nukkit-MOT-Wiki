@@ -7,12 +7,12 @@ sidebar_position: 5
 Nukkit-MOT gives plugin authors two different execution lanes:
 
 - the main server thread for world, entity, player, and inventory work
-- the async worker pool for slow I/O and expensive computation
+- the async worker pool for slow I/O and expensive computation, with opt-in virtual threads for I/O-bound work on Java 21+
 
 This guide shows how the scheduler APIs fit together, when to use each one, and where the thread boundary really is.
 
 :::tip Source-backed scope
-This page is written against the current Nukkit-MOT source, especially `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool`, and the server tick loop.
+This page is written against the current Nukkit-MOT source, especially `ServerScheduler`, `Task`, `PluginTask`, `NukkitRunnable`, `AsyncTask`, `TaskHandler`, `AsyncPool`, `VirtualThreadService`, and the server tick loop.
 :::
 
 ## Core Rules First
@@ -44,6 +44,7 @@ Time is measured in ticks:
 | `scheduleRepeatingTask(plugin, runnable, period)` | Repeat on the main thread | Runs until cancelled |
 | `scheduleDelayedRepeatingTask(plugin, runnable, delay, period)` | Delayed repeating sync task | Most common timer API |
 | `scheduleTask(plugin, runnable, true)` | Fire-and-forget async work | No built-in completion callback |
+| `scheduleTask(plugin, runnable, true, true)` | Fire-and-forget I/O-bound work | Runs on a virtual thread when available, see section 9 |
 | `scheduleAsyncTask(plugin, asyncTask)` | Async work that needs `onCompletion(...)` | Best async plugin API |
 | `NukkitRunnable` | Object-oriented wrapper around scheduler calls | Easy self-cancel and task id access |
 | `PluginTask` | Older `Task` style with `onRun(int currentTick)` | Useful if you want tick info or owner access |
@@ -135,6 +136,8 @@ Useful methods include:
 - `runTaskAsynchronously(plugin)`
 - `runTaskLaterAsynchronously(plugin, delay)`
 - `runTaskTimerAsynchronously(plugin, delay, period)`
+
+Each asynchronous variant also has an overload with a `virtual` flag, for example `runTaskTimerAsynchronously(plugin, delay, period, true)`. See section 9 for details.
 
 :::warning
 A `NukkitRunnable` instance can only be scheduled once. The class explicitly throws if you try to reuse the same instance after it has already been scheduled.
@@ -284,7 +287,71 @@ You can inspect the current pool size with:
 int workers = this.getServer().getScheduler().getAsyncTaskPoolSize();
 ```
 
-## 9. Thread Safety Boundaries
+Tasks scheduled as virtual do not use this pool, see the next section.
+
+## 9. Virtual Threads for I/O-bound Async Tasks
+
+On Java 21 or newer, Nukkit-MOT can run opt-in async tasks on virtual threads instead of the fixed `async-workers` pool.
+
+- controlled by `virtual-threads` in `nukkit-mot.yml`, default `on`
+- on older Java versions the feature is simply unavailable, and opt-in tasks fall back to the `async-workers` pool
+- the server jar keeps running on older JVMs unchanged: support ships inside the jar as multi-release classes and the JVM picks the right variant at class-loading time
+
+Virtual threads are cheap threads created one per task. They shine when many tasks spend most of their time waiting on I/O — HTTP requests, database queries, file access. They do not speed up CPU-bound code: keep heavy computation on the regular async pool.
+
+Check whether the virtual pool is active before relying on it:
+
+```java
+boolean enabled = this.getServer().getScheduler().isVirtualThreadsEnabled();
+```
+
+### Opting in with `AsyncTask`
+
+Override `isVirtual()` and return `true`. `scheduleAsyncTask(...)` picks the virtual pool automatically when it is available.
+
+```java
+this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+    @Override
+    protected boolean isVirtual() {
+        return true;
+    }
+
+    @Override
+    public void onRun() {
+        // blocking I/O such as an HTTP request or database query
+    }
+});
+```
+
+The server itself uses this hook for I/O-bound built-in tasks such as file writes and the debug paste upload.
+
+### Scheduler and `NukkitRunnable` overloads
+
+Every asynchronous scheduling call has an overload with a trailing `virtual` flag:
+
+```java
+this.getServer().getScheduler().scheduleTask(this, runnable, true, true);
+this.getServer().getScheduler().scheduleDelayedTask(this, runnable, delay, true, true);
+this.getServer().getScheduler().scheduleRepeatingTask(this, runnable, period, true, true);
+this.getServer().getScheduler().scheduleDelayedRepeatingTask(this, runnable, delay, period, true, true);
+```
+
+```java
+new NukkitRunnable() {
+    @Override
+    public void run() {
+        // blocking I/O
+    }
+}.runTaskTimerAsynchronously(this, 0, 20 * 60, true);
+```
+
+### Rules
+
+- virtual tasks must be asynchronous: requesting `virtual` without `asynchronous` throws a `PluginException`
+- when virtual threads are unavailable, `virtual` tasks run on the platform pool instead, so the same code works on every JVM
+- inside a virtual task, avoid long `synchronized` blocks around blocking I/O — on Java 21 through 23 they pin the carrier thread and can starve the scheduler
+
+## 10. Thread Safety Boundaries
 
 Treat these as main-thread-only unless you have verified a specific source path is explicitly safe:
 
