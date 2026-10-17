@@ -3,6 +3,7 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import DownloadDropdown from '@site/src/components/DownloadDropdown';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
@@ -376,15 +377,7 @@ function HomepageHeader() {
           </Translate>
         </p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="https://motci.cn/job/Nukkit-MOT/job/master/">
-            <Translate
-              id="homepage.downloadNukkitMot"
-              description="The homepage message to ask the user to download nukkit-mot">
-              🌐 Download
-            </Translate>
-          </Link>
+          <DownloadDropdown />
 
           <Link
             className="button button--secondary button--lg"

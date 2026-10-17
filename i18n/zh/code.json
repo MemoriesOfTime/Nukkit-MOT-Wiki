@@ -3,6 +3,34 @@
     "message": "🌐 下载",
     "description": "The homepage message to ask the user to download nukkit-mot"
   },
+  "homepage.download.fullTitle": {
+    "message": "标准版",
+    "description": "Download menu: full jar title"
+  },
+  "homepage.download.fullSize": {
+    "message": "≈ 90 MB",
+    "description": "Download menu: full jar approximate size badge"
+  },
+  "homepage.download.fullDesc": {
+    "message": "自包含全部依赖，开箱即用",
+    "description": "Download menu: full jar description"
+  },
+  "homepage.download.liteTitle": {
+    "message": "Lite 精简版",
+    "description": "Download menu: Lite jar title"
+  },
+  "homepage.download.liteSize": {
+    "message": "≈ 14 MB",
+    "description": "Download menu: Lite jar approximate size badge"
+  },
+  "homepage.download.sizeUnit": {
+    "message": "MB",
+    "description": "Download menu: size unit suffix for dynamically fetched sizes"
+  },
+  "homepage.download.liteDesc": {
+    "message": "首次启动自动下载依赖，需联网",
+    "description": "Download menu: Lite jar description"
+  },
   "homepage.visitDocs": {
     "message": "📖 学习",
     "description": "The homepage message to ask the user to visit docs"

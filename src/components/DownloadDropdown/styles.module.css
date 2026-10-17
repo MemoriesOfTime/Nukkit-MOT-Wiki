@@ -1,0 +1,176 @@
+.root {
+  position: relative;
+}
+
+.caret {
+  margin-left: 0.45rem;
+  transition: transform var(--ifm-transition-fast)
+    var(--ifm-transition-timing-default);
+}
+
+.caretOpen {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  left: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: max-content;
+  /* 100vw 含经典滚动条宽度（真机手机无碍，桌面窄窗口/webview 约多算 15px），
+     保护量 3.5rem = 左缘 hero padding 2rem + 滚动条余量，
+     避免右缘被 heroBanner 的 overflow: hidden 裁剪 */
+  max-width: min(22rem, calc(100vw - 3.5rem));
+  animation: menu-in var(--ifm-transition-slow)
+    var(--ifm-transition-timing-default);
+}
+
+/* 指向触发按钮的小箭头，随第一张卡片同色，把菜单和按钮连成一体 */
+.menu::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 1.9rem;
+  z-index: -1;
+  width: 10px;
+  height: 10px;
+  transform: rotate(45deg);
+  background: var(--ifm-card-background-color);
+  border-left: 1px solid var(--ifm-color-emphasis-300);
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu {
+    animation: none;
+  }
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--ifm-card-background-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 0.65rem;
+  box-shadow: var(--ifm-global-shadow-lw);
+  color: var(--ifm-font-color-base);
+  text-align: left;
+  transition:
+    border-color var(--ifm-transition-fast) var(--ifm-transition-timing-default),
+    background var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+
+.item:hover {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* 选项图标磁贴：给两个口味各自一个可辨识的视觉锚点 */
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1.15rem;
+  background: var(--ifm-color-emphasis-200);
+  border-radius: 0.5rem;
+}
+
+.itemBody {
+  /* 撑满剩余宽度，把右侧下载箭头顶到卡片右缘 */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.itemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.itemTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* 体积徽章：与标题同行，弱化为次要信息 */
+.itemSize {
+  flex-shrink: 0;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.itemDesc {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* 菜单底部：动态数据可用时显示的构建号（master · #1641），仅标识新鲜度 */
+.menuFooter {
+  padding: 0 0.35rem;
+  font-size: 0.72rem;
+  color: var(--ifm-color-emphasis-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 右侧下载指示：默认弱化，悬浮时点亮为主色 */
+.itemArrow {
+  flex-shrink: 0;
+  align-self: center;
+  color: var(--ifm-color-emphasis-400);
+  transition:
+    color var(--ifm-transition-fast) var(--ifm-transition-timing-default),
+    transform var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+
+.item:hover .itemArrow {
+  color: var(--ifm-color-primary);
+  transform: translateY(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itemArrow {
+    transition: none;
+  }
+
+  .item:hover .itemArrow {
+    transform: none;
+  }
+}

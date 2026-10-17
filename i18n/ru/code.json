@@ -30,6 +30,34 @@
     "message": "🌐 Скачать",
     "description": "The homepage message to ask the user to download nukkit-mot"
   },
+  "homepage.download.fullTitle": {
+    "message": "Стандартная версия",
+    "description": "Download menu: full jar title"
+  },
+  "homepage.download.fullSize": {
+    "message": "≈ 90 МБ",
+    "description": "Download menu: full jar approximate size badge"
+  },
+  "homepage.download.fullDesc": {
+    "message": "Включает все зависимости — готова к запуску",
+    "description": "Download menu: full jar description"
+  },
+  "homepage.download.liteTitle": {
+    "message": "Lite-версия",
+    "description": "Download menu: Lite jar title"
+  },
+  "homepage.download.liteSize": {
+    "message": "≈ 14 МБ",
+    "description": "Download menu: Lite jar approximate size badge"
+  },
+  "homepage.download.sizeUnit": {
+    "message": "МБ",
+    "description": "Download menu: size unit suffix for dynamically fetched sizes"
+  },
+  "homepage.download.liteDesc": {
+    "message": "Скачивает зависимости при первом запуске — нужен интернет",
+    "description": "Download menu: Lite jar description"
+  },
   "homepage.visitDocs": {
     "message": "📖 Изучение",
     "description": "The homepage message to ask the user to visit docs"
