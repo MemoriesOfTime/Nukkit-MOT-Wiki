@@ -1,8 +1,8 @@
 import {
   GH_ENDPOINTS,
   countContributors,
+  fetchCommitsWindow,
   ghApiFetch,
-  normalizeCommits,
   normalizeRepo,
   normalizeTags,
   type GhEndpointKey,
@@ -13,7 +13,9 @@ import {
  * 浏览器端自动刷新 Nukkit-MOT GitHub 动态：
  * - localStorage 缓存（CACHE_TTL_MS 内直接使用缓存，不发请求）；
  * - ETag 条件请求：GitHub 对 304 响应不消耗速率配额，匿名限流下也能长期轮询；
- * - commits 为必需数据，repo/tags/contributors 失败时逐项回退到 fallback（构建时快照）。
+ * - commits 为必需数据，经 fetchCommitsWindow 翻页拉取以覆盖 30 天窗口，
+ *   ETag 只针对第 1 页（第 1 页未变则后续页必然未变，直接沿用旧数据）；
+ *   repo/tags/contributors 失败时逐项回退到 fallback（构建时快照）。
  */
 
 const STORAGE_KEY = 'nkmot-activity-cache-v1';
@@ -64,7 +66,7 @@ export async function fetchLiveActivity(
   const token = undefined; // 公开站点绝不携带凭据
   const settled = await Promise.allSettled([
     ghApiFetch(GH_ENDPOINTS.repo, {etag: cache?.etags.repo, token, signal}),
-    ghApiFetch(GH_ENDPOINTS.commits, {etag: cache?.etags.commits, token, signal}),
+    fetchCommitsWindow({etag: cache?.etags.commits, signal}),
     ghApiFetch(GH_ENDPOINTS.tags, {etag: cache?.etags.tags, token, signal}),
     ghApiFetch(GH_ENDPOINTS.contributors, {etag: cache?.etags.contributors, token, signal}),
   ]);
@@ -76,6 +78,16 @@ export async function fetchLiveActivity(
   }
 
   const etags: LocalActivityCache['etags'] = {...cache?.etags};
+  // 提交列表：第 1 页 304 未变化 → 沿用缓存/快照且保留旧 etag；
+  // 200 但结果为空（异常响应）→ 同样回退到旧数据
+  const prevCommits = cache?.data.commits ?? fallback.commits;
+  let liveCommits = prevCommits;
+  if (!commits.value.unchanged) {
+    etags.commits = commits.value.etag;
+    if (commits.value.commits.length > 0) {
+      liveCommits = commits.value.commits;
+    }
+  }
   const pick = <T,>(
     result: PromiseSettledResult<{status: 200 | 304; json?: unknown; etag?: string}>,
     parse: (json: unknown) => T,
@@ -94,7 +106,7 @@ export async function fetchLiveActivity(
 
   const data: NkmotActivityData = {
     repo: pick(repo, normalizeRepo, fallback.repo, 'repo'),
-    commits: normalizeCommits(commits.value.json) || (cache?.data.commits ?? fallback.commits),
+    commits: liveCommits,
     tags: pick(tags, normalizeTags, fallback.tags, 'tags'),
     contributorsTotal: pick(
       contributors,

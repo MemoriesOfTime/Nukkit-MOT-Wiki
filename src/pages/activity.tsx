@@ -6,8 +6,8 @@ import Translate, {translate} from '@docusaurus/Translate';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import {usePluginData} from '@docusaurus/useGlobalData';
 import {useEffect, useState} from 'react';
-import type {NkmotCommit} from '@site/src/utils/githubActivityData';
-import type {NkmotActivityData} from '@site/src/utils/githubActivityData';
+import {ACTIVITY_WINDOW_MS} from '@site/src/utils/githubActivityData';
+import type {NkmotCommit, NkmotActivityData} from '@site/src/utils/githubActivityData';
 import {
   CACHE_TTL_MS,
   fetchLiveActivity,
@@ -19,7 +19,6 @@ import {localeTag} from '@site/src/utils/dateParts';
 import styles from './activity.module.css';
 
 const COMMIT_PAGE_SIZE = 30;
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 const AVATAR_SIZE = 32;
 
@@ -182,9 +181,10 @@ export default function ActivityPage(): React.ReactElement {
   const tags = data?.tags ?? [];
   const repo = data?.repo ?? null;
 
-  // 30 天窗口锚定在构建时的采集时间上，保证 SSR 与客户端结果完全一致
+  // 30 天窗口锚定在构建时的采集时间上，保证 SSR 与客户端结果完全一致；
+  // 口径与取数侧（fetchCommitsWindow）共用 ACTIVITY_WINDOW_MS
   const fetchedMs = data?.fetchedAt ? Date.parse(data.fetchedAt) : Number.NaN;
-  const cutoffMs = Number.isFinite(fetchedMs) ? fetchedMs - THIRTY_DAYS_MS : Number.NaN;
+  const cutoffMs = Number.isFinite(fetchedMs) ? fetchedMs - ACTIVITY_WINDOW_MS : Number.NaN;
   const recentCommits = Number.isFinite(cutoffMs)
     ? commits.filter((c) => Date.parse(c.date) >= cutoffMs)
     : [];
@@ -315,8 +315,9 @@ export default function ActivityPage(): React.ReactElement {
                 />
               </section>
 
+              {/* 图表与统计卡同为 30 天窗口口径；下方提交列表则展示全部已取数据 */}
               <ActivityCharts
-                commits={commits}
+                commits={recentCommits}
                 fetchedAt={data?.fetchedAt ?? ''}
                 locale={locale}
               />

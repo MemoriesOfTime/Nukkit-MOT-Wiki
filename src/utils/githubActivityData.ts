@@ -1,5 +1,5 @@
 /**
- * Nukkit-MOT GitHub 动态数据的共享类型、端点与规整逻辑。
+ * Nukkit-MOT GitHub 动态数据的共享类型、端点、规整与取数逻辑。
  * 同时被两方使用：
  * - 构建时插件（src/plugins/github-activity，经 jiti 以 Node 运行）
  * - 浏览器端自动刷新（src/utils/githubActivityClient）
@@ -8,6 +8,17 @@
 
 const REPO_OWNER = 'MemoriesOfTime';
 const REPO_NAME = 'Nukkit-MOT';
+
+/** 活动统计窗口：30 天（/activity 统计卡与图表、提交翻页取数的共同口径） */
+export const ACTIVITY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** GitHub /commits 单页条数（REST API 允许的最大值就是 100） */
+const COMMITS_PER_PAGE = 100;
+/**
+ * 提交翻页页数上限：5 页 = 最多 500 条。2026-10 的活跃度（30 天约 230 条，
+ * 约 3 页）之上留有余量；若仓库活跃度再翻倍导致统计重新截断，上调此值即可。
+ */
+const MAX_COMMIT_PAGES = 5;
 
 export type NkmotCommit = {
   sha: string;
@@ -53,10 +64,10 @@ export const EMPTY_DATA: NkmotActivityData = {
   stale: true,
 };
 
-/** GitHub API 端点路径 */
+/** GitHub API 端点路径（commits 为第 1 页，翻页见 commitsPagePath/fetchCommitsWindow） */
 export const GH_ENDPOINTS = {
   repo: `/repos/${REPO_OWNER}/${REPO_NAME}`,
-  commits: `/repos/${REPO_OWNER}/${REPO_NAME}/commits?per_page=100`,
+  commits: `/repos/${REPO_OWNER}/${REPO_NAME}/commits?per_page=${COMMITS_PER_PAGE}`,
   tags: `/repos/${REPO_OWNER}/${REPO_NAME}/tags?per_page=5`,
   contributors: `/repos/${REPO_OWNER}/${REPO_NAME}/contributors?per_page=100&anon=1`,
 } as const;
@@ -148,6 +159,67 @@ export function normalizeCommits(raw: unknown): NkmotCommit[] {
   }
   return commits;
 }
+
+/** 提交列表第 page 页的端点；page=1 与 GH_ENDPOINTS.commits 完全一致（保持边缘缓存键不变） */
+export function commitsPagePath(page: number): string {
+  return page <= 1 ? GH_ENDPOINTS.commits : `${GH_ENDPOINTS.commits}&page=${page}`;
+}
+
+/**
+ * 翻页拉取覆盖 30 天活动窗口的提交列表。
+ *
+ * GitHub /commits 单页上限 100 条，仓库高活跃时 100 条覆盖不了 30 天
+ * （如 2026-10：100 条只覆盖约 3 天），「近 30 天」统计与图表会被截断。
+ * 从第 1 页起顺序翻页，直到最旧一条早于窗口起点、取到短页（仓库历史见底）
+ * 或达到 MAX_COMMIT_PAGES 上限；翻页间隙新落入的提交按 sha 去重。
+ * 第 2 页起失败时保留已取到的部分（部分数据好于无数据）；第 1 页失败照常
+ * 抛出，由调用方回退。
+ */
+export async function fetchCommitsWindow(
+  opts: {etag?: string; token?: string; signal?: AbortSignal} = {},
+): Promise<CommitsWindowResult> {
+  const first = await ghApiFetch(commitsPagePath(1), opts);
+  if (first.status === 304) {
+    return {unchanged: true};
+  }
+  const cutoffMs = Date.now() - ACTIVITY_WINDOW_MS;
+  let pageItems = normalizeCommits(first.json);
+  const commits = [...pageItems];
+  const seen = new Set(commits.map((c) => c.sha));
+  for (let page = 2; page <= MAX_COMMIT_PAGES; page++) {
+    const oldest = commits[commits.length - 1];
+    if (pageItems.length < COMMITS_PER_PAGE || !oldest || Date.parse(oldest.date) < cutoffMs) {
+      break;
+    }
+    try {
+      const res = await ghApiFetch(commitsPagePath(page), {
+        token: opts.token,
+        signal: opts.signal,
+      });
+      if (res.status !== 200) {
+        break;
+      }
+      pageItems = normalizeCommits(res.json);
+    } catch (err) {
+      break;
+    }
+    if (pageItems.length === 0) {
+      break;
+    }
+    for (const commit of pageItems) {
+      if (!seen.has(commit.sha)) {
+        seen.add(commit.sha);
+        commits.push(commit);
+      }
+    }
+  }
+  return {unchanged: false, etag: first.etag, commits};
+}
+
+/** fetchCommitsWindow 的结果：unchanged = 第 1 页命中 304，调用方可沿用旧数据 */
+export type CommitsWindowResult =
+  | {unchanged: true}
+  | {unchanged: false; etag?: string; commits: NkmotCommit[]};
 
 export function normalizeTags(raw: unknown): NkmotTag[] {
   if (!Array.isArray(raw)) {

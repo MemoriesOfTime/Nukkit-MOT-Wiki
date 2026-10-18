@@ -6,7 +6,7 @@ import {localeTag} from '@site/src/utils/dateParts';
 import styles from './index.module.css';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-/** 采集数据最多 100 条提交，窗口兜底 120 天，防止极端稀疏提交把横轴拉到失控 */
+/** 页面传入的是 30 天窗口内的提交；窗口兜底 120 天，防止极端稀疏提交把横轴拉到失控 */
 const MAX_WINDOW_DAYS = 120;
 
 type DayBucket = {

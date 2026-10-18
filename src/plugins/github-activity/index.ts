@@ -5,8 +5,8 @@ import {
   EMPTY_DATA,
   GH_ENDPOINTS,
   countContributors,
+  fetchCommitsWindow,
   ghApiFetch,
-  normalizeCommits,
   normalizeRepo,
   normalizeTags,
   type NkmotActivityData,
@@ -22,6 +22,8 @@ import {
  *
  * - 支持 GITHUB_TOKEN 环境变量提高速率上限（仅直连 api.github.com 时生效；
  *   GH_API_BASE 指向中转时 Token 由 Worker 注入，客户端携带的凭证不会转发）；
+ * - 提交列表经 fetchCommitsWindow 翻页拉取，覆盖 30 天活动窗口
+ *   （仓库高活跃时单页 100 条不够）；
  * - 每次成功采集后写入 .docusaurus/github-activity-cache.json，
  *   构建机网络失败（离线构建 / 触发限流）时回退到上次缓存。
  */
@@ -40,15 +42,16 @@ export default function githubActivityPlugin(
     async loadContent() {
       const token = process.env.GITHUB_TOKEN;
       try {
-        const [repo, commitsRaw, tagsRaw, contributorsRaw] = await Promise.all([
+        const [repo, commitsWindow, tagsRaw, contributorsRaw] = await Promise.all([
           ghApiFetch(GH_ENDPOINTS.repo, {token}),
-          ghApiFetch(GH_ENDPOINTS.commits, {token}),
+          fetchCommitsWindow({token}),
           ghApiFetch(GH_ENDPOINTS.tags, {token}),
           ghApiFetch(GH_ENDPOINTS.contributors, {token}),
         ]);
         const data: NkmotActivityData = {
           repo: normalizeRepo(repo.json),
-          commits: normalizeCommits(commitsRaw.json),
+          // 构建时不带 etag，unchanged 实际不会发生（仅类型收窄）
+          commits: commitsWindow.unchanged ? [] : commitsWindow.commits,
           tags: normalizeTags(tagsRaw.json),
           contributorsTotal: countContributors(contributorsRaw.json),
           fetchedAt: new Date().toISOString(),
