@@ -9,6 +9,9 @@ import CompressionThresholdDemo from '@site/src/components/CompressionThresholdD
 import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
 import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
 import DefaultPortsGrid from '@site/src/components/DefaultPortsGrid';
+import ChunkDeliveryDemo from '@site/src/components/ChunkDeliveryDemo';
+import ChunkCacheSizing from '@site/src/components/ChunkCacheSizing';
+import SubChunkBudgetDemo from '@site/src/components/SubChunkBudgetDemo';
 
 # nukkit-mot.yml
 
@@ -498,6 +501,135 @@ IPv6 本地地址默认可信。
     labelPaused="卸载已暂停（背压）"
     caption="当队列达到上限时，区块卸载会暂停，直到磁盘写入赶上（背压）。把写入压力拉高到磁盘消化速度（12/s）以上即可看到效果。"
 />
+
+### 区块投递模式 {#chunk-delivery-modes}
+
+下面两个开关只改变网络传输格式，不影响世界数据与游戏行为，且按客户端生效——版本过低或未声明支持的客户端始终收到全量区块。
+
+<ChunkDeliveryDemo
+    labelServer="服务端"
+    labelClient="客户端"
+    modeFull="全量推送"
+    modeCache="客户端缓存"
+    modePull="子区块拉取"
+    modePullCache="拉取 + 缓存"
+    descFull="每次进入视野，都把整列序列化后完整发送。"
+    descCache="只传输 blob 哈希；客户端回报命中 / 未命中，未命中的内容只补发一次。"
+    descPull="先发一个仅含生物群系的空壳，客户端再按需拉取真正要渲染的子区块。"
+    descPullCache="拉取模式下条目也带哈希：空壳与条目都只带 blob id，只有未命中才传数据。"
+    laneFull="LevelChunk = 整列数据"
+    laneBlobIds="LevelChunk = blob id + 方块实体"
+    laneShell="LevelChunk 空壳 = 仅生物群系"
+    laneBiomeBlob="LevelChunk 空壳 = 生物群系哈希"
+    laneBlobStatus="BlobStatus（命中 / 未命中）"
+    laneMissResponse="MissResponse = 数据"
+    labelFirst="首次进入"
+    labelRevisit="离开后重回"
+    labelBytes="单列网络字节数"
+    labelOn="开"
+    labelOff="关"
+    chipChunkSettings="区块设置"
+    chipSerializer="序列化器"
+    chipBlobStore="blob 仓库"
+    chipChunkCache="区块缓存"
+    chipRenderer="渲染器"
+    chipSubChunks="子区块"
+    caption="示意数值：一列约 18 KB，客户端实际渲染约 38% 的子区块。"
+/>
+
+全量推送每次都发送整列；**客户端缓存**只发 blob 哈希，未命中的内容补发一次；**子区块拉取**（默认）先发仅含生物群系的空壳，再按需应答子区块请求。两个都开时拉取优先，只有未命中才传数据。
+
+### `client-cache`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | off |
+
+启用客户端区块缓存：区块列以 blob 哈希列表的形式传输，而不再发送完整数据；只有客户端回报缺失的 blob 才会补发
+
+需要协议 1.18.0（475）及以上，**且**客户端在登录时声明支持缓存——其他客户端仍然收到全量区块
+
+哈希指向全服共享、按内容寻址的仓库中序列化后的子区块与生物群系字节，仓库大小由 [`blob-store-max-mb`](#blob-store-max-mb) 限制
+
+参见上文的[区块投递模式](#chunk-delivery-modes)
+
+### `blob-store-max-mb`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 64  |
+
+客户端缓存 blob 仓库的内存预算（MB）
+
+该仓库由所有世界共享，按最近最少使用（LRU）驱逐未被 pin 的 blob；它同时也是已 pin（在途）blob 的硬顶，因此即使客户端不回应，也无法让仓库超出此预算
+
+当预算小于工作集时，旧列会被驱逐、客户端回报未命中、服务端重新发送数据——结果仍然正确，只是收益变小
+
+<ChunkCacheSizing
+    labelViewDistance="视野距离"
+    labelPlayers="在线玩家"
+    labelClustered="玩家集中"
+    labelDispersed="玩家分散"
+    labelWorkingSet="工作集"
+    labelBudget="建议预算"
+    labelDefault="默认 64 MB"
+    labelColumns="需容纳列数"
+    caption="工作集 = 屏幕上不重复的列数 × 约 18 KB。建议预算预留了 30% 余量；pending 上限覆盖玩家一次性接收的那批列。"
+    warning="默认的 64 MB 小于当前工作集：blob 会被驱逐，客户端回报未命中，服务端需要重新发送数据。建议调大 blob-store-max-mb。"
+    overflow="当前工作集已超出合理的最大预算（1024 MB）。请按热点区域估算：仓库是全服共享的，聚集在一起的玩家依然能命中缓存。"
+/>
+
+- **视野 8–12、玩家集中：** 默认 64 MB 通常足以容纳整个工作集
+- **视野 16 及以上：** 应当调大——工作集随半径的平方增长
+- **玩家分散在地图各处：** 每个聚集点都有各自的工作集
+- **有多个大型世界：** 仓库是全服的，下界与末地同样计入
+
+### `blob-pending-cap`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 512 |
+
+单个玩家「已发出但尚未收到命中/未命中回报」的不同 blob 哈希上限
+
+典型主世界区块列约二十多个哈希（每个子区块一个，再加生物群系），因此默认值大致对应 15–20 个在途的列
+
+超出上限时，该列对该玩家改为全量发送，其他玩家不受影响；小于 64 的取值会被钳制为 64
+
+### `sub-chunk-requests`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | on  |
+
+启用子区块按需拉取：服务端只发送仅含生物群系的空壳，由客户端请求它要渲染的 16×16×16 子区块
+
+需要协议 1.19.10（534）及以上；更早的客户端继续收到全量区块（其子区块系统会错误渲染方块实体）
+
+与 [`client-cache`](#client-cache) 同时开启时，空壳与条目都携带 blob 哈希，只有未命中才真正传数据
+
+### `subchunk-entries-per-tick`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 64  |
+
+服务端每玩家每 tick 序列化的子区块条目数
+
+只有非空子区块消耗预算；全空气子区块、未加载区块与越界 offset 都是免费应答，因此「全廉价」的请求即使预算为 0 也会被完整应答
+
+调高可让传送后地形更快补齐，调低可让主线程尖峰更平滑；取值下限为 1
+
+<SubChunkBudgetDemo
+    labelPending="排队 offset"
+    labelPerTick="本 tick 应答"
+    labelCleared="清空队列需"
+    labelTicks="tick"
+    labelSeconds="秒"
+    labelPlay="开始"
+    labelPause="暂停"
+    labelReset="重置"
+    caption="玩家传送时，客户端会一次性请求数百个子区块。服务端每 tick 最多应答 subchunk-entries-per-tick 个，剩余部分重新排队，于是大批请求被摊到多个 tick 上，而不是卡死在某一个 tick。"
+/>
+
+:::note
+还有两个与该配置无关、无法调整的上限：每玩家每 tick 最多 **4 MiB** 子区块响应，单个响应包最多 **2 MiB**。超过的部分会自动拆分到多个包、多个 tick。
+:::
 
 ## entity-settings（实体设置） {#entity-settings}
 

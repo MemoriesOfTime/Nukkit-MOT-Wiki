@@ -9,6 +9,9 @@ import CompressionThresholdDemo from '@site/src/components/CompressionThresholdD
 import AutoTickRateDemo from '@site/src/components/AutoTickRateDemo';
 import PendingWritesDemo from '@site/src/components/PendingWritesDemo';
 import DefaultPortsGrid from '@site/src/components/DefaultPortsGrid';
+import ChunkDeliveryDemo from '@site/src/components/ChunkDeliveryDemo';
+import ChunkCacheSizing from '@site/src/components/ChunkCacheSizing';
+import SubChunkBudgetDemo from '@site/src/components/SubChunkBudgetDemo';
 
 # nukkit-mot.yml
 
@@ -457,6 +460,84 @@ it's recommended to keep this enabled
 maximum number of pending chunk writes per world before chunk unloading pauses (backpressure)
 
 <PendingWritesDemo caption="When the queue reaches the limit, chunk unloading pauses until the disk catches up (backpressure). Raise the write pressure above the drain rate (12/s) to see it in action." />
+
+### Chunk delivery modes {#chunk-delivery-modes}
+
+The two switches below only change the wire format — never world data or gameplay — and apply per client: an old client, or one that never announces support, keeps receiving full columns.
+
+<ChunkDeliveryDemo caption="Illustrative sizes: a column is about 18 KB on the wire, and the client renders roughly 38% of its sub-sections." />
+
+Full push sends the whole column every time; **client cache** sends blob ids and re-sends misses once; **sub-chunk pull** (the default) sends a biome-only shell and answers section requests. With both on, pull wins and payloads only travel on a miss.
+
+### `client-cache`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | off           |
+
+enable the client chunk cache: a column travels as a list of blob hashes instead of its full payload, and only the blobs the client reports as missing are re-sent
+
+requires protocol 1.18.0 (475) or newer **and** a client that announces cache support at login — every other client keeps receiving full columns
+
+the hashes address serialized sub-chunk and biome bytes in a server-wide, content-addressed store bounded by [`blob-store-max-mb`](#blob-store-max-mb)
+
+see [chunk delivery modes](#chunk-delivery-modes) above
+
+### `blob-store-max-mb`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 64            |
+
+memory budget, in MB, for the shared client cache blob store
+
+the store is shared by every world and evicts least-recently-used, unpinned blobs; it is also the hard cap for pinned (in-flight) blobs, so an unresponsive client can never push it past this budget
+
+if the budget is smaller than the working set, old columns are evicted, clients report misses and the server re-sends payloads — still correct, just less efficient
+
+<ChunkCacheSizing />
+
+- **View distance 8–12, players clustered:** the default 64 MB usually holds the whole working set
+- **View distance 16+:** raise it — the working set grows with the square of the radius
+- **Players spread across the map:** each group has its own working set
+- **Several large worlds:** the store is server-wide, so the nether and the end count too
+
+### `blob-pending-cap`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 512           |
+
+maximum number of distinct blob hashes a single player may have awaiting a hit/miss report
+
+a typical overworld column is a couple dozen hashes (one per section plus biomes), so the default covers roughly 15–20 columns in flight
+
+over the cap, that column is sent in full to that player; other players are unaffected. Values below 64 are clamped to 64
+
+### `sub-chunk-requests`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+enable sub-chunk pull mode: the server sends a biome-only shell and the client requests the 16×16×16 sections it renders
+
+requires protocol 1.19.10 (534) or newer; older clients keep receiving full columns (their sub-chunk handling renders block entities incorrectly)
+
+combined with [`client-cache`](#client-cache), shells and entries carry blob hashes and payloads only travel on a miss
+
+### `subchunk-entries-per-tick`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 64            |
+
+sub-chunk entries the server serializes per player per tick
+
+only non-empty sections consume the budget; all-air sections, unloaded chunks and out-of-range offsets are answered for free, so an all-cheap request is always answered in full
+
+raise it to fill terrain faster after a teleport, lower it to smooth the main-thread spike. Values are clamped to at least 1
+
+<SubChunkBudgetDemo />
+
+:::note
+Two ceilings are independent of this setting and cannot be raised: at most **4 MiB** of sub-chunk responses per player per tick, and at most **2 MiB** per response packet. Larger answers are split across packets and ticks automatically.
+:::
 
 ## entity-settings (Entity Settings) {#entity-settings}
 
