@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import NationalDayTheme from '@site/src/components/NationalDayTheme';
 import ProgrammersDayTheme from '@site/src/components/ProgrammersDayTheme';
+import ProgrammersDay1024Theme from '@site/src/components/ProgrammersDay1024Theme';
 import MinecraftBirthdayTheme from '@site/src/components/MinecraftBirthdayTheme';
 import LanguageSwitchHint from '@site/src/components/LanguageSwitchHint';
 
@@ -16,6 +17,7 @@ export default function Root({ children }: RootProps): ReactNode {
     <>
       <NationalDayTheme />
       <ProgrammersDayTheme />
+      <ProgrammersDay1024Theme />
       <MinecraftBirthdayTheme />
       <LanguageSwitchHint />
       {children}

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { getDateParts } from '@site/src/utils/dateParts';
 
@@ -22,11 +22,18 @@ const STARS = [
 
 export default function NationalDayTheme(): ReactNode {
   const { i18n } = useDocusaurusContext();
-  const isChinese = i18n.currentLocale === 'zh';
-  const { month, day, year } = getDateParts('Asia/Shanghai');
-  const active = isChinese && month === 10 && day === 1;
+  const [year, setYear] = useState<number | null>(null);
 
-  if (!active) return null;
+  useEffect(() => {
+    const preview =
+      process.env.NODE_ENV === 'development' &&
+      new URLSearchParams(window.location.search).has('national-day');
+    const { month, day, year: currentYear } = getDateParts('Asia/Shanghai');
+    const active = month === 10 && day === 1;
+    setYear(i18n.currentLocale === 'zh' && (preview || active) ? currentYear : null);
+  }, [i18n.currentLocale]);
+
+  if (year === null) return null;
 
   const anniversary = year - 1949;
   return (

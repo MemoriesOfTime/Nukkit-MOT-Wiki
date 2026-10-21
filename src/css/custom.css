@@ -499,3 +499,129 @@ html:has(.minecraft-birthday-banner) .footer--dark {
     display: none;
   }
 }
+
+/* ===== 1024 程序员节主题（每年 10 月 24 日，仅中文页面由 ProgrammersDay1024Theme 组件启用） =====
+   1024 = 2¹⁰ = 1 KiB。横幅与配色都在客户端挂载横幅后同时生效。通过
+   :has(.programmers-day-1024-banner) 检测横幅是否存在来决定整站配色，
+   不依赖 JS 给 <html> 加类。 */
+html:has(.programmers-day-1024-banner) {
+  --ifm-color-primary: #b45309;
+  --ifm-color-primary-dark: #a24a08;
+  --ifm-color-primary-darker: #994607;
+  --ifm-color-primary-darkest: #7e3a06;
+  --ifm-color-primary-light: #c65c0a;
+  --ifm-color-primary-lighter: #cd5f0b;
+  --ifm-color-primary-lightest: #e8802f;
+  /* 页面整体琥珀暖调 */
+  --ifm-background-color: #fffaf1;
+}
+
+html[data-theme='dark']:has(.programmers-day-1024-banner) {
+  --ifm-color-primary: #ffb454;
+  --ifm-color-primary-dark: #f2a33c;
+  --ifm-color-primary-darker: #e89a30;
+  --ifm-color-primary-darkest: #c47c1e;
+  --ifm-color-primary-light: #ffc070;
+  --ifm-color-primary-lighter: #ffc985;
+  --ifm-color-primary-lightest: #ffdbb0;
+  --ifm-background-color: #14100a;
+}
+
+html:has(.programmers-day-1024-banner) .footer--dark {
+  background-color: #2a1d0e;
+}
+
+/* --- 终端提示符横幅：暗底琥珀字，结尾闪烁光标 --- */
+.programmers-day-1024-banner {
+  position: relative;
+  z-index: calc(var(--ifm-z-index-fixed) + 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #1a1206;
+  border-bottom: 1px solid #3a2a12;
+  color: #ffb454;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+.programmers-day-1024-prompt {
+  color: #7ee787;
+}
+
+.programmers-day-1024-banner-extra {
+  color: #b08a5a;
+  font-weight: 500;
+}
+
+.programmers-day-1024-cursor {
+  color: #ffb454;
+  animation: programmers-day-1024-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes programmers-day-1024-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* --- 二进制雨：全屏固定层，不响应鼠标，不遮挡交互 --- */
+.programmers-day-1024-bits {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.programmers-day-1024-bits span {
+  position: absolute;
+  top: -5vh;
+  font-family: var(--ifm-font-family-monospace);
+  text-shadow: 0 0 6px color-mix(in srgb, currentColor 55%, transparent);
+  opacity: 0;
+  animation-name: programmers-day-1024-bit-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes programmers-day-1024-bit-fall {
+  0% {
+    transform: translate3d(0, -6vh, 0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.5;
+  }
+  92% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(3vw, 110vh, 0);
+    opacity: 0;
+  }
+}
+
+/* 小屏隐藏进制换算说明，横幅保持单行 */
+@media (max-width: 576px) {
+  .programmers-day-1024-banner-extra {
+    display: none;
+  }
+}
+
+/* 减少动态：关掉二进制雨与光标闪烁 */
+@media (prefers-reduced-motion: reduce) {
+  .programmers-day-1024-bits {
+    display: none;
+  }
+
+  .programmers-day-1024-cursor {
+    animation: none;
+  }
+}
