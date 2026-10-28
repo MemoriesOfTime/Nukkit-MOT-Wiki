@@ -6,25 +6,41 @@ import FolderView from '@site/src/components/FolderView';
 
 # 自定义方块
 
-:::danger 前提条件：Bin 数据文件
+:::info 前提条件：原版调色板
 
-在使用自定义方块之前，你必须下载并放置 Bin 数据文件到服务器目录：
+自定义方块依赖服务器 `bin/` 目录下的原版调色板文件 `vanilla_palette_*.nbt`：每个受支持的客户端协议版本各一份，网易版客户端另有 `vanilla_palette_netease_*.nbt`。**Nukkit-MOT 会在启动时自动下载，不需要手动准备。**
 
-1. 从 [Bin_Data 仓库](https://github.com/MemoriesOfTime/Bin_Data) 下载
-2. 将 `bin` 文件夹放置到服务器根目录
+每次启动时服务端都会检查 `bin/` 目录，只从官方镜像 `https://bin-data.nkmot.com/`（内容源为 [MemoriesOfTime/Bin_Data](https://github.com/MemoriesOfTime/Bin_Data)）补齐缺失或损坏的文件，已经存在的不会重复下载。首次启动（以及游戏大版本更新后的首次启动）需要真正下载，启动会多花几秒。
 
-你的服务器目录结构应该如下：
+首次下载完成后，目录结构如下，之后无需再维护：
+
 ```
 NukkitServer/
-├── bin/                          ← 自定义方块必需
-│   ├── vanilla_palette_xxx.nbt
+├── bin/                          ← 由服务端自动维护
+│   ├── vanilla_palette_1001.nbt
+│   ├── vanilla_palette_netease_860.nbt
 │   └── ...
 ├── plugins/
 ├── worlds/
 └── Nukkit-MOT-SNAPSHOT.jar
 ```
 
-没有这些文件，自定义方块注册将会失败。
+:::
+
+:::note 离线服务器与手动固定调色板
+
+若服务器无法访问外网，或想固定某一版调色板，可以手动准备并关闭下载：
+
+1. 从 [Bin_Data 仓库](https://github.com/MemoriesOfTime/Bin_Data) 下载 `palettes.zip`（或只取需要的 `.nbt` 文件）；
+2. 把 `.nbt` 文件解压到 `bin/` 根目录（不要再套一层子目录）；
+3. 在 `nukkit-mot.yml` 中关闭自动下载：
+
+```yaml title="nukkit-mot.yml"
+custom-block-settings:
+  auto-download-vanilla-palette: false
+```
+
+下载失败不会导致启动失败：服务端照常启动，只在控制台输出警告，并打印上述手动操作提示。但如果某个协议版本的调色板始终缺失，使用该版本客户端的玩家就无法正常显示你的自定义方块，日志中会出现 `No vanilla palette found for <version>.`。完整选项说明见 [`custom-block-settings`](../../../user-guide/server-config/nukkit-mot-yml.mdx#custom-block-settings)。
 
 :::
 

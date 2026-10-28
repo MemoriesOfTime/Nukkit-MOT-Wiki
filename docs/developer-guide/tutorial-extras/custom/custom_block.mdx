@@ -8,25 +8,41 @@ import FolderView from '@site/src/components/FolderView';
 
 # Custom Block
 
-:::danger Prerequisites: Bin Data Files
+:::info Prerequisite: Vanilla Block Palettes
 
-Before using custom blocks, you must download and place the Bin data files in your server directory:
+Custom blocks rely on the vanilla block palettes (`vanilla_palette_*.nbt`) in the server's `bin/` folder — one file per supported client protocol, plus `vanilla_palette_netease_*.nbt` variants for NetEase clients. **Nukkit-MOT downloads them for you at startup, so there is no manual download step.**
 
-1. Download from [Bin_Data Repository](https://github.com/MemoriesOfTime/Bin_Data)
-2. Place the `bin` folder in your server root directory
+On every start the server checks `bin/` and only fetches what is missing or damaged from the official mirror `https://bin-data.nkmot.com/` (backed by [MemoriesOfTime/Bin_Data](https://github.com/MemoriesOfTime/Bin_Data)). Files that are already there are never downloaded again. The first startup (and the first one after a game update) actually downloads them, which delays startup by a few seconds.
 
-Your server directory should look like:
+Once populated, the folder looks like this, and you never need to touch it:
+
 ```
 NukkitServer/
-├── bin/                          ← Required for custom blocks
-│   ├── vanilla_palette_xxx.nbt
+├── bin/                          ← managed by the server
+│   ├── vanilla_palette_1001.nbt
+│   ├── vanilla_palette_netease_860.nbt
 │   └── ...
 ├── plugins/
 ├── worlds/
 └── Nukkit-MOT-SNAPSHOT.jar
 ```
 
-Without these files, custom block registration will fail.
+:::
+
+:::note Offline Servers and Pinned Palettes
+
+If the machine has no outbound access, or you want to pin an exact palette set, prepare the files by hand and disable the downloader:
+
+1. Download `palettes.zip` from [Bin_Data](https://github.com/MemoriesOfTime/Bin_Data) — or only the `.nbt` files you need.
+2. Extract the `.nbt` files straight into `bin/` (no sub-folder).
+3. Turn the automatic download off in `nukkit-mot.yml`:
+
+```yaml title="nukkit-mot.yml"
+custom-block-settings:
+  auto-download-vanilla-palette: false
+```
+
+A failed download is never fatal: the server still starts, logs a warning with the mirror URL, and prints these same manual steps. But if a palette for a client protocol version stays missing, clients on that version cannot render your custom blocks — the log will say `No vanilla palette found for <version>.`. See [`custom-block-settings`](../../../user-guide/server-config/nukkit-mot-yml.mdx#custom-block-settings) for the full option reference.
 
 :::
 
