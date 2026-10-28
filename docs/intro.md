@@ -18,7 +18,7 @@ keywords:
 Nukkit-MOT is a fork of [Nukkit](https://github.com/CloudburstMC/Nukkit) that provides multi-version support, compatibility with NetEase clients, and a well-established plugin ecosystem.
 
 ### What's new in Nukkit-MOT? {#whats-new}
-1. Support for 1.2 – 1.26.50 version (you can set the minimum protocol in the config)
+1. Support for 1.2 – 1.26.60 version (you can set the minimum protocol in the config)
 2. Supports most entities with AI
 3. Support for the nether world and The End
 4. Generation of dungeons and caves
