@@ -28,7 +28,7 @@ Nukkit-MOT 服务器高级配置。设置按类别分组排序。
 
 异步工作线程数
 
-如果设置为 auto，则会尝试自动检测核心数进行调整
+如果设置为 auto，则会使用 CPU 核心数 + 1（最少 4）
 
 ### `virtual-threads`
 | 数据类型   | 默认值 |
@@ -94,6 +94,15 @@ Nukkit-MOT 服务器高级配置。设置按类别分组排序。
 | Integer | 60000 |
 
 如果 Nukkit-MOT 主线程暂停超过 60000 毫秒，会抛出致命错误并终止执行的毫秒数
+
+### `shutdown-watchdog-kill-timeout`
+| 数据类型    | 默认值   |
+|---------|-------|
+| Integer | 600000 |
+
+关机过程停滞且没有保存进度达到该毫秒数后，强制终止服务器，适用于世界或插件卡住关机流程的情况
+
+`0` 表示仅记录警告，不强制终止
 
 ### `do-level-gc`
 | 数据类型    | 默认值 |
@@ -202,11 +211,11 @@ network-settings:
 |---------|-----|
 | `List<String>` | [] |
 
-额外的 ICE STUN/TURN 服务器，例如 `stun:stun.l.google.com:19302`
+额外的 ICE STUN 服务器，例如 `stun:stun.l.google.com:19302`
 
-TURN 凭证直接写在 URL 中：`turn:user:pass@host:port?transport=udp`
+STUN 用于帮助 NAT 后的玩家发现直连媒体路径
 
-当玩家侧为对称 NAT、无法建立直连媒体路径时，可添加 TURN 中继——完整的媒体不可达排查清单见 [`server-udp-ports`](server-properties.mdx#server-udp-ports)
+如果对称 NAT 后的玩家仍无法建立媒体路径，完整的排查清单见 [`server-udp-ports`](server-properties.mdx#server-udp-ports)
 
 #### `identity-file`
 | 数据类型    | 默认值 |
@@ -227,6 +236,40 @@ TURN 凭证直接写在 URL 中：`turn:user:pass@host:port?transport=udp`
 客户端信任提示中显示的运营者名称，留空则使用 MOTD
 
 仅用于展示——可以随时修改，无需更换身份密钥
+
+#### `https-certificate`
+| 数据类型    | 默认值 |
+|---------|-----|
+| String |     |
+
+信令端口的 TLS 证书：PEM 证书链（叶子证书在前）或 PKCS12 文件，路径相对于服务器根目录
+
+通过 HTTPS 加入的玩家不会看到首次使用的信任提示，iOS 客户端没有证书则无法加入。留空则以明文提供服务
+
+#### `https-private-key`
+| 数据类型    | 默认值 |
+|---------|-----|
+| String |     |
+
+`https-certificate` 对应的 PEM 私钥。当 `https-certificate` 为 PKCS12 文件时留空
+
+#### `https-password`
+| 数据类型    | 默认值 |
+|---------|-----|
+| String |     |
+
+PKCS12 文件或加密 PEM 私钥的密码
+
+支持 `file:/path/to/password`，从文件中读取密码
+
+#### `https-reject-plaintext`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | on  |
+
+配置证书后，对明文信令请求返回 HTTP 426，不再提供服务
+
+设为 `off` 可在同一端口上同时接受明文与 TLS
 
 ### `zlib-provider`
 | 数据类型    | 默认值 |
@@ -266,7 +309,7 @@ TURN 凭证直接写在 URL 中：`turn:user:pass@host:port?transport=udp`
 |---------|-----|
 | Integer | 7   |
 
-区块数据的 Zlib 压缩级别（0-9）
+区块数据的 Zlib 压缩级别（1-9）
 
 更高的值 = 更多的 CPU 占用 + 更小的区块数据包
 
@@ -667,7 +710,9 @@ IPv6 本地地址默认可信。
 
 :::note
 
-末影龙、凋灵和村民不会消失
+Boss 生物（末影龙、凋灵）和进入求爱状态的生物（如繁殖过的村民）永远不会消失
+
+使用命名牌命名、被拴绳拴住、以及 30 秒内受过伤害的生物同样不会消失
 
 :::
 
@@ -679,6 +724,24 @@ IPv6 本地地址默认可信。
 实体自动生成任务运行的频率
 
 以刻为单位，20刻 = 1秒
+
+### `activation-blocks`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 80  |
+
+世界中距离所有玩家（水平距离）超过该方块数的生物，每秒更新一次而非每刻更新，跳过的时间会在后续补上
+
+生物本来也会在该范围外停止走动。`0` 表示关闭该限流，走动范围保持 80 格
+
+### `target-search-interval`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Integer | 10  |
+
+没有跟随目标的生物进行索敌搜索的间隔（刻）
+
+有目标、正在被攻击或被击退的生物仍每刻搜索。`1` 恢复旧的每刻搜索行为
 
 ### `ticks-per-despawns`
 | 数据类型    | 默认值   |
@@ -796,6 +859,15 @@ worlds:
 
 ## player-settings（玩家设置） {#player-settings}
 
+### `movement-collision-check`
+| 数据类型    | 默认值 |
+|---------|-----|
+| Boolean | on  |
+
+启用玩家移动碰撞检测
+
+设为 `off` 可恢复旧的宽松移动判定，允许客户端穿过实体方块
+
 ### `save-player-data`
 | 数据类型    | 默认值 |
 |---------|-----|
@@ -904,7 +976,7 @@ worlds:
 |---------|-----|
 | Boolean | off |
 
-启用在 Windows CMD 标题中显示服务器占用信息
+启用在 ANSI 终端标题中显示服务器占用信息（在线玩家、内存、TPS、负载）
 
 <Image img={require('@site/static/images/server-config/windows_cmd_title.png')} alt="Windows 命令行标题" />
 

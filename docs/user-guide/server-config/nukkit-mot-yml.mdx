@@ -28,7 +28,7 @@ For standard Minecraft server settings, see [server.properties](server-propertie
 
 number of async worker threads
 
-if set to auto, it will try to automatically detect the number of cores and use that
+if set to auto, it will use the CPU core count plus one (minimum 4)
 
 ### `virtual-threads`
 | Data Type | Default Value |
@@ -90,6 +90,15 @@ useful if you have an auto restart script or the server runs on a panel with thi
 | Integer   | 60000         |
 
 Milliseconds the watchdog waits, if the Nukkit-MOT main thread is suspended for more than 60000 milliseconds, a fatal error is thrown and execution is terminated
+
+### `shutdown-watchdog-kill-timeout`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 600000        |
+
+Milliseconds of shutdown stall without save progress before the server is force-killed, useful when a world or plugin hangs the shutdown sequence
+
+`0` only logs a warning instead of force-killing
 
 ### `do-level-gc`
 | Data Type | Default Value |
@@ -191,11 +200,11 @@ Set to `false` to run RakNet only — the TCP signaling endpoint and the media p
 |--------------|---------------|
 | `List<String>` | []          |
 
-Extra ICE STUN/TURN servers, e.g. `stun:stun.l.google.com:19302`
+Extra ICE STUN servers, e.g. `stun:stun.l.google.com:19302`
 
-TURN credentials go in the URL: `turn:user:pass@host:port?transport=udp`
+STUN helps players behind NAT discover a direct media path
 
-Add a TURN relay when players behind symmetric NAT cannot establish a direct media path — see [`server-udp-ports`](server-properties.mdx#server-udp-ports) for the full media-unreachable checklist
+If players behind symmetric NAT still cannot establish a media path, see [`server-udp-ports`](server-properties.mdx#server-udp-ports) for the full media-unreachable checklist
 
 #### `identity-file`
 | Data Type | Default Value |
@@ -216,6 +225,40 @@ Running several servers? Share one identity file across them to present as the s
 Operator name in the client trust prompt, empty uses the MOTD
 
 Display text only — it can be changed at any time without replacing the identity key
+
+#### `https-certificate`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+TLS certificate for the signaling port: a PEM chain (leaf first) or a PKCS12 file, resolved against the server root
+
+Players joining over HTTPS do not see the first-use trust prompt, and iOS clients cannot join without it. Leave empty to serve plaintext
+
+#### `https-private-key`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+PEM private key for `https-certificate`. Leave empty when `https-certificate` is a PKCS12 file
+
+#### `https-password`
+| Data Type | Default Value |
+|-----------|---------------|
+| String    |               |
+
+Password for the PKCS12 file or an encrypted PEM private key
+
+Supports `file:/path/to/password` to read it from a file instead
+
+#### `https-reject-plaintext`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Once a certificate is configured, answer plaintext signaling with HTTP 426 instead of serving it
+
+Set to `off` to keep accepting plaintext alongside TLS on the same port
 
 ### `zlib-provider`
 | Data Type | Default Value |
@@ -248,7 +291,7 @@ higher = more cpu usage but less bandwidth usage
 |-----------|---------------|
 | Integer   | 7             |
 
-Zlib compression level for chunk data (0-9)
+Zlib compression level for chunk data (1-9)
 
 higher = more cpu usage but smaller chunk packets
 
@@ -575,7 +618,9 @@ enable despawning of mobs and animals without a name tag
 
 :::note
 
-there are special cases such as the ender dragon, withers and villagers that do not despawn
+there are special cases that never despawn: boss mobs (ender dragon, wither) and mobs that have entered love mode (e.g. bred villagers)
+
+mobs with a name tag, leashed mobs and mobs damaged within the last 30 seconds are also exempt
 
 :::
 
@@ -587,6 +632,24 @@ there are special cases such as the ender dragon, withers and villagers that do 
 how often entity auto spawn task runs
 
 in ticks, 20 ticks = 1 second
+
+### `activation-blocks`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 80            |
+
+Mobs farther than this many blocks (horizontally) from every player in their world run their update once per second instead of every tick, catching up the skipped time
+
+Mobs already stop walking past this range. `0` turns the throttle off and keeps the walking range at 80 blocks
+
+### `target-search-interval`
+| Data Type | Default Value |
+|-----------|---------------|
+| Integer   | 10            |
+
+Ticks between target searches for mobs without a follow target
+
+Mobs with a target, under attack or knock-back still search every tick. `1` restores the old per-tick search
 
 ### `ticks-per-despawns`
 | Data Type | Default Value |
@@ -704,6 +767,15 @@ Each world entry supports:
 
 ## player-settings (Player Settings) {#player-settings}
 
+### `movement-collision-check`
+| Data Type | Default Value |
+|-----------|---------------|
+| Boolean   | on            |
+
+Enable player movement collision checks
+
+Set to `off` to restore the legacy movement acceptance, which lets clients move through solid blocks
+
 ### `save-player-data`
 | Data Type | Default Value |
 |-----------|---------------|
@@ -812,7 +884,7 @@ set a higher value (1-3) if you want more debug logging
 |-----------|---------------|
 | Boolean   | off           |
 
-Enable to display server occupancy information in Windows CMD title
+Enable to display server occupancy information (online players, memory, TPS, load) in the ANSI terminal title
 
 <Image img={require('@site/static/images/server-config/windows_cmd_title.png')} alt="Windows CMD Title" />
 

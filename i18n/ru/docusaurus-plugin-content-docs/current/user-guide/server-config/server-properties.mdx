@@ -124,14 +124,13 @@ Check the firewall/port forwarding for the media UDP window udp/... (server-udp-
 
 1. Разрешите входящий UDP для порта медиатрафика — в файрволе хоста, группах безопасности облака и пробросе на роутере. По умолчанию медиатрафик делит UDP-сторону `server-port` (`19132`) с RakNet, которая и так должна быть открыта — ничего дополнительного не нужно; отдельный закреплённый порт (например, `server-udp-ports=19134`) нужно открыть/пробросить явно, а непредсказуемые системные порты бывают только при `server-udp-ports=0` — сначала закрепите диапазон (например, `server-udp-ports=50000-50010`) и пробросьте его
 2. Публичные порты отличаются от внутренних (NAT-отображение)? Опубликуйте внешнюю сторону: `server-udp-ports=60000-60010:50000-50010`. Публичный адрес — это DDNS-имя? Укажите его спереди как префикс адреса: `server-udp-ports=mc.example.com:60000-60010:50000-50010`
-3. Всё ещё не работает для игроков за симметричным NAT? Через TURN-релей в [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet) можно передавать медиатрафик дальше:
+3. Всё ещё не работает для игроков за симметричным NAT? Добавьте дополнительные STUN-серверы для ICE-обнаружения через [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet):
 
 ```yaml
 network-settings:
   nethernet:
     ice-servers:
       - stun:stun.l.google.com:19302
-      - 'turn:user:pass@turn.example.com:3478?transport=udp'
 ```
 
 :::tip Диагностика по цифрам /status
@@ -263,7 +262,7 @@ IPv6-адрес, к которому привязывается опционал
 
 генератор, используемый для создания мира по умолчанию, если тот ещё не существует
 
-поддерживаются по умолчанию: default, normal, flat, nether, the_end или void
+поддерживаются по умолчанию: default, normal, oldnormal, flat, nether, the_end или void
 
 ## `generator-settings`
 | Тип данных | Значение по умолчанию |

@@ -124,14 +124,13 @@ Fix it like this:
 
 1. Allow the media UDP port inbound — host firewall, cloud security group and router port forwarding alike. With the default the media shares `server-port`'s UDP side (`19132`), which RakNet already needs open — nothing extra to allow; a standalone pinned port (e.g. `server-udp-ports=19134`) must be opened/forwarded explicitly, and only with `server-udp-ports=0` are the ports system-assigned and unpredictable — pin a window first (e.g. `server-udp-ports=50000-50010`) and forward that
 2. Public ports differ from the internal ones (NAT mapping)? Publish the external side instead: `server-udp-ports=60000-60010:50000-50010`. Is the public address a DDNS name? Put that name in front as the address prefix: `server-udp-ports=mc.example.com:60000-60010:50000-50010`
-3. Still failing for players behind symmetric NAT? Relay the media through a TURN server configured in [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet):
+3. Still failing for players behind symmetric NAT? Add extra STUN servers for ICE discovery via [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet):
 
 ```yaml
 network-settings:
   nethernet:
     ice-servers:
       - stun:stun.l.google.com:19302
-      - 'turn:user:pass@turn.example.com:3478?transport=udp'
 ```
 
 :::tip Diagnosing by the /status numbers
@@ -263,7 +262,7 @@ Seed for the default level
 
 generator used to create the default level if it doesn't exist
 
-supported by default: default, normal, flat, nether, the_end or void
+supported by default: default, normal, oldnormal, flat, nether, the_end or void
 
 ## `generator-settings`
 | Data Type | Default Value |

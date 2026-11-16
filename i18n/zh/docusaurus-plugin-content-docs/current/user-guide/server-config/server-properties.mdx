@@ -124,14 +124,13 @@ Check the firewall/port forwarding for the media UDP window udp/... (server-udp-
 
 1. 放行媒体 UDP 端口的入站——主机防火墙、云安全组、路由器端口转发都要放行。默认配置下媒体与 RakNet 共用 `server-port` 的 UDP 侧（`19132`），RakNet 本就要求放行，无需额外操作；钉住独立端口（如 `server-udp-ports=19134`）时则必须显式放行/转发该端口；只有设为 `0` 时端口才由系统分配、不可预知——先钉住窗口（如 `server-udp-ports=50000-50010`）再转发
 2. 公网端口与内部端口不一致（NAT 映射）？改为发布外部一侧：`server-udp-ports=60000-60010:50000-50010`；公网地址是 DDNS 域名时，把域名直接写在前缀位置：`server-udp-ports=mc.example.com:60000-60010:50000-50010`
-3. 对称 NAT 后的玩家仍然连不上？在 [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet) 中配置 TURN 中继转发媒体：
+3. 对称 NAT 后的玩家仍然连不上？通过 [`network-settings.nethernet.ice-servers`](nukkit-mot-yml.mdx#network-settings-nethernet) 添加额外的 STUN 服务器辅助 ICE 发现：
 
 ```yaml
 network-settings:
   nethernet:
     ice-servers:
       - stun:stun.l.google.com:19302
-      - 'turn:user:pass@turn.example.com:3478?transport=udp'
 ```
 
 :::tip 按 /status 的数字排查
@@ -263,7 +262,7 @@ Nukkit 使用的默认语言
 
 如果默认世界不存在，则使用的生成器
 
-默认支持：default, normal, flat, nether, the_end 或 void
+默认支持：default, normal, oldnormal, flat, nether, the_end 或 void
 
 ## `generator-settings`
 | 数据类型   | 默认值 |
